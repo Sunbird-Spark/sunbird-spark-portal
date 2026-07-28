@@ -8,6 +8,8 @@ import {
 } from "../services/collection/contentProgressCalculator";
 import type { ConsumptionSummary } from "../services/collection/contentProgressCalculator";
 import { useUserId } from "./useAuthInfo";
+import { eventHasScore, extractSummary, normalizeScormAssessEvent } from "./contentStateTelemetryEvent";
+import type { TelemetryEvent } from "./contentStateTelemetryEvent";
 
 interface UseContentStateUpdateParams {
   collectionId: string | undefined;
@@ -22,48 +24,6 @@ interface UseContentStateUpdateParams {
   /** When true (e.g. creator viewing own collection), no progress/state API calls are made. */
   skipContentStateUpdate?: boolean;
   contentType?: string;
-}
-
-/** Telemetry callback receives the raw player detail (e.g. { eid, edata }), not { type, data }. */
-type TelemetryEvent = {
-  eid?: string;
-  type?: string;
-  actor?: { id?: string };
-  ets?: number;
-  edata?: { summary?: ConsumptionSummary[]; score?: number; endpageseen?: boolean; [key: string]: unknown };
-  summary?: ConsumptionSummary | ConsumptionSummary[];
-  data?: string | {
-    eid?: string;
-    actor?: { id?: string };
-    ets?: number;
-    edata?: { summary?: ConsumptionSummary[]; score?: number; [key: string]: unknown };
-    summary?: ConsumptionSummary | ConsumptionSummary[];
-    score?: number;
-    [key: string]: unknown;
-  };
-};
-
-/** True when the event carries a score (submit), e.g. ASSESS with edata.score or summary score. */
-function eventHasScore(event: TelemetryEvent | undefined): boolean {
-  if (!event) return false;
-  const raw = event?.data ?? event;
-  if (typeof raw === "string") return false;
-  const rawData = raw as Record<string, unknown>;
-  if (typeof (rawData?.edata as { score?: number } | undefined)?.score === "number") return true;
-  if (typeof (rawData as { score?: number })?.score === "number") return true;
-  const summary = (rawData?.edata as any)?.summary ?? (rawData as any)?.summary;
-  const arr = Array.isArray(summary) ? summary : summary ? [summary] : [];
-  return arr.some(
-    (s) => typeof (s as ConsumptionSummary & { score?: number })?.score === "number"
-  );
-}
-
-function extractSummary(event: TelemetryEvent): ConsumptionSummary[] {
-  const raw = event?.data ?? event;
-  if (typeof raw === "string") return [];
-  const rawData = raw as any;
-  const rawSummary = rawData?.edata?.summary ?? rawData?.summary;
-  return Array.isArray(rawSummary) ? rawSummary : rawSummary ? [rawSummary] : [];
 }
 
 export function useContentStateUpdate({
@@ -209,7 +169,23 @@ export function useContentStateUpdate({
 
       if (eidUpper === "ASSESS") {
         const rawEventData = event?.data ?? event;
-        assessEventsRef.current = [...assessEventsRef.current, rawEventData ?? event];
+        const accumulatedEvent = isScorm
+          ? normalizeScormAssessEvent(rawEventData ?? event)
+          : (rawEventData ?? event);
+        assessEventsRef.current = [...assessEventsRef.current, accumulatedEvent];
+        // SCORM's plugin only fires a scored ASSESS once lesson_status is already
+        // completed/passed - so this is itself a completion signal, independent of
+        // whether END has fired yet (player build ordering isn't reliable).
+        if (
+          isScorm &&
+          eventHasScore(event) &&
+          assessmentTsRef.current != null &&
+          !sendingAssessmentRef.current
+        ) {
+          sendingAssessmentRef.current = true;
+          void sendAssessmentAndInvalidate();
+          lastSentStatusRef.current = null;
+        }
         return;
       }
 
@@ -230,6 +206,10 @@ export function useContentStateUpdate({
       if (eidUpper === "END") {
         const summary = extractSummary(event);
         if (isSelfAssess || isScorm) {
+          // An assessment send may already be in flight (e.g. SCORM's ASSESS-triggered
+          // completion above, which can fire before END on some player builds) -
+          // nothing left for END to do once that's underway.
+          if (sendingAssessmentRef.current) return;
           
           const mergedSummary = (summary as ConsumptionSummary[]).reduce<ConsumptionSummary>((acc, s) => ({ ...acc, ...s }), {});
           const endPageSeen = Boolean(mergedSummary.endpageseen || mergedSummary.visitedcontentend);
@@ -238,15 +218,19 @@ export function useContentStateUpdate({
             eventHasScore(event) ||
             assessEventsRef.current.some((e) => eventHasScore(e as TelemetryEvent));
 
-          // SCORM's terminal event fires once at LMSCommit with values already landed; no endpageseen flag to check.
-          if (
-            (isScorm ? hasScore : hasScore && endPageSeen) &&
-            assessmentTsRef.current != null &&
-            !sendingAssessmentRef.current
-          ) {
+          if (hasScore && endPageSeen && assessmentTsRef.current != null) {
             sendingAssessmentRef.current = true;
             void sendAssessmentAndInvalidate();
             lastSentStatusRef.current = null;
+            return;
+          }
+          // SCORM completion (lesson_status completed/passed) is independent of score -
+          // many SCORM packages have no quiz at all. Complete directly off endpageseen,
+          // without going through the assessments path (avoids consuming a maxAttempts
+          // slot for content that was never actually scored).
+          if (isScorm && endPageSeen && currentContentStatusRef.current !== 2) {
+            lastSentStatusRef.current = null;
+            void handleContentStateUpdate(2, true);
             return;
           }
           // Completion criteria not met; do not regress an already-completed content.

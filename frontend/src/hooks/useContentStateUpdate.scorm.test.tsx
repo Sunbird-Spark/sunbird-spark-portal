@@ -1,0 +1,151 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook } from '@testing-library/react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useContentStateUpdate } from './useContentStateUpdate';
+import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
+
+const mockMutateAsync = vi.fn().mockResolvedValue(undefined);
+
+const { mockUseQuery } = vi.hoisted(() => ({
+  mockUseQuery: vi.fn(() => ({
+    data: { uid: 'user_1', sid: 'session_1', isAuthenticated: true },
+    isLoading: false,
+    error: null,
+  })),
+}));
+
+vi.mock('@tanstack/react-query', () => ({
+  useQueryClient: vi.fn(),
+  useQuery: mockUseQuery,
+}));
+
+vi.mock('./useBatch', () => ({
+  useContentStateUpdateMutation: vi.fn(() => ({ mutateAsync: mockMutateAsync })),
+}));
+
+vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
+  default: { getUserId: vi.fn() },
+}));
+
+describe('useContentStateUpdate — SCORM (mimeType)', () => {
+  const mockInvalidateQueries = vi.fn().mockResolvedValue(undefined);
+  const mockQueryClient = { invalidateQueries: mockInvalidateQueries };
+
+  const scormParams = {
+    collectionId: 'course_1',
+    contentId: 'content_1',
+    effectiveBatchId: 'batch_1',
+    isEnrolledInCurrentBatch: true,
+    mimeType: 'application/vnd.ekstep.scorm-archive',
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseQuery.mockReturnValue({
+      data: { uid: 'user_1', sid: 'session_1', isAuthenticated: true },
+      isLoading: false,
+      error: null,
+    });
+    (useQueryClient as ReturnType<typeof vi.fn>).mockReturnValue(mockQueryClient);
+    (userAuthInfoService.getUserId as ReturnType<typeof vi.fn>).mockReturnValue('user_1');
+  });
+
+  it('sends status 2 on END with endpageseen and no score (lesson_status completed, no quiz)', async () => {
+    const { result } = renderHook(() =>
+      useContentStateUpdate({ ...scormParams, currentContentStatus: 1 })
+    );
+    result.current({ eid: 'START', ets: 1700000000000 });
+    result.current({ eid: 'END', edata: { summary: [{ endpageseen: true }] } });
+    await vi.waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        userId: 'user_1',
+        courseId: 'course_1',
+        batchId: 'batch_1',
+        contents: [{ contentId: 'content_1', status: 2 }],
+      });
+    });
+    expect(mockMutateAsync.mock.calls[0]?.[0]?.assessments).toBeUndefined();
+  });
+
+  it('detects a string score (SCORM API values are always strings) and sends status 2 with assessments', async () => {
+    const { result } = renderHook(() =>
+      useContentStateUpdate({ ...scormParams, currentContentStatus: 1 })
+    );
+    result.current({ eid: 'START', ets: 1700000000000 });
+    result.current({
+      eid: 'ASSESS',
+      edata: { score: '95', item: { id: 'ITEM1', maxscore: '100' }, pass: 'Yes' },
+    } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
+    result.current({ eid: 'END', edata: { summary: [{ endpageseen: true }] } });
+    await vi.waitFor(() => {
+      // Call 0 is START's own status:1 PATCH; call 1 is the ASSESS-triggered send.
+      expect(mockMutateAsync).toHaveBeenCalledTimes(2);
+    });
+    const call = mockMutateAsync.mock.calls[1]?.[0] as
+      | {
+          contents: { status: number }[];
+          assessments?: { events: { edata: { score: number; item: { maxscore: number } } }[] }[];
+        }
+      | undefined;
+    expect(call?.contents).toEqual([
+      expect.objectContaining({ contentId: 'content_1', status: 2 }),
+    ]);
+    expect(call?.assessments).toHaveLength(1);
+    // Score/maxscore must be normalized to real numbers, not left as SCORM's
+    // native strings, so the backend's totalScore aggregation doesn't break.
+    const sentEvent = call?.assessments?.[0]?.events?.[0];
+    expect(sentEvent?.edata.score).toBe(95);
+    expect(typeof sentEvent?.edata.score).toBe('number');
+    expect(sentEvent?.edata.item.maxscore).toBe(100);
+    expect(typeof sentEvent?.edata.item.maxscore).toBe('number');
+  });
+
+  it('still records the score via a follow-up PATCH when END fires before ASSESS (unreliable player ordering)', async () => {
+    const { result } = renderHook(() =>
+      useContentStateUpdate({ ...scormParams, currentContentStatus: 1 })
+    );
+    result.current({ eid: 'START', ets: 1700000000000 });
+    // END arrives before ASSESS (the exact race the addendum guards against).
+    // END alone already completes the content (no assessments yet); ASSESS
+    // then arrives and sends a follow-up PATCH carrying the score.
+    result.current({ eid: 'END', edata: { summary: [{ endpageseen: true }] } });
+    result.current({
+      eid: 'ASSESS',
+      edata: { score: '95', pass: 'Yes' },
+    } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
+    await vi.waitFor(() => {
+      // Call 0 is START's own status:1 PATCH; call 1 is END's scoreless shortcut;
+      // call 2 is the ASSESS-triggered follow-up carrying the score.
+      expect(mockMutateAsync).toHaveBeenCalledTimes(3);
+    });
+    const firstCall = mockMutateAsync.mock.calls[1]?.[0] as
+      | { contents: { status: number }[]; assessments?: unknown[] }
+      | undefined;
+    const secondCall = mockMutateAsync.mock.calls[2]?.[0] as
+      | { contents: { status: number }[]; assessments?: unknown[] }
+      | undefined;
+    expect(firstCall?.contents).toEqual([
+      expect.objectContaining({ contentId: 'content_1', status: 2 }),
+    ]);
+    expect(firstCall?.assessments).toBeUndefined();
+    expect(secondCall?.contents).toEqual([
+      expect.objectContaining({ contentId: 'content_1', status: 2 }),
+    ]);
+    expect(secondCall?.assessments).toHaveLength(1);
+  });
+
+  it('caps status at 1 when END has no endpageseen and no score', async () => {
+    const { result } = renderHook(() =>
+      useContentStateUpdate({ ...scormParams, currentContentStatus: 1 })
+    );
+    result.current({ eid: 'START', ets: 1700000000000 });
+    result.current({ eid: 'END', edata: { summary: [{ progress: 100 }] } });
+    await vi.waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith(
+        expect.objectContaining({
+          contents: [expect.objectContaining({ status: 1 })],
+        })
+      );
+    });
+  });
+});
