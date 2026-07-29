@@ -11,6 +11,12 @@ import { useUserId } from "./useAuthInfo";
 import { eventHasScore, extractSummary, normalizeScormAssessEvent } from "./contentStateTelemetryEvent";
 import type { TelemetryEvent } from "./contentStateTelemetryEvent";
 
+const ContentStatus = {
+  NotStarted: 0,
+  InProgress: 1,
+  Completed: 2,
+} as const;
+
 interface UseContentStateUpdateParams {
   collectionId: string | undefined;
   contentId: string | undefined;
@@ -105,7 +111,7 @@ export function useContentStateUpdate({
         batchId: effectiveBatchId,
         contents: [{
           contentId,
-          status: 2,
+          status: ContentStatus.Completed,
           lastAccessTime: dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss:SSSZZ"),
         }],
         assessments: [{
@@ -135,7 +141,7 @@ export function useContentStateUpdate({
       const isSelfAssess = (contentTypeRef.current ?? "").toLowerCase() === "selfassess";
       const isQuestionSet = (mimeType ?? "").toLowerCase() === "application/vnd.sunbird.questionset";
       const isScorm = (mimeType ?? "").toLowerCase() === "application/vnd.ekstep.scorm-archive";
-      if (!isSelfAssess && !isQuestionSet && !isScorm && currentContentStatusRef.current === 2) return;
+      if (!isSelfAssess && !isQuestionSet && !isScorm && currentContentStatusRef.current === ContentStatus.Completed) return;
 
       const rawEvent = event?.data ?? event;
       const eid = typeof rawEvent === "string" ? "" : (event?.eid ?? (event?.data as any)?.eid ?? event?.type ?? "") as string;
@@ -155,11 +161,11 @@ export function useContentStateUpdate({
         const ets = (rawEvent as any)?.ets ?? event?.ets;
         if (ets != null) assessmentTsRef.current = ets;
         assessEventsRef.current = [];
-        if (currentContentStatusRef.current !== 2 && lastSentStatusRef.current !== 1 && !startUpdateInFlightRef.current) {
+        if (currentContentStatusRef.current !== ContentStatus.Completed && lastSentStatusRef.current !== ContentStatus.InProgress && !startUpdateInFlightRef.current) {
           startUpdateInFlightRef.current = true;
-          handleContentStateUpdate(1, true)
+          handleContentStateUpdate(ContentStatus.InProgress, true)
             .then(() => {
-              lastSentStatusRef.current = 1;
+              lastSentStatusRef.current = ContentStatus.InProgress;
             })
             .catch(() => {
               /* Already logged in handleContentStateUpdate; ref left null so next START retries */
@@ -232,18 +238,18 @@ export function useContentStateUpdate({
           // many SCORM packages have no quiz at all. Complete directly off endpageseen,
           // without going through the assessments path (avoids consuming a maxAttempts
           // slot for content that was never actually scored).
-          if (isScorm && endPageSeen && currentContentStatusRef.current !== 2) {
+          if (isScorm && endPageSeen && currentContentStatusRef.current !== ContentStatus.Completed) {
             lastSentStatusRef.current = null;
-            void handleContentStateUpdate(2, true);
+            void handleContentStateUpdate(ContentStatus.Completed, true);
             return;
           }
           // Completion criteria not met; do not regress an already-completed content.
-          if (currentContentStatusRef.current === 2) return;
+          if (currentContentStatusRef.current === ContentStatus.Completed) return;
           const effectiveProgress = calculateContentProgress(summary as ConsumptionSummary[], mimeType ?? "");
           const statusFromProgress = progressToStatus(effectiveProgress);
-          const status = Math.min(statusFromProgress, 1);
-          if (status === 0 && lastSentStatusRef.current === 1) {
-            void handleContentStateUpdate(1, true);
+          const status = Math.min(statusFromProgress, ContentStatus.InProgress);
+          if (status === ContentStatus.NotStarted && lastSentStatusRef.current === ContentStatus.InProgress) {
+            void handleContentStateUpdate(ContentStatus.InProgress, true);
           } else {
             lastSentStatusRef.current = null;
             void handleContentStateUpdate(status, true);
@@ -252,7 +258,7 @@ export function useContentStateUpdate({
         }
         const effectiveProgress = calculateContentProgress(summary as ConsumptionSummary[], mimeType ?? "");
         let status = progressToStatus(effectiveProgress);
-        if (status === 0 && lastSentStatusRef.current === 1) status = 1;
+        if (status === ContentStatus.NotStarted && lastSentStatusRef.current === ContentStatus.InProgress) status = ContentStatus.InProgress;
         lastSentStatusRef.current = null;
         void handleContentStateUpdate(status, true);
       }
