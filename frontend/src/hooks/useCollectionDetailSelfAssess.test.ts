@@ -91,6 +91,26 @@ describe('useCollectionDetailSelfAssess', () => {
     expect(result.current.maxAttemptsExceeded).toBe(false);
   });
 
+  it('returns maxAttemptsExceeded true for SCORM content even when isSelfAssess is false', () => {
+    mockIsSelfAssess.mockReturnValue(false);
+    const scormNode: HierarchyContentNode = {
+      identifier: 'scorm-1',
+      mimeType: 'application/vnd.ekstep.scorm-archive',
+      maxAttempts: 2,
+    };
+    mockFindNodeById.mockImplementation((_root: HierarchyContentNode, id: string) =>
+      id === 'scorm-1' ? scormNode : undefined
+    );
+    const { result } = renderHook(() =>
+      useCollectionDetailSelfAssess({
+        ...defaultParams,
+        contentId: 'scorm-1',
+        contentAttemptInfoMap: { 'scorm-1': { attemptCount: 2 } },
+      })
+    );
+    expect(result.current.maxAttemptsExceeded).toBe(true);
+  });
+
   it('returns maxAttemptsExceeded false when hasBatchInRoute is false', () => {
     const { result } = renderHook(() =>
       useCollectionDetailSelfAssess({

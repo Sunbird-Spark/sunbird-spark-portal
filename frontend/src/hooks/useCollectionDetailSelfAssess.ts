@@ -37,8 +37,9 @@ export function useCollectionDetailSelfAssess({
     () => (contentId && collectionData?.hierarchyRoot ? findNodeById(collectionData.hierarchyRoot, contentId) : undefined),
     [contentId, collectionData?.hierarchyRoot]
   );
+  const isScorm = (currentContentNode?.mimeType ?? "") === "application/vnd.ekstep.scorm-archive";
   const selfAssessWithBatch = Boolean(
-    currentContentNode && isSelfAssess(currentContentNode) && hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege
+    currentContentNode && (isSelfAssess(currentContentNode) || isScorm) && hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege
   );
   const attemptInfo = contentId ? contentAttemptInfoMap?.[contentId] : undefined;
   const attemptCount = attemptInfo?.attemptCount ?? 0;
