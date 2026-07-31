@@ -56,12 +56,6 @@ function toNumber(value: unknown): unknown {
   return value;
 }
 
-/**
- * SCORM API values (score, maxscore) are always strings per spec. The backend's
- * bestScore aggregation expects real numbers (as QUML's normalizer already
- * provides) - coerce them here before the event is accumulated/sent, so a
- * string score/maxscore doesn't silently break server-side totalScore math.
- */
 export function normalizeScormAssessEvent(event: unknown): unknown {
   if (!event || typeof event !== "object") return event;
   const e = event as Record<string, unknown>;
