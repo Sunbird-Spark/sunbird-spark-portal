@@ -143,6 +143,7 @@ const CollectionDetailPage = () => {
     currentContentStatus,
     skipContentStateUpdate: contentCreatorPrivilege,
     contentType: currentContentNode?.contentType,
+    maxAttemptsExceeded,
   });
 
   const collectionCdata = useMemo(

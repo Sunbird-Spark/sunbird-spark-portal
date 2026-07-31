@@ -48,11 +48,12 @@ export default function ContentRow({
   const isQuestionSet = (node.mimeType ?? "") === "application/vnd.sunbird.questionset";
   const isScorm = (node.mimeType ?? "") === "application/vnd.ekstep.scorm-archive";
   const isAssessmentContent = isSelfAssess || isQuestionSet || isScorm;
+  const isHardBlockedAssessment = isSelfAssess || isQuestionSet;
   const maxAttempts = node.maxAttempts;
   const attemptInfo = contentAttemptInfoMap?.[node.identifier];
   const attemptCount = attemptInfo?.attemptCount ?? 0;
   const isDisabledByAttempts =
-    isAssessmentContent &&
+    isHardBlockedAssessment &&
     maxAttempts != null &&
     typeof maxAttempts === "number" &&
     attemptCount >= maxAttempts;

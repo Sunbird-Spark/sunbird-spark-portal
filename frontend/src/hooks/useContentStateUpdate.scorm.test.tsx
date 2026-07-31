@@ -172,6 +172,58 @@ describe('useContentStateUpdate — SCORM (mimeType)', () => {
     expect(secondSend?.assessments?.[0]?.attemptId).toBe(firstSend?.assessments?.[0]?.attemptId);
   });
 
+  it('does not drop a quiz score that arrives while the previous send is still in flight', async () => {
+    let resolveFirstSend: (() => void) | undefined;
+    mockMutateAsync
+      .mockImplementationOnce(() => Promise.resolve(undefined)) // START's status:1 PATCH
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirstSend = () => resolve(undefined);
+          })
+      ) // first quiz's send - stays pending until we resolve it manually
+      .mockResolvedValue(undefined); // second quiz's send, once redriven
+
+    const { result } = renderHook(() =>
+      useContentStateUpdate({ ...scormParams, currentContentStatus: 1 })
+    );
+    result.current({ eid: 'START', ets: 1700000000000 });
+    result.current({
+      eid: 'ASSESS',
+      edata: { score: '300', item: { id: 'SCO1', maxscore: '700' }, pass: 'No' },
+    } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
+
+    await vi.waitFor(() => {
+      // Call 0 START, call 1 the first quiz's send (now pending in-flight).
+      expect(mockMutateAsync).toHaveBeenCalledTimes(2);
+    });
+
+    // Second quiz's score arrives WHILE the first send is still unresolved.
+    result.current({
+      eid: 'ASSESS',
+      edata: { score: '700', item: { id: 'SCO1', maxscore: '700' }, pass: 'Yes' },
+    } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
+
+    // It must not fire yet (a send is in flight), and must not be lost either.
+    expect(mockMutateAsync).toHaveBeenCalledTimes(2);
+
+    resolveFirstSend?.();
+
+    await vi.waitFor(() => {
+      // The queued second event must be redriven once the first send settles.
+      expect(mockMutateAsync).toHaveBeenCalledTimes(3);
+    });
+
+    // The redrive is not cleared of the first event (assessEventsRef only
+    // resets on the idle path), so both quiz scores are carried in this send -
+    // the important thing is the second (queued-while-in-flight) score isn't lost.
+    const secondSend = mockMutateAsync.mock.calls[2]?.[0] as
+      | { assessments?: { events: { edata: { score: number } }[] }[] }
+      | undefined;
+    const events = secondSend?.assessments?.[0]?.events;
+    expect(events?.map((e) => e.edata.score)).toEqual([300, 700]);
+  });
+
   it('caps status at 1 when END has no endpageseen and no score', async () => {
     const { result } = renderHook(() =>
       useContentStateUpdate({ ...scormParams, currentContentStatus: 1 })

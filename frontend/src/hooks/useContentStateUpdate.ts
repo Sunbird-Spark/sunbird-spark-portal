@@ -30,6 +30,8 @@ interface UseContentStateUpdateParams {
   /** When true (e.g. creator viewing own collection), no progress/state API calls are made. */
   skipContentStateUpdate?: boolean;
   contentType?: string;
+  /** When true, attempts are exhausted: completion status still updates, but no score/assessment is persisted. */
+  maxAttemptsExceeded?: boolean;
 }
 
 export function useContentStateUpdate({
@@ -42,6 +44,7 @@ export function useContentStateUpdate({
   currentContentStatus,
   skipContentStateUpdate = false,
   contentType,
+  maxAttemptsExceeded = false,
 }: UseContentStateUpdateParams): (event: TelemetryEvent) => void {
   const queryClient = useQueryClient();
   const { mutateAsync: contentStateUpdate } = useContentStateUpdateMutation();
@@ -52,6 +55,7 @@ export function useContentStateUpdate({
   const assessmentTsRef = useRef<number | null>(null);
   const assessEventsRef = useRef<unknown[]>([]);
   const sendingAssessmentRef = useRef(false);
+  const pendingResendRef = useRef(false);
   const attemptIdRef = useRef<string | null>(null);
 
   // Use refs for values that change after content state updates to keep the
@@ -60,6 +64,8 @@ export function useContentStateUpdate({
   useEffect(() => { currentContentStatusRef.current = currentContentStatus; }, [currentContentStatus]);
   const contentTypeRef = useRef(contentType);
   useEffect(() => { contentTypeRef.current = contentType; }, [contentType]);
+  const maxAttemptsExceededRef = useRef(maxAttemptsExceeded);
+  useEffect(() => { maxAttemptsExceededRef.current = maxAttemptsExceeded; }, [maxAttemptsExceeded]);
 
   useEffect(() => {
     lastSentStatusRef.current = null;
@@ -67,6 +73,7 @@ export function useContentStateUpdate({
     assessmentTsRef.current = null;
     assessEventsRef.current = [];
     sendingAssessmentRef.current = false;
+    pendingResendRef.current = false;
     attemptIdRef.current = null;
   }, [contentId]);
 
@@ -128,8 +135,13 @@ export function useContentStateUpdate({
     } catch (err) {
       console.error("Assessment state update failed:", err);
     } finally {
-      assessEventsRef.current = [];
-      sendingAssessmentRef.current = false;
+      if (pendingResendRef.current) {
+        pendingResendRef.current = false;
+        void sendAssessmentAndInvalidate();
+      } else {
+        assessEventsRef.current = [];
+        sendingAssessmentRef.current = false;
+      }
     }
   }, [collectionId, contentId, effectiveBatchId, userId, queryClient, contentStateUpdate]);
 
@@ -149,7 +161,7 @@ export function useContentStateUpdate({
 
       // Support renderer:question:submitscore for SelfAssess content (aligned with old portal)
       if (isSelfAssess && event?.data === "renderer:question:submitscore") {
-        if (assessmentTsRef.current != null && !sendingAssessmentRef.current) {
+        if (assessmentTsRef.current != null && !sendingAssessmentRef.current && !maxAttemptsExceededRef.current) {
           sendingAssessmentRef.current = true;
           void sendAssessmentAndInvalidate();
           lastSentStatusRef.current = null;
@@ -186,15 +198,14 @@ export function useContentStateUpdate({
         // SCORM's plugin only fires a scored ASSESS once lesson_status is already
         // completed/passed - so this is itself a completion signal, independent of
         // whether END has fired yet (player build ordering isn't reliable).
-        if (
-          isScorm &&
-          eventHasScore(event) &&
-          assessmentTsRef.current != null &&
-          !sendingAssessmentRef.current
-        ) {
-          sendingAssessmentRef.current = true;
-          void sendAssessmentAndInvalidate();
-          lastSentStatusRef.current = null;
+        if (isScorm && eventHasScore(event) && assessmentTsRef.current != null && !maxAttemptsExceededRef.current) {
+          if (sendingAssessmentRef.current) {
+            pendingResendRef.current = true;
+          } else {
+            sendingAssessmentRef.current = true;
+            void sendAssessmentAndInvalidate();
+            lastSentStatusRef.current = null;
+          }
         }
         return;
       }
@@ -205,7 +216,7 @@ export function useContentStateUpdate({
         const edataQ = (rawEvent as any)?.edata;
         // edata.starttime (surfaced as ets) is a fallback if START telemetry was missed.
         if ((rawEvent as any)?.ets != null && assessmentTsRef.current == null) assessmentTsRef.current = (rawEvent as any).ets as number;
-        if (typeof edataQ?.score === "number" && Boolean(edataQ?.endpageseen) && assessmentTsRef.current != null && !sendingAssessmentRef.current) {
+        if (typeof edataQ?.score === "number" && Boolean(edataQ?.endpageseen) && assessmentTsRef.current != null && !sendingAssessmentRef.current && !maxAttemptsExceededRef.current) {
           sendingAssessmentRef.current = true;
           void sendAssessmentAndInvalidate();
           lastSentStatusRef.current = null;
@@ -228,7 +239,7 @@ export function useContentStateUpdate({
             eventHasScore(event) ||
             assessEventsRef.current.some((e) => eventHasScore(e as TelemetryEvent));
 
-          if (hasScore && endPageSeen && assessmentTsRef.current != null) {
+          if (hasScore && endPageSeen && assessmentTsRef.current != null && !maxAttemptsExceededRef.current) {
             sendingAssessmentRef.current = true;
             void sendAssessmentAndInvalidate();
             lastSentStatusRef.current = null;

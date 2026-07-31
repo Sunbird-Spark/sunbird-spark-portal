@@ -44,12 +44,6 @@ export function useCollectionDetailSelfAssess({
   const attemptInfo = contentId ? contentAttemptInfoMap?.[contentId] : undefined;
   const attemptCount = attemptInfo?.attemptCount ?? 0;
   const maxAttempts = currentContentNode?.maxAttempts;
-  const maxAttemptsExceeded = Boolean(
-    selfAssessWithBatch &&
-    maxAttempts != null &&
-    typeof maxAttempts === "number" &&
-    attemptCount >= maxAttempts
-  );
 
   const attemptCountForPlayerRef = useRef(attemptCount);
   const prevContentIdRef = useRef(contentId);
@@ -61,6 +55,13 @@ export function useCollectionDetailSelfAssess({
     // Initial server data arrived (was 0/loading, now has real value).
     attemptCountForPlayerRef.current = attemptCount;
   }
+
+  const maxAttemptsExceeded = Boolean(
+    selfAssessWithBatch &&
+    maxAttempts != null &&
+    typeof maxAttempts === "number" &&
+    attemptCountForPlayerRef.current >= maxAttempts
+  );
 
   const playerMetadata = useMemo((): Record<string, unknown> | undefined => {
     if (!rawPlayerMetadata) return undefined;
