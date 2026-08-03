@@ -31,14 +31,25 @@ const ContentPlayerPage = () => {
   const backTo = stateFrom && !stateFrom.startsWith('/content/') && !stateFrom.startsWith('/collection/') ? stateFrom : '/explore';
   const linkState = { from: backTo };
 
-  // enrichTranscripts is only turned on here (the play/view page) - it's
-  // opt-in on useContentRead precisely so the collection/content editor and
-  // detail pages keep using the unmodified v1 response shape they always have.
-  const { data, isLoading, error } = useContentRead(contentId || '', { enrichTranscripts: true });
-  const contentData = data?.data?.content;
-  
+  // Base read without enrich=all - cheap, used to learn mimeType before
+  // deciding whether a second, enriched read is even worth making.
+  const { data, isLoading, error } = useContentRead(contentId || '');
+  const baseContentData = data?.data?.content;
+  const isVideoContent = !!baseContentData?.mimeType?.startsWith('video/');
+
+  // enrich=all (transcripts) is only fetched for actual video/webm content -
+  // this page also renders PDF/EPUB/ECML/QUML, which have no use for it and
+  // shouldn't pay its cost. Not gated on isLoading since it doesn't block
+  // initial render: transcripts arriving after playback starts is handled by
+  // the video player's existing hot-reload path for transcript updates.
+  const { data: enrichedData } = useContentRead(contentId || '', {
+    enrichTranscripts: true,
+    enabled: isVideoContent,
+  });
+  const contentData = isVideoContent ? (enrichedData?.data?.content ?? baseContentData) : baseContentData;
+
   // Check if this is QUML content that needs special handling
-  const isQumlContent = contentData?.mimeType === 'application/vnd.sunbird.questionset' || 
+  const isQumlContent = contentData?.mimeType === 'application/vnd.sunbird.questionset' ||
                        contentData?.mimeType === 'application/vnd.sunbird.question';
   
   // Use QUML hook for question sets, regular content hook for others

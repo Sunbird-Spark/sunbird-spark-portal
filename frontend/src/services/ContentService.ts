@@ -11,12 +11,13 @@ import type { ContentSearchRequest, ContentSearchResponse } from '../types/works
 // capped), so there's no need to know a given language's granularity here.
 function mapRawTranscripts(raw: RawTranscript[] | undefined): PlayerTranscript[] {
   return (raw || [])
-    .filter((entry) => !!entry.captionsUrl && entry.status === 'Live')
+    .filter((entry): entry is RawTranscript & { captionsUrl: string } =>
+      !!entry.captionsUrl && entry.status === 'Live')
     .map((entry) => ({
       language: entry.language || (entry.languageCode || 'Unknown').toUpperCase(),
       identifier: entry.code,
       languageCode: entry.languageCode || '',
-      artifactUrl: entry.captionsUrl as string,
+      artifactUrl: entry.captionsUrl,
       wordByWordUrl: entry.captionsUrl,
       sourceLanguage: !!entry.sourceLanguage,
     }));

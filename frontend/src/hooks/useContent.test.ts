@@ -202,6 +202,15 @@ describe('useContentRead', () => {
     expect(mockContentRead).toHaveBeenCalledWith('c-123', ['name'], 'view', false);
   });
 
+  it('includes enrichTranscripts=true in queryKey and passes it through to contentRead when enabled', () => {
+    mockContentRead.mockResolvedValue({ data: {} });
+    renderHook(() => useContentRead('c-123', { fields: ['name'], mode: 'view', enrichTranscripts: true }));
+    const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
+    expect(call.queryKey).toEqual(['content-read', 'c-123', ['name'], 'view', true]);
+    (call.queryFn as () => void)();
+    expect(mockContentRead).toHaveBeenCalledWith('c-123', ['name'], 'view', true);
+  });
+
   it('has 1 hour staleTime', () => {
     renderHook(() => useContentRead('c-123'));
     const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
