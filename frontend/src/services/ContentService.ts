@@ -1,9 +1,29 @@
 import { getClient, ApiResponse } from '../lib/http-client';
-import { ContentApiResponse } from "@/types/contentTypes";
+import { ContentApiResponse, RawTranscript, PlayerTranscript } from "@/types/contentTypes";
 import type { ContentSearchRequest, ContentSearchResponse } from '../types/workspaceTypes';
 
+// Maps the raw enrichment.transcripts shape (artifactUrl = transcript.json,
+// captionsUrl = the actual VTT) to what sunbird-video-player's Transcript
+// interface expects - artifactUrl must be the VTT. wordByWordUrl is set to
+// the same VTT for every language: the overlay's accumulation logic handles
+// both word-level and sentence-level VTTs correctly on its own (a full cue is
+// never truncated, only additional cues appended to a non-empty line are
+// capped), so there's no need to know a given language's granularity here.
+function mapRawTranscripts(raw: RawTranscript[] | undefined): PlayerTranscript[] {
+  return (raw || [])
+    .filter((entry) => !!entry.captionsUrl && entry.status === 'Live')
+    .map((entry) => ({
+      language: entry.language || (entry.languageCode || 'Unknown').toUpperCase(),
+      identifier: entry.code,
+      languageCode: entry.languageCode || '',
+      artifactUrl: entry.captionsUrl as string,
+      wordByWordUrl: entry.captionsUrl,
+      sourceLanguage: !!entry.sourceLanguage,
+    }));
+}
+
 const DEFAULT_CONTENT_FIELDS = [
-  'transcripts', 'ageGroup', 'appIcon', 'artifactUrl', 'attributions', 'audience',
+  'ageGroup', 'appIcon', 'artifactUrl', 'attributions', 'audience',
   'author', 'badgeAssertions', 'body', 'channel', 'code', 'concepts', 'contentCredits',
   'contentType', 'contributors', 'copyright', 'copyrightYear', 'createdBy', 'createdOn',
   'creator', 'creators', 'description', 'displayScore', 'domain', 'editorState',
@@ -52,13 +72,29 @@ export class ContentService {
     });
   }
 
-  public async contentRead(contentId: string, fields?: string[], mode?: string): Promise<ApiResponse<ContentApiResponse>> {
+  // `enrichTranscripts` is opt-in and defaults to false - it adds ?enrich=all,
+  // which is what actually returns enrichment.transcripts ("transcripts"
+  // alone is not a recognized raw field name on this endpoint). Left off by
+  // default so the other existing callers of contentRead (collection/content
+  // view & editor pages) keep getting exactly the response shape they always
+  // have - only the video player path needs this.
+  public async contentRead(
+    contentId: string,
+    fields?: string[],
+    mode?: string,
+    enrichTranscripts = false
+  ): Promise<ApiResponse<ContentApiResponse>> {
     const resolvedFields = fields ?? DEFAULT_CONTENT_FIELDS;
     const params = new URLSearchParams();
     if (resolvedFields.length) params.set('fields', resolvedFields.join(','));
     if (mode) params.set('mode', mode);
+    if (enrichTranscripts) params.set('enrich', 'all');
     const queryString = params.toString() ? `?${params.toString()}` : '';
-    return getClient().get<ContentApiResponse>(`/content/v1/read/${contentId}${queryString}`);
+    const response = await getClient().get<ContentApiResponse>(`/content/v1/read/${contentId}${queryString}`);
+    if (enrichTranscripts && response.data?.content) {
+      response.data.content.transcripts = mapRawTranscripts(response.data.content.enrichment?.transcripts);
+    }
+    return response;
   }
 
   public async contentRetire(contentIds: string[]): Promise<ApiResponse<any>> {

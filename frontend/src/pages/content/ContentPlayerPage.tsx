@@ -31,7 +31,10 @@ const ContentPlayerPage = () => {
   const backTo = stateFrom && !stateFrom.startsWith('/content/') && !stateFrom.startsWith('/collection/') ? stateFrom : '/explore';
   const linkState = { from: backTo };
 
-  const { data, isLoading, error } = useContentRead(contentId || '');
+  // enrichTranscripts is only turned on here (the play/view page) - it's
+  // opt-in on useContentRead precisely so the collection/content editor and
+  // detail pages keep using the unmodified v1 response shape they always have.
+  const { data, isLoading, error } = useContentRead(contentId || '', { enrichTranscripts: true });
   const contentData = data?.data?.content;
   
   // Check if this is QUML content that needs special handling
