@@ -173,7 +173,7 @@ describe('useContentRead', () => {
   it('uses content-read queryKey with contentId, fields, and mode', () => {
     renderHook(() => useContentRead('content-abc', { fields: ['name', 'description'], mode: 'edit' }));
     const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
-    expect(call.queryKey).toEqual(['content-read', 'content-abc', ['name', 'description'], 'edit']);
+    expect(call.queryKey).toEqual(['content-read', 'content-abc', ['name', 'description'], 'edit', false]);
   });
 
   it('is enabled when contentId is non-empty', () => {
@@ -199,7 +199,7 @@ describe('useContentRead', () => {
     renderHook(() => useContentRead('c-123', { fields: ['name'], mode: 'view' }));
     const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
     (call.queryFn as () => void)();
-    expect(mockContentRead).toHaveBeenCalledWith('c-123', ['name'], 'view');
+    expect(mockContentRead).toHaveBeenCalledWith('c-123', ['name'], 'view', false);
   });
 
   it('has 1 hour staleTime', () => {
