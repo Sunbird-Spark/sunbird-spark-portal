@@ -102,6 +102,87 @@ describe('ContentService', () => {
     expect(mockClient.get).toHaveBeenCalledWith('/content/v1/read/do_789');
   });
 
+  describe('contentRead enrichTranscripts', () => {
+    it('does not add enrich=all when enrichTranscripts is false', async () => {
+      mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+      await service.contentRead('do_100', [], undefined, false);
+      expect(mockClient.get).toHaveBeenCalledWith('/content/v1/read/do_100');
+    });
+
+    it('adds enrich=all when enrichTranscripts is true', async () => {
+      mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+      await service.contentRead('do_101', [], undefined, true);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const callUrl = (mockClient as any).get.mock.calls[0][0] as string;
+      expect(callUrl).toContain('/content/v1/read/do_101');
+      expect(callUrl).toContain('enrich=all');
+    });
+
+    it('maps enrichment.transcripts to content.transcripts, filtering out non-Live and captionsUrl-less entries', async () => {
+      mockClient.get = vi.fn().mockResolvedValue({
+        data: {
+          content: {
+            enrichment: {
+              transcripts: [
+                { code: 'c_en', language: 'English', languageCode: 'en', captionsUrl: 'https://x/en.vtt', sourceLanguage: true, status: 'Live' },
+                { code: 'c_fr', language: 'French', languageCode: 'fr', captionsUrl: 'https://x/fr.vtt', status: 'Draft' },
+                { code: 'c_pt', language: 'Portuguese', languageCode: 'pt', status: 'Live' },
+              ],
+            },
+          },
+        },
+        status: 200,
+        headers: {},
+      });
+      const response = await service.contentRead('do_102', [], undefined, true);
+      expect(response.data.content.transcripts).toEqual([
+        {
+          language: 'English',
+          identifier: 'c_en',
+          languageCode: 'en',
+          artifactUrl: 'https://x/en.vtt',
+          wordByWordUrl: 'https://x/en.vtt',
+          sourceLanguage: true,
+        },
+      ]);
+    });
+
+    it('leaves content.transcripts untouched when enrichment is missing', async () => {
+      mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+      const response = await service.contentRead('do_103', [], undefined, true);
+      expect(response.data.content.transcripts).toBeUndefined();
+    });
+
+    it('does not clobber an existing raw content.transcripts when mapping yields nothing', async () => {
+      mockClient.get = vi.fn().mockResolvedValue({
+        data: { content: { transcripts: [{ some: 'raw-shape' }] } },
+        status: 200,
+        headers: {},
+      });
+      const response = await service.contentRead('do_104', [], undefined, true);
+      expect(response.data.content.transcripts).toEqual([{ some: 'raw-shape' }]);
+    });
+
+    it('treats a missing status as Live and normalizes case', async () => {
+      mockClient.get = vi.fn().mockResolvedValue({
+        data: {
+          content: {
+            enrichment: {
+              transcripts: [
+                { code: 'c_en', language: 'English', languageCode: 'en', captionsUrl: 'https://x/en.vtt' },
+                { code: 'c_hi', language: 'Hindi', languageCode: 'hi', captionsUrl: 'https://x/hi.vtt', status: 'live' },
+              ],
+            },
+          },
+        },
+        status: 200,
+        headers: {},
+      });
+      const response = await service.contentRead('do_105', [], undefined, true);
+      expect(response.data.content.transcripts).toHaveLength(2);
+    });
+  });
+
   describe('contentPublish', () => {
     it('should call client.post with correct URL and request body', async () => {
       mockClient.post = vi.fn().mockResolvedValue({ data: {}, status: 200, headers: {} });
