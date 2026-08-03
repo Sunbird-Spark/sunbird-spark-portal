@@ -12,7 +12,7 @@ import type { ContentSearchRequest, ContentSearchResponse } from '../types/works
 function mapRawTranscripts(raw: RawTranscript[] | undefined): PlayerTranscript[] {
   return (raw || [])
     .filter((entry): entry is RawTranscript & { captionsUrl: string } =>
-      !!entry.captionsUrl && entry.status === 'Live')
+      !!entry.captionsUrl && (entry.status ?? 'Live').toLowerCase() === 'live')
     .map((entry) => ({
       language: entry.language || (entry.languageCode || 'Unknown').toUpperCase(),
       identifier: entry.code,
@@ -24,7 +24,7 @@ function mapRawTranscripts(raw: RawTranscript[] | undefined): PlayerTranscript[]
 }
 
 const DEFAULT_CONTENT_FIELDS = [
-  'ageGroup', 'appIcon', 'artifactUrl', 'attributions', 'audience',
+  'transcripts', 'ageGroup', 'appIcon', 'artifactUrl', 'attributions', 'audience',
   'author', 'badgeAssertions', 'body', 'channel', 'code', 'concepts', 'contentCredits',
   'contentType', 'contributors', 'copyright', 'copyrightYear', 'createdBy', 'createdOn',
   'creator', 'creators', 'description', 'displayScore', 'domain', 'editorState',
@@ -93,7 +93,12 @@ export class ContentService {
     const queryString = params.toString() ? `?${params.toString()}` : '';
     const response = await getClient().get<ContentApiResponse>(`/content/v1/read/${contentId}${queryString}`);
     if (enrichTranscripts && response.data?.content) {
-      response.data.content.transcripts = mapRawTranscripts(response.data.content.enrichment?.transcripts);
+      const mappedTranscripts = mapRawTranscripts(response.data.content.enrichment?.transcripts);
+      // Only overwrite when we actually mapped something - `enrich=all` isn't guaranteed
+      // to strip the raw `transcripts` field, so an empty enrichment shouldn't clobber it.
+      if (mappedTranscripts.length) {
+        response.data.content.transcripts = mappedTranscripts;
+      }
     }
     return response;
   }

@@ -147,10 +147,39 @@ describe('ContentService', () => {
       ]);
     });
 
-    it('leaves content.transcripts undefined when enrichment is missing', async () => {
+    it('leaves content.transcripts untouched when enrichment is missing', async () => {
       mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
       const response = await service.contentRead('do_103', [], undefined, true);
-      expect(response.data.content.transcripts).toEqual([]);
+      expect(response.data.content.transcripts).toBeUndefined();
+    });
+
+    it('does not clobber an existing raw content.transcripts when mapping yields nothing', async () => {
+      mockClient.get = vi.fn().mockResolvedValue({
+        data: { content: { transcripts: [{ some: 'raw-shape' }] } },
+        status: 200,
+        headers: {},
+      });
+      const response = await service.contentRead('do_104', [], undefined, true);
+      expect(response.data.content.transcripts).toEqual([{ some: 'raw-shape' }]);
+    });
+
+    it('treats a missing status as Live and normalizes case', async () => {
+      mockClient.get = vi.fn().mockResolvedValue({
+        data: {
+          content: {
+            enrichment: {
+              transcripts: [
+                { code: 'c_en', language: 'English', languageCode: 'en', captionsUrl: 'https://x/en.vtt' },
+                { code: 'c_hi', language: 'Hindi', languageCode: 'hi', captionsUrl: 'https://x/hi.vtt', status: 'live' },
+              ],
+            },
+          },
+        },
+        status: 200,
+        headers: {},
+      });
+      const response = await service.contentRead('do_105', [], undefined, true);
+      expect(response.data.content.transcripts).toHaveLength(2);
     });
   });
 

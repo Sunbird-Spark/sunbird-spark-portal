@@ -31,22 +31,16 @@ const ContentPlayerPage = () => {
   const backTo = stateFrom && !stateFrom.startsWith('/content/') && !stateFrom.startsWith('/collection/') ? stateFrom : '/explore';
   const linkState = { from: backTo };
 
-  // Base read without enrich=all - cheap, used to learn mimeType before
-  // deciding whether a second, enriched read is even worth making.
-  const { data, isLoading, error } = useContentRead(contentId || '');
-  const baseContentData = data?.data?.content;
-  const isVideoContent = !!baseContentData?.mimeType?.startsWith('video/');
-
-  // enrich=all (transcripts) is only fetched for actual video/webm content -
-  // this page also renders PDF/EPUB/ECML/QUML, which have no use for it and
-  // shouldn't pay its cost. Not gated on isLoading since it doesn't block
-  // initial render: transcripts arriving after playback starts is handled by
-  // the video player's existing hot-reload path for transcript updates.
-  const { data: enrichedData } = useContentRead(contentId || '', {
-    enrichTranscripts: true,
-    enabled: isVideoContent,
-  });
-  const contentData = isVideoContent ? (enrichedData?.data?.content ?? baseContentData) : baseContentData;
+  // Single read with enrich=all. A two-phase read (base first, enriched once
+  // mimeType is known) was tried but caused a real bug: VideoPlayer's init
+  // effect depends on `metadata` identity, so once the enriched read resolved
+  // it tore down and rebuilt the <sunbird-video-player> element mid-playback -
+  // restarting the video, dropping any seek, and double-firing START
+  // telemetry. For YouTube (EcmlPlayer) it reloaded the iframe the same way.
+  // The extra `enrich=all` param on non-video mimeTypes just returns an
+  // unused key, which is cheaper than that.
+  const { data, isLoading, error } = useContentRead(contentId || '', { enrichTranscripts: true });
+  const contentData = data?.data?.content;
 
   // Check if this is QUML content that needs special handling
   const isQumlContent = contentData?.mimeType === 'application/vnd.sunbird.questionset' ||
