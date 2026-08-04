@@ -27,16 +27,18 @@ function isNumericScore(value: unknown): boolean {
 }
 
 /** True when the event carries a score (submit), e.g. ASSESS with edata.score or summary score. */
-export function eventHasScore(event: TelemetryEvent | undefined): boolean {
+export function eventHasScore(event: TelemetryEvent | undefined, isScorm: boolean): boolean {
   if (!event) return false;
   const raw = event?.data ?? event;
   if (typeof raw === "string") return false;
   const rawData = raw as Record<string, unknown>;
-  if (isNumericScore((rawData?.edata as { score?: unknown } | undefined)?.score)) return true;
-  if (isNumericScore((rawData as { score?: unknown })?.score)) return true;
+  const hasScore = (value: unknown): boolean =>
+    isScorm ? isNumericScore(value) : typeof value === "number" && !Number.isNaN(value);
+  if (hasScore((rawData?.edata as { score?: unknown } | undefined)?.score)) return true;
+  if (hasScore((rawData as { score?: unknown })?.score)) return true;
   const summary = (rawData?.edata as any)?.summary ?? (rawData as any)?.summary;
   const arr = Array.isArray(summary) ? summary : summary ? [summary] : [];
-  return arr.some((s) => isNumericScore((s as ConsumptionSummary & { score?: unknown })?.score));
+  return arr.some((s) => hasScore((s as ConsumptionSummary & { score?: unknown })?.score));
 }
 
 export function extractSummary(event: TelemetryEvent): ConsumptionSummary[] {

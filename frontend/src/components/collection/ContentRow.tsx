@@ -182,5 +182,6 @@ export default function ContentRow({
     >
       {content}
     </Link>
+    
   );
 }

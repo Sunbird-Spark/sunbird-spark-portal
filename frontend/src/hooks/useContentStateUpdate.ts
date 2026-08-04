@@ -173,6 +173,7 @@ export function useContentStateUpdate({
         const ets = (rawEvent as any)?.ets ?? event?.ets;
         if (ets != null) assessmentTsRef.current = ets;
         assessEventsRef.current = [];
+        attemptIdRef.current = null;
         if (currentContentStatusRef.current !== ContentStatus.Completed && lastSentStatusRef.current !== ContentStatus.InProgress && !startUpdateInFlightRef.current) {
           startUpdateInFlightRef.current = true;
           handleContentStateUpdate(ContentStatus.InProgress, true)
@@ -198,7 +199,7 @@ export function useContentStateUpdate({
         // SCORM's plugin only fires a scored ASSESS once lesson_status is already
         // completed/passed - so this is itself a completion signal, independent of
         // whether END has fired yet (player build ordering isn't reliable).
-        if (isScorm && eventHasScore(event) && assessmentTsRef.current != null && !maxAttemptsExceededRef.current) {
+        if (isScorm && eventHasScore(event, isScorm) && assessmentTsRef.current != null && !maxAttemptsExceededRef.current) {
           if (sendingAssessmentRef.current) {
             pendingResendRef.current = true;
           } else {
@@ -236,8 +237,8 @@ export function useContentStateUpdate({
           const endPageSeen = Boolean(mergedSummary.endpageseen || mergedSummary.visitedcontentend);
 
           const hasScore =
-            eventHasScore(event) ||
-            assessEventsRef.current.some((e) => eventHasScore(e as TelemetryEvent));
+            eventHasScore(event, isScorm) ||
+            assessEventsRef.current.some((e) => eventHasScore(e as TelemetryEvent, isScorm));
 
           if (hasScore && endPageSeen && assessmentTsRef.current != null && !maxAttemptsExceededRef.current) {
             sendingAssessmentRef.current = true;
