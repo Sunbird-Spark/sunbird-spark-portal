@@ -91,6 +91,50 @@ describe('useCollectionDetailSelfAssess', () => {
     expect(result.current.maxAttemptsExceeded).toBe(false);
   });
 
+  it('returns maxAttemptsExceeded true for SCORM content even when isSelfAssess is false', () => {
+    mockIsSelfAssess.mockReturnValue(false);
+    const scormNode: HierarchyContentNode = {
+      identifier: 'scorm-1',
+      mimeType: 'application/vnd.ekstep.scorm-archive',
+      maxAttempts: 2,
+    };
+    mockFindNodeById.mockImplementation((_root: HierarchyContentNode, id: string) =>
+      id === 'scorm-1' ? scormNode : undefined
+    );
+    const { result } = renderHook(() =>
+      useCollectionDetailSelfAssess({
+        ...defaultParams,
+        contentId: 'scorm-1',
+        contentAttemptInfoMap: { 'scorm-1': { attemptCount: 2 } },
+      })
+    );
+    expect(result.current.maxAttemptsExceeded).toBe(true);
+  });
+
+  it('does not flip maxAttemptsExceeded true mid-session when attemptCount reaches maxAttempts as a side effect of THIS session (e.g. query invalidation after this attempt\'s own first scored event)', () => {
+    // maxAttempts is 2 (from selfAssessNode); attempt starts below the limit.
+    const { result, rerender } = renderHook(
+      (props: typeof defaultParams) => useCollectionDetailSelfAssess(props),
+      { initialProps: { ...defaultParams, contentAttemptInfoMap: { 'quiz-1': { attemptCount: 1 } } } }
+    );
+    expect(result.current.maxAttemptsExceeded).toBe(false);
+    // Simulates the mid-session bump: this attempt's own first scored event
+    // invalidates the contentState query, refetch now reports attemptCount
+    // reaching maxAttempts - must NOT retroactively exceed for this session.
+    rerender({ ...defaultParams, contentAttemptInfoMap: { 'quiz-1': { attemptCount: 2 } } });
+    expect(result.current.maxAttemptsExceeded).toBe(false);
+  });
+
+  it('still correctly reports maxAttemptsExceeded true on a fresh mount when attempts were already exhausted before this session', () => {
+    const { result } = renderHook(() =>
+      useCollectionDetailSelfAssess({
+        ...defaultParams,
+        contentAttemptInfoMap: { 'quiz-1': { attemptCount: 2 } },
+      })
+    );
+    expect(result.current.maxAttemptsExceeded).toBe(true);
+  });
+
   it('returns maxAttemptsExceeded false when hasBatchInRoute is false', () => {
     const { result } = renderHook(() =>
       useCollectionDetailSelfAssess({
