@@ -55,7 +55,7 @@ const ContentReviewPage = ({ mode }: { mode: 'view' | 'review' }) => {
   const [isLoadingRequestChangesForm, setIsLoadingRequestChangesForm] = useState(false);
   const [showPublishWarning, setShowPublishWarning] = useState(false);
 
-  const { data, isLoading, error } = useContentRead(contentId || '', { mode: 'edit' });
+  const { data, isLoading, error } = useContentRead(contentId || '', { mode: 'edit', enrichTranscripts: true });
   const contentData = data?.data?.content;
   const isQumlContent =
     contentData?.mimeType === 'application/vnd.sunbird.questionset' ||
