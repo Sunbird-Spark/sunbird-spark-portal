@@ -24,10 +24,5 @@
       "Read(*.key)",
       "Read(**/.env)"
     ]
-  },
-  "includeCoAuthoredBy": false,
-  "attribution": {
-    "commit": "",
-    "pr": ""
   }
 }
