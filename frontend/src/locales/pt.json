@@ -620,6 +620,41 @@
       "course": "Curso",
       "collection": "Coleção",
       "textbook": "Livro Didático",
+      "questionSet": "Conjunto de perguntas",
+      "questionEditor": "Editor de perguntas",
+      "uploadContent": "Enviar conteúdo",
+      "uploadLargeContent": "Enviar conteúdo grande",
+      "learningPath": "Trilha de Aprendizagem"
+    },
+    "editorDescriptions": {
+      "course": "Crie cursos com módulos, aulas e avaliações.",
+      "learningPath": "Guie os alunos por uma sequência estruturada de cursos e recursos.",
+      "textbook": "Crie e organize livros didáticos digitais com capítulos e unidades.",
+      "collection": "Organize e selecione recursos em coleções temáticas.",
+      "uploadContent": "Envie PDFs, vídeos, apresentações e documentos para os alunos.",
+      "uploadLargeContent": "Envie arquivos de vídeo grandes do seu dispositivo local (MP4, etc.)",
+      "quiz": "Crie quizzes com múltipla escolha, preenchimento de lacunas e correção automática.",
+      "story": "Crie histórias interativas e experiências de aprendizagem gamificadas.",
+      "questionSet": "Crie e gerencie conjuntos de perguntas para quizzes e avaliações.",
+      "questionEditor": "Crie, edite e gerencie perguntas individuais."
+    },
+    "categories": {
+      "collectionEditor": {
+        "title": "Editor de Coleções",
+        "subtitle": "Criar conteúdo educacional estruturado"
+      },
+      "uploadEditor": {
+        "title": "Editor de Envio",
+        "subtitle": "Enviar e publicar conteúdo existente"
+      },
+      "resourceEditor": {
+        "title": "Editor de Recursos",
+        "subtitle": "Criar recursos de aprendizagem interativos"
+      },
+      "qumlEditor": {
+        "title": "Editor QuML",
+        "subtitle": "Criar e gerenciar avaliações"
+      },
       "learningPath": "Trilha de Aprendizagem",
       "questionSet": "Conjunto de perguntas"
     },
@@ -1409,4 +1444,3 @@
     "noMoreContent": "Não há mais conteúdo para mostrar"
   }
 }
-

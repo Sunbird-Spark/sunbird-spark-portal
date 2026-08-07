@@ -11,13 +11,13 @@ describe('CreateOptions', () => {
     const onOptionSelect = vi.fn();
     render(<CreateOptions onOptionSelect={onOptionSelect} />);
     expect(screen.getByText('createOptions.title')).toBeInTheDocument();
-    expect(screen.getByText('Collection Editor')).toBeInTheDocument();
+    expect(screen.getByText('workspace.categories.collectionEditor.title')).toBeInTheDocument();
   });
 
   it('calls onOptionSelect with option id when Course is clicked', () => {
     const onOptionSelect = vi.fn();
     render(<CreateOptions onOptionSelect={onOptionSelect} />);
-    const courseButton = screen.getByRole('button', { name: /Course/ });
+    const courseButton = screen.getByRole('button', { name: /workspace\.editorOptions\.course/ });
     fireEvent.click(courseButton);
     expect(onOptionSelect).toHaveBeenCalledWith('course');
   });
@@ -25,7 +25,7 @@ describe('CreateOptions', () => {
   it('calls onOptionSelect when another option is clicked', () => {
     const onOptionSelect = vi.fn();
     render(<CreateOptions onOptionSelect={onOptionSelect} />);
-    fireEvent.click(screen.getByRole('button', { name: /Collection/ }));
+    fireEvent.click(screen.getByRole('button', { name: /workspace\.editorOptions\.collection/ }));
     expect(onOptionSelect).toHaveBeenCalledWith('collection');
   });
 });
