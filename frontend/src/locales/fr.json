@@ -620,7 +620,39 @@
       "course": "Cours",
       "collection": "Collection",
       "textbook": "Manuel",
-      "questionSet": "Ensemble de questions"
+      "questionSet": "Ensemble de questions",
+      "questionEditor": "Éditeur de questions",
+      "uploadContent": "Télécharger du contenu",
+      "uploadLargeContent": "Télécharger un contenu volumineux"
+    },
+    "editorDescriptions": {
+      "course": "Concevez des cours avec des modules, des leçons et des évaluations.",
+      "textbook": "Créez et organisez des manuels numériques avec chapitres et unités.",
+      "collection": "Organisez et sélectionnez des ressources en collections thématiques.",
+      "uploadContent": "Téléchargez des PDF, vidéos, présentations et documents pour les apprenants.",
+      "uploadLargeContent": "Téléchargez des fichiers vidéo volumineux depuis votre appareil local (MP4, etc.)",
+      "quiz": "Créez des quiz avec des QCM, des textes à trous et une correction automatique.",
+      "story": "Concevez des histoires interactives et des expériences d'apprentissage ludiques.",
+      "questionSet": "Créez et gérez des ensembles de questions pour les quiz et évaluations.",
+      "questionEditor": "Créez, modifiez et gérez des questions individuelles."
+    },
+    "categories": {
+      "collectionEditor": {
+        "title": "Éditeur de collections",
+        "subtitle": "Créer du contenu pédagogique structuré"
+      },
+      "uploadEditor": {
+        "title": "Éditeur de téléchargement",
+        "subtitle": "Télécharger et publier du contenu existant"
+      },
+      "resourceEditor": {
+        "title": "Éditeur de ressources",
+        "subtitle": "Créer des ressources pédagogiques interactives"
+      },
+      "qumlEditor": {
+        "title": "Éditeur QuML",
+        "subtitle": "Créer et gérer des évaluations"
+      }
     },
     "noAccessToCreate": "Vous n'avez pas accès pour créer ce contenu",
     "collectionDescriptions": {

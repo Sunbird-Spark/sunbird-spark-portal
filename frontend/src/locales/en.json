@@ -620,7 +620,39 @@
       "course": "Course",
       "collection": "Collection",
       "textbook": "TextBook",
-      "questionSet": "Question Set"
+      "questionSet": "Question Set",
+      "questionEditor": "Question Editor",
+      "uploadContent": "Upload Content",
+      "uploadLargeContent": "Upload Large Content"
+    },
+    "editorDescriptions": {
+      "course": "Design courses with modules, lessons, and assessments.",
+      "textbook": "Create and organize digital textbooks with chapters and units.",
+      "collection": "Organize and curate resources into thematic collections.",
+      "uploadContent": "Upload PDFs, videos, presentations, and documents for learners.",
+      "uploadLargeContent": "Upload large video files from your local device (MP4, etc.)",
+      "quiz": "Create quizzes with MCQs, fill-in-the-blanks, and auto-grading.",
+      "story": "Design interactive stories and gamified learning experiences.",
+      "questionSet": "Create and manage sets of questions for quizzes and assessments.",
+      "questionEditor": "Create, edit, and manage individual questions."
+    },
+    "categories": {
+      "collectionEditor": {
+        "title": "Collection Editor",
+        "subtitle": "Create structured learning content"
+      },
+      "uploadEditor": {
+        "title": "Upload Editor",
+        "subtitle": "Upload and publish existing content"
+      },
+      "resourceEditor": {
+        "title": "Resource Editor",
+        "subtitle": "Create interactive learning resources"
+      },
+      "qumlEditor": {
+        "title": "QuML Editor",
+        "subtitle": "Create and manage assessments"
+      }
     },
     "noAccessToCreate": "You do not have access to create this content",
     "collectionDescriptions": {

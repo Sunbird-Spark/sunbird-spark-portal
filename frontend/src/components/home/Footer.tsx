@@ -41,7 +41,7 @@ const Footer = () => {
           </div>
 
           {/* Links - Right aligned */}
-          <div className="flex flex-col sm:flex-row gap-10 md:gap-20 lg:gap-28 lg:pr-[6.25rem] w-full lg:w-auto">
+          <div className="flex flex-col sm:flex-row gap-10 md:gap-20 lg:gap-28 lg:pe-[6.25rem] w-full lg:w-auto">
             {/* Products */}
             <div>
               <h4 className="font-semibold text-sm mb-6 text-white">
