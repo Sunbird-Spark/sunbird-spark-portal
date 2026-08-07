@@ -30,16 +30,17 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import useInteract from "@/hooks/useInteract";
 
 // Option IDs that use the dynamic form dialog for content creation
-const DYNAMIC_FORM_OPTIONS = ['quiz', 'story', 'textbook', 'collection', 'learning-path'];
+const DYNAMIC_FORM_OPTIONS = ['quiz', 'story', 'textbook', 'collection'];
 
-// Option IDs for collection-type content created via the dynamic form (textbook, collection, learning-path)
-const COLLECTION_FORM_OPTIONS = ['textbook', 'collection', 'learning-path'];
+// Option IDs for collection-type content created via the dynamic form (textbook, collection)
+const COLLECTION_FORM_OPTIONS = ['textbook', 'collection'];
 
 /** QuML editor option IDs */
 const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
 
-// Learning Path always has a fixed primaryCategory, so the "Collection Type" field is not applicable
-const LEARNING_PATH_EXCLUDED_FIELDS = ['primaryCategory'];
+// Option IDs that use the simple name+description dialog and map directly to a
+// COLLECTION_CONTENT_CONFIG entry keyed by the option id itself
+const SIMPLE_COLLECTION_OPTIONS = ['course', 'learning-path'];
 
 const EDITOR_OPTION_LABELS: Record<string, string> = {
   'quiz': 'workspace.editorOptions.quiz',
@@ -373,8 +374,8 @@ const WorkspacePage = () => {
       setShowDynamicFormDialog(true);
       return;
     }
-    // Course and question-set use the simple name dialog
-    if (optionId === 'course' || QUML_EDITOR_OPTIONS.includes(optionId)) {
+    // Course, Learning Path, and question-set use the simple name dialog
+    if (SIMPLE_COLLECTION_OPTIONS.includes(optionId) || QUML_EDITOR_OPTIONS.includes(optionId)) {
       setSelectedOption(optionId);
       setShowNameDialog(true);
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
@@ -407,12 +408,8 @@ const WorkspacePage = () => {
       const isCollectionType = selectedOption && COLLECTION_FORM_OPTIONS.includes(selectedOption);
 
       if (isCollectionType) {
-        // Textbook / Collection / Learning Path: create collection-type content
-        const configKey = selectedOption === 'textbook'
-          ? 'digital-textbook'
-          : selectedOption === 'learning-path'
-            ? 'learning-path'
-            : 'content-playlist';
+        // Textbook / Collection: create collection-type content
+        const configKey = selectedOption === 'textbook' ? 'digital-textbook' : 'content-playlist';
         const config = COLLECTION_CONTENT_CONFIG[configKey];
         if (!config) throw new Error(t("workspace.errors.invalidContentType"));
 
@@ -495,10 +492,10 @@ const WorkspacePage = () => {
   const handleContentNameSubmit = async (name: string, extra?: { description?: string }) => {
     setIsCreating(true);
     try {
-      if (selectedOption === 'course') {
-        // Course creation: inline collection creation logic
+      if (selectedOption && SIMPLE_COLLECTION_OPTIONS.includes(selectedOption)) {
+        // Course / Learning Path creation: inline collection creation logic
         const { creator, createdBy, organisation, createdFor } = getCreatorMeta();
-        const config = COLLECTION_CONTENT_CONFIG['course']!;
+        const config = COLLECTION_CONTENT_CONFIG[selectedOption]!;
         const { descriptionKey, ...apiConfig } = config;
         const targetFWIds: string[] = orgFramework ? [orgFramework] : [];
 
@@ -513,7 +510,7 @@ const WorkspacePage = () => {
         });
         const contentId = response.data?.identifier || response.data?.content_id;
         if (!contentId) {
-          console.error("Course creation response missing identifier:", response);
+          console.error("Collection creation response missing identifier:", response);
           throw new Error(t("workspace.errors.unexpectedResponse"));
         }
         navigate(`/edit/collection-editor/${contentId}`, { state: { from: location.pathname + location.search } });
@@ -531,11 +528,11 @@ const WorkspacePage = () => {
   };
 
   // Determines the editor route from the cached WorkspaceItem type from search API.
-  // Only Course, TextBook, and Collection go to collection editor; everything else goes to content editor.
+  // Only Course, TextBook, Collection, and LearningPath go to collection editor; everything else goes to content editor.
   const getEditorRoute = (id: string): string | null => {
     const item = visibleContents.find((c) => c.id === id);
     if (!item) return null;
-    if (["Course", "TextBook", "Collection"].includes(item.contentType)) {
+    if (["Course", "TextBook", "Collection", "LearningPath"].includes(item.contentType)) {
       return `/edit/collection-editor/${id}`;
     }
     if (item.primaryCategory === 'Practice Question Set') {
@@ -724,10 +721,9 @@ const WorkspacePage = () => {
         isLoading={isCreating}
         orgChannelId={orgChannelId}
         orgFramework={orgFramework}
-        formSubType={selectedOption === 'quiz' ? 'assessment' : selectedOption === 'textbook' ? 'textbook' : (selectedOption === 'collection' || selectedOption === 'learning-path') ? 'collection' : 'resource'}
+        formSubType={selectedOption === 'quiz' ? 'assessment' : selectedOption === 'textbook' ? 'textbook' : selectedOption === 'collection' ? 'collection' : 'resource'}
         title={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? `${t('create')} ${t(EDITOR_OPTION_LABELS[selectedOption])}`.trim() : t('workspace.createContent')}
         defaultFields={DEFAULT_FIELDS}
-        excludeFieldCodes={selectedOption === 'learning-path' ? LEARNING_PATH_EXCLUDED_FIELDS : undefined}
       />
     </div>
   );

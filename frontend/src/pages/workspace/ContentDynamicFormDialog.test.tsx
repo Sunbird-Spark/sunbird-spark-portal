@@ -242,17 +242,6 @@ describe('ContentDynamicFormDialog', () => {
     });
   });
 
-  it('should exclude fields listed in excludeFieldCodes from rendering and validation', async () => {
-    renderWithQueryClient(<ContentDynamicFormDialog {...defaultProps} excludeFieldCodes={['subject']} />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Content Name')).toBeInTheDocument();
-    });
-
-    expect(screen.queryByText('Subject')).not.toBeInTheDocument();
-    expect(screen.queryByPlaceholderText('Select subject')).not.toBeInTheDocument();
-  });
-
   it('should show required field indicators', async () => {
     renderWithQueryClient(<ContentDynamicFormDialog {...defaultProps} />);
 
