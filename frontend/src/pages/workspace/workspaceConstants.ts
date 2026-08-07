@@ -28,6 +28,7 @@ export const WORKSPACE_PRIMARY_CATEGORY_FILTER = [
   'Course',
   'Digital Textbook',
   'Question paper',
+  'Learning Path',
 ] as const;
 
 /** Number of items to fetch per page. */
@@ -66,7 +67,7 @@ export function getPrimaryCategoryForTypeFilter(
 ): string[] | undefined {
   switch (filter) {
     case 'course':
-      return ['Course', 'Digital Textbook'];
+      return ['Course', 'Digital Textbook', 'Learning Path'];
     case 'content':
       return ['Learning Resource', 'Explanation Content', 'Teacher Resource', 'eTextbook'];
     case 'quiz':
