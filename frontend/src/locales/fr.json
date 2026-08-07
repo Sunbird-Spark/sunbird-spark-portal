@@ -653,13 +653,16 @@
         "title": "Éditeur QuML",
         "subtitle": "Créer et gérer des évaluations"
       }
+      "learningPath": "Parcours d'apprentissage",
+      "questionSet": "Ensemble de questions"
     },
     "noAccessToCreate": "Vous n'avez pas accès pour créer ce contenu",
     "collectionDescriptions": {
       "course": "Entrez une description pour le cours",
       "contentPlaylist": "Entrez une description pour la collection",
       "digitalTextbook": "Entrez une description pour le manuel numérique",
-      "questionPaper": "Entrez une description pour le questionnaire"
+      "questionPaper": "Entrez une description pour le questionnaire",
+      "learningPath": "Entrez une description pour le parcours d'apprentissage"
     },
     "errors": {
       "unexpectedResponse": "Réponse inattendue du serveur. Veuillez réessayer.",

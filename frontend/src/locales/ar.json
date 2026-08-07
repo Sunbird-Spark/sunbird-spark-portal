@@ -653,13 +653,16 @@
         "title": "محرر QuML",
         "subtitle": "إنشاء وإدارة التقييمات"
       }
+      "learningPath": "مسار تعلم",
+      "questionSet": "مجموعة أسئلة"
     },
     "noAccessToCreate": "ليس لديك صلاحية لإنشاء هذا المحتوى",
     "collectionDescriptions": {
       "course": "أدخل وصفاً للدورة",
       "contentPlaylist": "أدخل وصفاً للمجموعة",
       "digitalTextbook": "أدخل وصفاً للكتاب الرقمي",
-      "questionPaper": "أدخل وصفاً لورقة الأسئلة"
+      "questionPaper": "أدخل وصفاً لورقة الأسئلة",
+      "learningPath": "أدخل وصفاً لمسار التعلم"
     },
     "errors": {
       "unexpectedResponse": "استجابة غير متوقعة من الخادم. يرجى المحاولة مرة أخرى.",

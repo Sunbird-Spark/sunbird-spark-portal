@@ -653,13 +653,16 @@
         "title": "QuML Editor",
         "subtitle": "Create and manage assessments"
       }
+      "learningPath": "Learning Path",
+      "questionSet": "Question Set"
     },
     "noAccessToCreate": "You do not have access to create this content",
     "collectionDescriptions": {
       "course": "Enter description for Course",
       "contentPlaylist": "Enter description for Collection",
       "digitalTextbook": "Enter description for Digital Textbook",
-      "questionPaper": "Enter description for Question Paper"
+      "questionPaper": "Enter description for Question Paper",
+      "learningPath": "Enter description for Learning Path"
     },
     "errors": {
       "unexpectedResponse": "Unexpected server response. Please try again.",

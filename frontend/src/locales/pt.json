@@ -653,13 +653,16 @@
         "title": "Editor QuML",
         "subtitle": "Criar e gerenciar avaliações"
       }
+      "learningPath": "Trilha de Aprendizagem",
+      "questionSet": "Conjunto de perguntas"
     },
     "noAccessToCreate": "Você não tem acesso para criar este conteúdo",
     "collectionDescriptions": {
       "course": "Digite uma descrição para o curso",
       "contentPlaylist": "Digite uma descrição para a coleção",
       "digitalTextbook": "Digite uma descrição para o livro digital",
-      "questionPaper": "Digite uma descrição para o questionário"
+      "questionPaper": "Digite uma descrição para o questionário",
+      "learningPath": "Digite uma descrição para a Trilha de Aprendizagem"
     },
     "errors": {
       "unexpectedResponse": "Resposta inesperada do servidor. Por favor, tente novamente.",
