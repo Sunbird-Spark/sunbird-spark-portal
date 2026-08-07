@@ -18,8 +18,8 @@
   "confirm": "Confirm",
   "back": "Back",
   "next": "Next",
-    "yes": "Yes",
-    "no": "No",
+  "yes": "Yes",
+  "no": "No",
   "changeLanguage": "Change Language",
   "home": "Home",
   "dashboard": "Dashboard",
@@ -623,10 +623,12 @@
       "questionSet": "Question Set",
       "questionEditor": "Question Editor",
       "uploadContent": "Upload Content",
-      "uploadLargeContent": "Upload Large Content"
+      "uploadLargeContent": "Upload Large Content",
+      "learningPath": "Learning Path"
     },
     "editorDescriptions": {
       "course": "Design courses with modules, lessons, and assessments.",
+      "learningPath": "Guide learners through a structured sequence of courses and resources.",
       "textbook": "Create and organize digital textbooks with chapters and units.",
       "collection": "Organize and curate resources into thematic collections.",
       "uploadContent": "Upload PDFs, videos, presentations, and documents for learners.",
@@ -652,7 +654,7 @@
       "qumlEditor": {
         "title": "QuML Editor",
         "subtitle": "Create and manage assessments"
-      }
+      },
       "learningPath": "Learning Path",
       "questionSet": "Question Set"
     },
@@ -1291,7 +1293,6 @@
     "filter": "Filter",
     "untitledCourse": "Untitled Course"
   },
-
   "trackableCollection": {
     "completed": "Completed"
   },
@@ -1444,4 +1445,3 @@
     "noMoreContent": "No more content to show"
   }
 }
-

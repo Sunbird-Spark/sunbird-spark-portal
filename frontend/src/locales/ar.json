@@ -623,10 +623,12 @@
       "questionSet": "مجموعة أسئلة",
       "questionEditor": "محرر الأسئلة",
       "uploadContent": "رفع محتوى",
-      "uploadLargeContent": "رفع محتوى كبير"
+      "uploadLargeContent": "رفع محتوى كبير",
+      "learningPath": "مسار تعلم"
     },
     "editorDescriptions": {
       "course": "صمّم دورات تحتوي على وحدات ودروس وتقييمات.",
+      "learningPath": "وجّه المتعلمين عبر تسلسل منظم من الدورات والموارد.",
       "textbook": "أنشئ ونظّم كتباً رقمية مقسّمة إلى فصول ووحدات.",
       "collection": "نظّم وجمّع الموارد في مجموعات موضوعية.",
       "uploadContent": "قم برفع ملفات PDF والفيديو والعروض التقديمية والوثائق للمتعلمين.",
@@ -652,7 +654,7 @@
       "qumlEditor": {
         "title": "محرر QuML",
         "subtitle": "إنشاء وإدارة التقييمات"
-      }
+      },
       "learningPath": "مسار تعلم",
       "questionSet": "مجموعة أسئلة"
     },
@@ -1443,4 +1445,3 @@
     "noMoreContent": "لا يوجد المزيد من المحتوى لعرضه"
   }
 }
-

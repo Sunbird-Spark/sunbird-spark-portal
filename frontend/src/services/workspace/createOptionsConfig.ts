@@ -25,8 +25,8 @@ export function getEditorCategories(forBookCreator = false): EditorCategory[] {
     },
     {
       id: 'learning-path',
-      title: 'Learning Path',
-      description: 'Guide learners through a structured sequence of courses and resources.',
+      titleKey: 'workspace.editorOptions.learningPath',
+      descriptionKey: 'workspace.editorDescriptions.learningPath',
       icon: FiMap,
       iconBg: 'bg-sunbird-wave/15',
       iconColor: 'text-sunbird-ink',
