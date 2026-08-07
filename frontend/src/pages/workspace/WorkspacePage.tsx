@@ -92,7 +92,7 @@ const COLLECTION_CONTENT_CONFIG: Record<string, {
     mimeType: 'application/vnd.ekstep.content-collection',
     contentType: 'LearningPath',
     primaryCategory: 'Learning Path',
-    resourceType: 'LearningPath',
+    resourceType: 'Collection',
     descriptionKey: 'workspace.collectionDescriptions.learningPath'
   },
 };
