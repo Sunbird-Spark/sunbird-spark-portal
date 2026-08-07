@@ -1,0 +1,12 @@
+# Runs the Playwright E2E suite on demand, outside GitHub Actions.
+# Browsers ship preinstalled in this base image, so no `playwright install` step is needed at run time.
+FROM mcr.microsoft.com/playwright:v1.59.1-noble
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+CMD ["npm", "run", "test:e2e"]

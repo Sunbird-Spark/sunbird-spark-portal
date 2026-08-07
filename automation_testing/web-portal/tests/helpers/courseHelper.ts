@@ -73,14 +73,19 @@ interface ConsumeAllLessonsOptions {
   waitSidebarCompletion?: boolean;
 }
 
+export interface StuckLesson {
+  title: string;
+  contentType: string;
+}
+
 export async function consumeAllLessons(
   page: Page,
   origin: string,
   lessonAnchors: Locator,
   options: ConsumeAllLessonsOptions = {},
-): Promise<string[]> {
+): Promise<StuckLesson[]> {
   const { waitSidebarCompletion = true } = options;
-  const stuckLessons: string[] = [];
+  const stuckLessons: StuckLesson[] = [];
 
   // Status labels (Completed / In Progress / not viewed) come from an async API call.
   // Wait until at least one anchor shows a status before snapshotting completion state,
@@ -260,7 +265,7 @@ export async function consumeAllLessons(
           console.log(`  [${i + 1}/${lessons.length}] Sidebar stale but progress ${progressBefore}→${pbNum}% — lesson completed`);
         } else {
           console.log(`  Warning: lesson "${title}" sidebar did not update to Completed within 20 s (authoritative check is the progress bar)`);
-          stuckLessons.push(title);
+          stuckLessons.push({ title, contentType });
         }
       }
       // The CourseCompletionDialog fires when TanStack Query refetches and the

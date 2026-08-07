@@ -129,6 +129,31 @@ The same keys are in `.env.example` — copy those values across. If a variable 
 
 ---
 
+## Running via Docker (no GitHub Actions or code access needed)
+
+The suite can also run entirely outside GitHub Actions, for anyone who doesn't have (or shouldn't need) a GitHub seat or a local dev environment — a one-button web page triggers the exact same suite in a Docker container and shows the report when it's done.
+
+This has two pieces:
+
+| Piece | What it is |
+|---|---|
+| [`web-portal/Dockerfile.e2e`](../automation_testing/web-portal/Dockerfile.e2e) | Packages this suite (Node + Chromium + the test code) into a self-contained image. Building it runs the identical `npm run test:e2e` the CI templates above use. |
+| [`test-runner-service/`](../automation_testing/test-runner-service) | A small always-on web app: one "Run E2E Tests" button, a "Target environment" field (defaults to `test.sunbirded.org`, but accepts any instance — sandbox, staging, etc.), a run history table, and a link to each run's Playwright HTML report. Rebuilds the image from current source before every run, so it can't silently run stale code. |
+
+Quick start:
+
+```bash
+cd test-runner-service
+npm install
+npm run dev
+```
+
+Then open `http://localhost:4000`, pick a target environment, and click **Run E2E Tests**. See [`test-runner-service/README.md`](../automation_testing/test-runner-service/README.md) for full configuration (credentials, the Basic Auth password, deployment beyond a local machine).
+
+Runs are serialized one at a time — a second click while one is in progress is rejected — because, same as above, this suite mutates real enrollment/certificate/course-progress state, and overlapping runs would corrupt each other's results.
+
+---
+
 ## Adding a New Test
 
 1. **Create your spec file** under the appropriate folder:
