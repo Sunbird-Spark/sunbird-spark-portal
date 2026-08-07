@@ -30,13 +30,16 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import useInteract from "@/hooks/useInteract";
 
 // Option IDs that use the dynamic form dialog for content creation
-const DYNAMIC_FORM_OPTIONS = ['quiz', 'story', 'textbook', 'collection'];
+const DYNAMIC_FORM_OPTIONS = ['quiz', 'story', 'textbook', 'collection', 'learning-path'];
 
-// Option IDs for collection-type content created via the dynamic form (textbook, collection)
-const COLLECTION_FORM_OPTIONS = ['textbook', 'collection'];
+// Option IDs for collection-type content created via the dynamic form (textbook, collection, learning-path)
+const COLLECTION_FORM_OPTIONS = ['textbook', 'collection', 'learning-path'];
 
 /** QuML editor option IDs */
 const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
+
+// Learning Path always has a fixed primaryCategory, so the "Collection Type" field is not applicable
+const LEARNING_PATH_EXCLUDED_FIELDS = ['primaryCategory'];
 
 const EDITOR_OPTION_LABELS: Record<string, string> = {
   'quiz': 'workspace.editorOptions.quiz',
@@ -44,6 +47,7 @@ const EDITOR_OPTION_LABELS: Record<string, string> = {
   'course': 'workspace.editorOptions.course',
   'collection': 'workspace.editorOptions.collection',
   'textbook': 'workspace.editorOptions.textbook',
+  'learning-path': 'workspace.editorOptions.learningPath',
   'question-set': 'workspace.editorOptions.questionSet',
   'question-editor': 'workspace.editorOptions.questionSet',
 };
@@ -82,6 +86,13 @@ const COLLECTION_CONTENT_CONFIG: Record<string, {
     primaryCategory: 'Question paper',
     resourceType: 'Collection',
     descriptionKey: 'workspace.collectionDescriptions.questionPaper'
+  },
+  'learning-path': {
+    mimeType: 'application/vnd.ekstep.content-collection',
+    contentType: 'LearningPath',
+    primaryCategory: 'Learning Path',
+    resourceType: 'LearningPath',
+    descriptionKey: 'workspace.collectionDescriptions.learningPath'
   },
 };
 
@@ -396,8 +407,12 @@ const WorkspacePage = () => {
       const isCollectionType = selectedOption && COLLECTION_FORM_OPTIONS.includes(selectedOption);
 
       if (isCollectionType) {
-        // Textbook / Collection: create collection-type content
-        const configKey = selectedOption === 'textbook' ? 'digital-textbook' : 'content-playlist';
+        // Textbook / Collection / Learning Path: create collection-type content
+        const configKey = selectedOption === 'textbook'
+          ? 'digital-textbook'
+          : selectedOption === 'learning-path'
+            ? 'learning-path'
+            : 'content-playlist';
         const config = COLLECTION_CONTENT_CONFIG[configKey];
         if (!config) throw new Error(t("workspace.errors.invalidContentType"));
 
@@ -709,9 +724,10 @@ const WorkspacePage = () => {
         isLoading={isCreating}
         orgChannelId={orgChannelId}
         orgFramework={orgFramework}
-        formSubType={selectedOption === 'quiz' ? 'assessment' : selectedOption === 'textbook' ? 'textbook' : selectedOption === 'collection' ? 'collection' : 'resource'}
+        formSubType={selectedOption === 'quiz' ? 'assessment' : selectedOption === 'textbook' ? 'textbook' : (selectedOption === 'collection' || selectedOption === 'learning-path') ? 'collection' : 'resource'}
         title={selectedOption && EDITOR_OPTION_LABELS[selectedOption] ? `${t('create')} ${t(EDITOR_OPTION_LABELS[selectedOption])}`.trim() : t('workspace.createContent')}
         defaultFields={DEFAULT_FIELDS}
+        excludeFieldCodes={selectedOption === 'learning-path' ? LEARNING_PATH_EXCLUDED_FIELDS : undefined}
       />
     </div>
   );

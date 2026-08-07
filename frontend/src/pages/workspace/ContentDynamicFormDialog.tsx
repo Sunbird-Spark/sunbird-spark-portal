@@ -7,6 +7,9 @@ import { useFormRead } from "../../hooks/useForm";
 import { useFramework } from "../../hooks/useFramework";
 import "./ContentDynamicForm.css";
 
+/** Stable empty default so `excludeFieldCodes` doesn't get a fresh array identity on every render */
+const NO_EXCLUDED_FIELDS: string[] = [];
+
 interface FormField {
   code: string;
   name: string;
@@ -41,6 +44,8 @@ interface ContentDynamicFormDialogProps {
   onFormLoadComplete?: () => void;
   submitButtonProps?: Record<string, string | boolean | number>;
   defaultFields?: Record<string, readonly { key: string; name: string }[]>;
+  /** Field codes to drop from the fetched form schema (not rendered, required, or submitted) */
+  excludeFieldCodes?: string[];
 }
 
 const processFormSubmission = (formValues: Record<string, string | string[]>, fields: FormField[]): ContentFormData => {
@@ -91,6 +96,7 @@ export default function ContentDynamicFormDialog({
   onFormLoadComplete,
   submitButtonProps,
   defaultFields,
+  excludeFieldCodes = NO_EXCLUDED_FIELDS,
 }: ContentDynamicFormDialogProps) {
   const { t } = useAppI18n();
   const [showDialog, setShowDialog] = useState(false);
@@ -114,8 +120,10 @@ export default function ContentDynamicFormDialog({
   );
   const fields = useMemo(() => {
     const formFields: FormField[] = formData?.data?.form?.data?.fields ?? [];
-    return [...formFields].filter((f) => f.visible && f.inputType !== 'Concept').sort((a, b) => a.index - b.index);
-  }, [formData]);
+    return [...formFields]
+      .filter((f) => f.visible && f.inputType !== 'Concept' && !excludeFieldCodes.includes(f.code))
+      .sort((a, b) => a.index - b.index);
+  }, [formData, excludeFieldCodes]);
 
   const frameworkCategories = useMemo(() => {
     return frameworkData?.data?.framework?.categories ?? [];

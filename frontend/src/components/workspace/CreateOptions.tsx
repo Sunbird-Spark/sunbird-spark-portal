@@ -30,7 +30,7 @@ const CreateOptions = ({ onOptionSelect, isBookCreator = false }: CreateOptionsP
       </div>
 
       {/* Editor Categories */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {editorCategories.map((category) => (
           <div
             key={category.id}
