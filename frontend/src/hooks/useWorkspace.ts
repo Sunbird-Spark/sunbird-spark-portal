@@ -104,9 +104,10 @@ export function useWorkspace({
   // Both modes use facets (limit=1) for lightweight counting.
   // Creator mode: scoped to the user's own content.
   // Reviewer mode: uses createdBy != to exclude the reviewer's own content directly.
-  // typeFilter is included so tab badges and stats update when a type is selected.
+  // typeFilter/transcriptFilter are included so tab badges and stats stay consistent
+  // with the filtered content list rather than showing unfiltered totals.
   const countsQuery = useQuery({
-    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter, searchQuery, secondaryView],
+    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter, searchQuery, secondaryView, transcriptFilter],
     queryFn: () =>
       contentService.contentSearch({
         filters: {
@@ -119,6 +120,7 @@ export function useWorkspace({
         facets: ['status'],
         limit: 1,
         offset: 0,
+        ...(transcriptFilter ? { exists: ['enrichment'] } : {}),
       }),
     enabled: queryEnabled,
     staleTime: 0,
