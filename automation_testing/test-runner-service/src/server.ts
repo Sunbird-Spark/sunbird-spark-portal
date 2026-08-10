@@ -1,11 +1,23 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { config } from './config.js';
-import { startRun, finishRun, listRuns, isRunInProgress } from './runLock.js';
+import { config, assertAuthConfigured } from './config.js';
+import { startRun, finishRun, listRuns, isRunInProgress, getRun } from './runLock.js';
 import { runE2ESuite, reportDirFor } from './dockerRunner.js';
+import { safeCompare } from './safeCompare.js';
+import { CSRF_COOKIE_NAME, generateCsrfToken, readCookie } from './csrf.js';
 
 const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
 
 const app = express();
+
+try {
+    assertAuthConfigured(config);
+} catch (err) {
+    console.error((err as Error).message);
+    process.exit(1);
+}
+if (!config.TRIGGER_SHARED_SECRET) {
+    console.warn('WARNING: ALLOW_NO_AUTH=1 is set — the trigger endpoint is running without authentication.');
+}
 
 function requireSharedSecret(req: Request, res: Response, next: NextFunction) {
     if (!config.TRIGGER_SHARED_SECRET) {
@@ -14,7 +26,7 @@ function requireSharedSecret(req: Request, res: Response, next: NextFunction) {
     const [scheme, encoded] = (req.get('authorization') || '').split(' ');
     if (scheme === 'Basic' && encoded) {
         const password = Buffer.from(encoded, 'base64').toString('utf8').split(':')[1] ?? '';
-        if (password === config.TRIGGER_SHARED_SECRET) {
+        if (safeCompare(password, config.TRIGGER_SHARED_SECRET)) {
             return next();
         }
     }
@@ -26,6 +38,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(requireSharedSecret);
 
 const ENVIRONMENT_PRESETS = ['https://test.sunbirded.org', 'https://sandbox.sunbirded.org'];
+const ALLOWED_BASE_URLS = new Set([...ENVIRONMENT_PRESETS, config.BASE_URL]);
 
 const SUNBIRD_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 150 1280 430" style="height:2.3rem;width:auto;flex-shrink:0;display:block;">
   <g>
@@ -48,7 +61,7 @@ const STATUS_STYLES: Record<string, string> = {
     error: 'background:hsl(0 70% 93%);color:hsl(0 65% 40%);',
 };
 
-function renderHome(): string {
+function renderHome(csrfToken: string): string {
     const rows = listRuns()
         .map((r) => {
             const badge = `<span style="display:inline-block;padding:0.2rem 0.7rem;border-radius:999px;font-size:0.82rem;font-weight:500;${STATUS_STYLES[r.status] ?? ''}">${r.status}</span>`;
@@ -136,6 +149,7 @@ function renderHome(): string {
   <div class="card">
     <p class="desc" style="margin-top:0;">Rebuilds from current source and runs the Playwright suite from <code>automation_testing/web-portal</code> against whichever environment you pick below.</p>
     <form method="post" action="/run">
+      <input type="hidden" name="csrfToken" value="${csrfToken}">
       <div class="field">
         <label for="baseUrl">Target environment</label>
         <select id="baseUrl" name="baseUrl">
@@ -161,16 +175,27 @@ function renderHome(): string {
 </html>`;
 }
 
-app.get('/', (_req, res) => {
-    res.type('html').send(renderHome());
+app.get('/', (req, res) => {
+    const csrfToken = generateCsrfToken();
+    res.cookie(CSRF_COOKIE_NAME, csrfToken, { httpOnly: true, sameSite: 'strict' });
+    res.type('html').send(renderHome(csrfToken));
 });
 
 app.post('/run', (req, res) => {
+    const wantsJson = req.accepts(['html', 'json']) === 'json';
+
+    if (!wantsJson) {
+        const cookieToken = readCookie(req.headers.cookie, CSRF_COOKIE_NAME);
+        const bodyToken = typeof req.body?.csrfToken === 'string' ? req.body.csrfToken : '';
+        if (!cookieToken || !safeCompare(cookieToken, bodyToken)) {
+            res.status(403).type('text').send('Invalid or missing CSRF token');
+            return;
+        }
+    }
+
     const requestedUrl = (req.body?.baseUrl ?? '').trim() || config.BASE_URL;
-    try {
-        new URL(requestedUrl);
-    } catch {
-        res.status(400).send(`Invalid target environment URL: ${requestedUrl}`);
+    if (!ALLOWED_BASE_URLS.has(requestedUrl)) {
+        res.status(400).type('text').send(`Unsupported target environment: ${requestedUrl}`);
         return;
     }
 
@@ -186,7 +211,24 @@ app.post('/run', (req, res) => {
         .then((exitCode) => finishRun(run.id, exitCode === 0 ? 'passed' : 'failed'))
         .catch(() => finishRun(run.id, 'error'));
 
+    if (wantsJson) {
+        res.status(202).json({ runId: run.id, status: run.status });
+        return;
+    }
     res.redirect('/');
+});
+
+app.get('/runs/:id', (req, res) => {
+    if (!UUID_PATTERN.test(req.params.id)) {
+        res.status(404).end();
+        return;
+    }
+    const run = getRun(req.params.id);
+    if (!run) {
+        res.status(404).end();
+        return;
+    }
+    res.json(run);
 });
 
 app.use('/runs/:id/report', (req, res, next) => {
