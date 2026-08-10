@@ -198,6 +198,7 @@ const WorkspacePage = () => {
       ? (type as ContentTypeFilter)
       : 'all';
   });
+  const [transcriptFilter, setTranscriptFilter] = useState(false);
 
   // Local state for responsive typing; debounced value drives API + URL.
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
@@ -291,6 +292,7 @@ const WorkspacePage = () => {
     enabled: showContent,
     isBookCreatorOnly,
     isBookReviewerOnly,
+    transcriptFilter,
   });
 
   const visibleContents = useMemo(
@@ -634,6 +636,8 @@ const WorkspacePage = () => {
     onViewModeChange: handleViewModeChange,
     typeFilter,
     onTypeFilterChange: handleTypeFilterChange,
+    transcriptFilter,
+    onTranscriptFilterChange: setTranscriptFilter,
     contentCount: showContent ? visibleContents.length : undefined,
     totalCount: showContent ? totalCount : undefined,
     onCreateClick: handleCreateClick,

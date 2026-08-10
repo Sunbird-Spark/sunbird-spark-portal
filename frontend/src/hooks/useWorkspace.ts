@@ -53,6 +53,8 @@ interface UseWorkspaceOptions {
   isBookReviewerOnly?: boolean;
   /** Secondary action view (Uploads/Collaborations) merged on top of segment tab filters. */
   secondaryView?: WorkspaceView | null;
+  /** When true, restrict results to content with enrichment data (e.g. transcripts). */
+  transcriptFilter?: boolean;
 }
 
 /**
@@ -78,6 +80,7 @@ export function useWorkspace({
   isBookCreatorOnly = false,
   isBookReviewerOnly = false,
   secondaryView = null,
+  transcriptFilter = false,
 }: UseWorkspaceOptions): UseWorkspaceReturn {
   const queryClient = useQueryClient();
   const isContentTab = !['create'].includes(activeTab);
@@ -167,12 +170,15 @@ export function useWorkspace({
       baseFilters.collaborators = [userId ?? ''];
       baseFilters.objectType = 'Content';
     }
+    if (transcriptFilter) {
+      baseFilters.status = [...WORKSPACE_STATUS_FILTER];
+    }
 
     return baseFilters;
-  }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, secondaryView]);
+  }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, secondaryView, transcriptFilter]);
 
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
-    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery, secondaryView],
+    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery, secondaryView, transcriptFilter],
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
         filters: getFiltersForTab(),
@@ -180,6 +186,7 @@ export function useWorkspace({
         limit: WORKSPACE_PAGE_LIMIT,
         offset: pageParam as number,
         sort_by: buildSortBy(sortBy),
+        ...(transcriptFilter ? { exists: ['enrichment'] } : {}),
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
