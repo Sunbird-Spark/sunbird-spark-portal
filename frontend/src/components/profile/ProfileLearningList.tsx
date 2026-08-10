@@ -40,7 +40,7 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
     const location = useLocation();
     const status = getCompletionStatus(course.status, course.completionPercentage ?? 0);
     const progress = course.completionPercentage ?? 0;
-    const thumbnail = course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl || getPlaceholderImage(course.collectionId);
+    const thumbnail = course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl || getPlaceholderImage(course.courseId);
     const title = course.courseName || course.content?.name || t('profileLearning.untitledCourse');
 
     const isDownloading = downloadingCourseId === course.courseId;
@@ -48,12 +48,12 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
     return (
         <div className="profile-learning-item relative">
             <Link
-                to={`/collection/${course.collectionId}`}
+                to={`/collection/${course.courseId}`}
                 state={{ from: location.pathname + location.search }}
                 className="absolute inset-0"
                 aria-label={title}
                 data-edataid="profile-learning-card-click"
-                data-objectid={course.collectionId}
+                data-objectid={course.courseId}
                 data-objecttype="Collection"
             />
             {/* 1. Thumbnail + Details */}
@@ -65,7 +65,7 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
                         className="w-[4.375rem] h-[4.375rem] rounded-xl object-cover"
                         onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = getPlaceholderImage(course.collectionId);
+                            e.currentTarget.src = getPlaceholderImage(course.courseId);
                         }}
                     />
                 </div>
