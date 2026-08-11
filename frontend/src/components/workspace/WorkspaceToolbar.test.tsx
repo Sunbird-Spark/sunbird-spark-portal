@@ -37,6 +37,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'workspace.typeFilters.content': 'Content',
         'workspace.typeFilters.quiz': 'Quiz',
         'workspace.typeFilters.collection': 'Collection',
+        'workspace.typeFilters.learningPath': 'Learning Path',
       };
       return translations[key] || key;
     },
