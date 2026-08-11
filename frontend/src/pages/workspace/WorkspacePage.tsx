@@ -198,7 +198,7 @@ const WorkspacePage = () => {
       ? (type as ContentTypeFilter)
       : 'all';
   });
-  const [transcriptFilter, setTranscriptFilter] = useState(false);
+  const [transcriptFilter, setTranscriptFilter] = useState(() => searchParams.get('transcripts') === '1');
 
   // Local state for responsive typing; debounced value drives API + URL.
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
@@ -225,7 +225,7 @@ const WorkspacePage = () => {
     }, { replace: true });
   }, [debouncedSearch, setSearchParams]);
 
-  // Sync typeFilter, activeView, secondaryView from URL on back/forward
+  // Sync typeFilter, activeView, secondaryView, transcriptFilter from URL on back/forward
   useEffect(() => {
     const urlType = searchParams.get('type');
     if (urlType && ['all', 'course', 'content', 'quiz', 'collection'].includes(urlType)) {
@@ -237,9 +237,10 @@ const WorkspacePage = () => {
     }
     const urlMore = searchParams.get('more');
     setSecondaryView(urlMore === 'uploads' || urlMore === 'collaborations' ? (urlMore as WorkspaceView) : null);
+    setTranscriptFilter(searchParams.get('transcripts') === '1');
   }, [searchParams]);
 
-  // Sync typeFilter, activeView, secondaryView to URL
+  // Sync typeFilter, activeView, secondaryView, transcriptFilter to URL
   useEffect(() => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -254,9 +255,12 @@ const WorkspacePage = () => {
       const newMore = secondaryView || '';
       if (next.get('more') !== newMore) { changed = true; if (newMore) next.set('more', newMore); else next.delete('more'); }
 
+      const newTranscripts = transcriptFilter ? '1' : '';
+      if (next.get('transcripts') !== newTranscripts) { changed = true; if (newTranscripts) next.set('transcripts', newTranscripts); else next.delete('transcripts'); }
+
       return changed ? next : prev;
     }, { replace: true });
-  }, [typeFilter, activeView, secondaryView, setSearchParams]);
+  }, [typeFilter, activeView, secondaryView, transcriptFilter, setSearchParams]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [showDynamicFormDialog, setShowDynamicFormDialog] = useState(false);
@@ -611,6 +615,11 @@ const WorkspacePage = () => {
     setTypeFilter(type);
   };
 
+  const handleTranscriptFilterChange = (value: boolean) => {
+    interact({ id: 'workspace-transcript-filter', type: 'CLICK', pageid: 'workspace', cdata: [{ id: String(value), type: 'TranscriptFilter' }] });
+    setTranscriptFilter(value);
+  };
+
   const handleViewChange = (view: WorkspaceView) => {
     setActiveView(view);
     setSecondaryView(null);
@@ -637,7 +646,7 @@ const WorkspacePage = () => {
     typeFilter,
     onTypeFilterChange: handleTypeFilterChange,
     transcriptFilter,
-    onTranscriptFilterChange: setTranscriptFilter,
+    onTranscriptFilterChange: handleTranscriptFilterChange,
     contentCount: showContent ? visibleContents.length : undefined,
     totalCount: showContent ? totalCount : undefined,
     onCreateClick: handleCreateClick,

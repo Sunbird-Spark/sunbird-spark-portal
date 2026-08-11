@@ -172,12 +172,13 @@ export function useWorkspace({
       baseFilters.collaborators = [userId ?? ''];
       baseFilters.objectType = 'Content';
     }
-    if (transcriptFilter) {
-      baseFilters.status = [...WORKSPACE_STATUS_FILTER];
-    }
 
+    // transcriptFilter deliberately does NOT touch status - exists: ['enrichment'] (added
+    // below) ANDs with whatever status the active tab/secondary view already narrowed to,
+    // so "Has Transcripts" on Drafts still only shows Drafts, and the reviewer queue's
+    // createdBy-scoped, status-narrowed filter isn't widened into leaking other users' drafts.
     return baseFilters;
-  }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, secondaryView, transcriptFilter]);
+  }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, secondaryView]);
 
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
     queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery, secondaryView, transcriptFilter],

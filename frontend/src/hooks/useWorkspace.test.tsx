@@ -50,7 +50,7 @@ describe('useWorkspace - transcriptFilter', () => {
     expect(contentSearchCall[1].request.exists).toEqual(['enrichment']);
   });
 
-  it('widens status to the full workspace allow-list (not dropped) when transcriptFilter is true', async () => {
+  it('does not touch status filtering at all - exists ANDs with whatever the tab already narrowed to', async () => {
     renderHook(
       () =>
         useWorkspace({
@@ -67,6 +67,7 @@ describe('useWorkspace - transcriptFilter', () => {
     const contentSearchCall = (mockClient.post as any).mock.calls.find(
       (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit !== 1,
     );
+    // "all" tab's own status filter is already the full allow-list - unaffected by transcriptFilter either way.
     expect(contentSearchCall[1].request.filters).toEqual({
       createdBy: 'user_1',
       primaryCategory: expect.any(Array),
@@ -74,7 +75,28 @@ describe('useWorkspace - transcriptFilter', () => {
     });
   });
 
-  it('overrides the "uploads" secondary view\'s Draft-only status with the full allow-list when transcriptFilter is also true', async () => {
+  it('preserves a narrower tab\'s own status filter when transcriptFilter is true (regression: previously widened to every status, breaking Drafts/Review/Published)', async () => {
+    renderHook(
+      () =>
+        useWorkspace({
+          userId: 'user_1',
+          activeTab: 'drafts',
+          sortBy: 'updated',
+          typeFilter: 'all',
+          transcriptFilter: true,
+        }),
+      { wrapper: Wrapper },
+    );
+
+    await waitFor(() => expect(mockClient.post).toHaveBeenCalled());
+    const contentSearchCall = (mockClient.post as any).mock.calls.find(
+      (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit !== 1,
+    );
+    expect(contentSearchCall[1].request.filters.status).toEqual(['Draft', 'FlagDraft']);
+    expect(contentSearchCall[1].request.exists).toEqual(['enrichment']);
+  });
+
+  it('preserves the "uploads" secondary view\'s Draft-only status when transcriptFilter is also true (regression: previously widened to every status)', async () => {
     renderHook(
       () =>
         useWorkspace({
@@ -92,9 +114,31 @@ describe('useWorkspace - transcriptFilter', () => {
     const contentSearchCall = (mockClient.post as any).mock.calls.find(
       (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit !== 1,
     );
-    expect(contentSearchCall[1].request.filters.status).toEqual([...WORKSPACE_STATUS_FILTER]);
+    expect(contentSearchCall[1].request.filters.status).toEqual(['Draft']);
     // mimeType narrowing from the "uploads" view is untouched by the transcript filter.
     expect(contentSearchCall[1].request.filters.mimeType).toEqual(expect.any(Array));
+  });
+
+  it('does not widen the reviewer pending-review queue\'s status/createdBy scoping when transcriptFilter is true (regression: previously leaked other creators\' drafts into the review queue)', async () => {
+    renderHook(
+      () =>
+        useWorkspace({
+          userId: 'user_1',
+          activeTab: 'pending-review',
+          sortBy: 'updated',
+          typeFilter: 'all',
+          userRole: 'reviewer',
+          transcriptFilter: true,
+        }),
+      { wrapper: Wrapper },
+    );
+
+    await waitFor(() => expect(mockClient.post).toHaveBeenCalled());
+    const contentSearchCall = (mockClient.post as any).mock.calls.find(
+      (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit !== 1,
+    );
+    expect(contentSearchCall[1].request.filters.status).toEqual(['Review', 'Processing', 'FlagReview']);
+    expect(contentSearchCall[1].request.filters.createdBy).toEqual({ '!=': 'user_1' });
   });
 
   it('also includes exists: ["enrichment"] in the counts request, so tab badges stay consistent with the filtered list', async () => {
