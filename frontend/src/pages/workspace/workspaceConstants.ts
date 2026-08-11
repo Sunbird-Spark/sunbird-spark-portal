@@ -28,6 +28,7 @@ export const WORKSPACE_PRIMARY_CATEGORY_FILTER = [
   'Course',
   'Digital Textbook',
   'Question paper',
+  'Learning Path',
 ] as const;
 
 /** Number of items to fetch per page. */
@@ -73,6 +74,8 @@ export function getPrimaryCategoryForTypeFilter(
       return ['Practice Question Set', 'Course Assessment', 'Exam Question', 'Question paper'];
     case 'collection':
       return ['Content Playlist', 'Digital Textbook'];
+    case 'learningPath':
+      return ['Learning Path'];
     case 'all':
     default:
       return undefined;

@@ -30,7 +30,7 @@ const CreateOptions = ({ onOptionSelect, isBookCreator = false }: CreateOptionsP
       </div>
 
       {/* Editor Categories */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {editorCategories.map((category) => (
           <div
             key={category.id}
@@ -39,10 +39,10 @@ const CreateOptions = ({ onOptionSelect, isBookCreator = false }: CreateOptionsP
             {/* Category Header */}
             <div className={`${category.accentColor} px-5 py-4`} style={category.headerStyle}>
               <h3 className="text-lg font-semibold text-white font-rubik">
-                {category.title}
+                {t(category.titleKey)}
               </h3>
               <p className="text-white/80 text-sm font-rubik">
-                {category.subtitle}
+                {t(category.subtitleKey)}
               </p>
             </div>
 
@@ -70,12 +70,12 @@ const CreateOptions = ({ onOptionSelect, isBookCreator = false }: CreateOptionsP
                           <h4 className={`font-medium text-sm font-rubik mb-0.5 transition-colors ${
                             disabled ? 'text-gray-400' : 'text-foreground group-hover:text-sunbird-theme-accent'
                           }`}>
-                            {option.title}
+                            {t(option.titleKey)}
                           </h4>
                           <p className={`text-xs leading-relaxed font-rubik line-clamp-2 ${
                             disabled ? 'text-gray-400' : 'text-muted-foreground'
                           }`}>
-                            {option.description}
+                            {t(option.descriptionKey)}
                           </p>
                         </div>
                       </div>

@@ -76,6 +76,7 @@
     "contentplaylist": "قائمة تشغيل المحتوى",
     "digitaltextbook": "كتاب مدرسي رقمي",
     "questionpaper": "ورقة الأسئلة",
+    "learningpath": "مسار تعلم",
     "ecml": "إي سي إم إل",
     "h5p": "إتش فايف بي",
     "practicequestionset": "مجموعة أسئلة تدريبية",
@@ -602,7 +603,8 @@
       "course": "دورة",
       "content": "محتوى",
       "quiz": "اختبار",
-      "collection": "مجموعة"
+      "collection": "مجموعة",
+      "learningPath": "مسار التعلم"
     },
     "segments": {
       "all": "الكل",
@@ -621,6 +623,42 @@
       "course": "دورة",
       "collection": "مجموعة",
       "textbook": "كتاب مدرسي",
+      "questionSet": "مجموعة أسئلة",
+      "questionEditor": "محرر الأسئلة",
+      "uploadContent": "رفع محتوى",
+      "uploadLargeContent": "رفع محتوى كبير",
+      "learningPath": "مسار تعلم"
+    },
+    "editorDescriptions": {
+      "course": "صمّم دورات تحتوي على وحدات ودروس وتقييمات.",
+      "learningPath": "وجّه المتعلمين عبر تسلسل منظم من الدورات والموارد.",
+      "textbook": "أنشئ ونظّم كتباً رقمية مقسّمة إلى فصول ووحدات.",
+      "collection": "نظّم وجمّع الموارد في مجموعات موضوعية.",
+      "uploadContent": "قم برفع ملفات PDF والفيديو والعروض التقديمية والوثائق للمتعلمين.",
+      "uploadLargeContent": "قم برفع ملفات فيديو كبيرة من جهازك المحلي (MP4 وغيرها).",
+      "quiz": "أنشئ اختبارات تحتوي على أسئلة اختيار من متعدد وإكمال الفراغات والتصحيح الآلي.",
+      "story": "صمّم قصصاً تفاعلية وتجارب تعليمية قائمة على الألعاب.",
+      "questionSet": "أنشئ وأدر مجموعات من الأسئلة للاختبارات والتقييمات.",
+      "questionEditor": "أنشئ وحرّر وأدر الأسئلة الفردية."
+    },
+    "categories": {
+      "collectionEditor": {
+        "title": "محرر المجموعات",
+        "subtitle": "إنشاء محتوى تعليمي منظم"
+      },
+      "uploadEditor": {
+        "title": "محرر الرفع",
+        "subtitle": "رفع ونشر محتوى موجود"
+      },
+      "resourceEditor": {
+        "title": "محرر الموارد",
+        "subtitle": "إنشاء موارد تعليمية تفاعلية"
+      },
+      "qumlEditor": {
+        "title": "محرر QuML",
+        "subtitle": "إنشاء وإدارة التقييمات"
+      },
+      "learningPath": "مسار تعلم",
       "questionSet": "مجموعة أسئلة"
     },
     "noAccessToCreate": "ليس لديك صلاحية لإنشاء هذا المحتوى",
@@ -628,7 +666,8 @@
       "course": "أدخل وصفاً للدورة",
       "contentPlaylist": "أدخل وصفاً للمجموعة",
       "digitalTextbook": "أدخل وصفاً للكتاب الرقمي",
-      "questionPaper": "أدخل وصفاً لورقة الأسئلة"
+      "questionPaper": "أدخل وصفاً لورقة الأسئلة",
+      "learningPath": "أدخل وصفاً لمسار التعلم"
     },
     "errors": {
       "unexpectedResponse": "استجابة غير متوقعة من الخادم. يرجى المحاولة مرة أخرى.",
@@ -1409,4 +1448,3 @@
     "noMoreContent": "لا يوجد المزيد من المحتوى لعرضه"
   }
 }
-

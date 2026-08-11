@@ -1,4 +1,4 @@
-import type { IEditorConfig, EditorMode } from '@project-sunbird/collection-editor-react';
+import type { IEditorConfig, IConfig, EditorMode } from '@project-sunbird/collection-editor-react';
 import userAuthInfoService from '../../userAuthInfoService/userAuthInfoService';
 import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
@@ -63,6 +63,24 @@ export async function buildCollectionEditorConfig(
     // non-fatal — the editor falls back to its own user-read
   }
 
+  // apiSlug isn't declared on IConfig in the currently-installed collection-editor-react
+  // version yet — it's being added there to redirect channel/course-hierarchy calls from
+  // the hardcoded '/action' prefix (404s on this backend) to '/portal' (proxied to Kong,
+  // where those routes actually exist), mirroring how the QuML editor config already
+  // sets apiSlug: '/portal'.
+  const config: IConfig & { apiSlug?: string } = {
+    mode: editorMode,
+    objectType: 'Collection',
+    primaryCategory: metadata.primaryCategory || 'Content Playlist',
+    framework: framework ? [framework] : [],
+    targetFWIds: (metadata.targetFWIds as string[]) || [],
+    // Learning Path's category definition caps maxDepth at 1 (Levels can't nest);
+    // an explicit maxDepth here would override that, so leave it unset for Learning Path.
+    ...(metadata.primaryCategory !== 'Learning Path' ? { maxDepth: 4 } : {}),
+    categoryDefinitionApiVersion: 'v1',
+    apiSlug: '/portal',
+  };
+
   return {
     context: {
       // Portal proxies all API calls through the backend; auth is handled via
@@ -81,15 +99,7 @@ export async function buildCollectionEditorConfig(
       targetFWIds: (metadata.targetFWIds as string[]) || [],
       ...(userFullName ? { user: { fullName: userFullName } } : {}),
     },
-    config: {
-      mode: editorMode,
-      objectType: 'Collection',
-      primaryCategory: metadata.primaryCategory || 'Content Playlist',
-      framework: framework ? [framework] : [],
-      targetFWIds: (metadata.targetFWIds as string[]) || [],
-      maxDepth: 4,
-      categoryDefinitionApiVersion: 'v1',
-    },
+    config,
     metadata,
   };
 }

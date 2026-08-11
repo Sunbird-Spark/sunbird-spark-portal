@@ -54,7 +54,7 @@ const HomeContinueLearning = () => {
             (b.lastContentAccessTime ?? 0) - (a.lastContentAccessTime ?? 0)
         )[0];
 
-    const { data: collectionData } = useCollection(lastAccessedCourse?.collectionId);
+    const { data: collectionData } = useCollection(lastAccessedCourse?.courseId);
 
     if (isLoading || !lastAccessedCourse) return null;
 
@@ -64,7 +64,7 @@ const HomeContinueLearning = () => {
 
     if (!contentId) return null;
 
-    const continueTo = `/collection/${lastAccessedCourse.collectionId}/batch/${lastAccessedCourse.batchId}/content/${contentId}`;
+    const continueTo = `/collection/${lastAccessedCourse.courseId}/batch/${lastAccessedCourse.batchId}/content/${contentId}`;
 
     const thumbnail = lastAccessedCourse.content?.posterImage || lastAccessedCourse.content?.appIcon || lastAccessedCourse.courseLogoUrl;
     const title = lastAccessedCourse.courseName || lastAccessedCourse.content?.name || "Untitled Course";
@@ -79,7 +79,7 @@ const HomeContinueLearning = () => {
                             {/* Thumbnail */}
                             <div className="home-continue-learning-thumbnail">
                                 <img
-                                    src={thumbnail || getPlaceholderImage(lastAccessedCourse.collectionId)}
+                                    src={thumbnail || getPlaceholderImage(lastAccessedCourse.courseId)}
                                     alt={title}
                                     className="w-full h-full object-cover"
                                 />

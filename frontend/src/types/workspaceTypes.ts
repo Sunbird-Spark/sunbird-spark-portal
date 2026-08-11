@@ -18,12 +18,12 @@ export type ViewMode = 'grid' | 'list';
 
 export type SortOption = 'updated' | 'created' | 'title';
 
-export type ContentTypeFilter = 'all' | 'course' | 'content' | 'quiz' | 'collection';
+export type ContentTypeFilter = 'all' | 'course' | 'content' | 'quiz' | 'collection' | 'learningPath';
 
 export interface EditorOption {
   id: string;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   icon: IconType;
   iconBg: string;
   iconColor: string;
@@ -31,8 +31,8 @@ export interface EditorOption {
 
 export interface EditorCategory {
   id: string;
-  title: string;
-  subtitle: string;
+  titleKey: string;
+  subtitleKey: string;
   options: EditorOption[];
   accentColor: string;
   borderColor: string;
