@@ -53,6 +53,8 @@ interface UseWorkspaceOptions {
   isBookReviewerOnly?: boolean;
   /** Secondary action view (Uploads/Collaborations) merged on top of segment tab filters. */
   secondaryView?: WorkspaceView | null;
+  /** When true, restrict results to content with enrichment data (e.g. transcripts). */
+  transcriptFilter?: boolean;
 }
 
 /**
@@ -78,6 +80,7 @@ export function useWorkspace({
   isBookCreatorOnly = false,
   isBookReviewerOnly = false,
   secondaryView = null,
+  transcriptFilter = false,
 }: UseWorkspaceOptions): UseWorkspaceReturn {
   const queryClient = useQueryClient();
   const isContentTab = !['create'].includes(activeTab);
@@ -101,9 +104,10 @@ export function useWorkspace({
   // Both modes use facets (limit=1) for lightweight counting.
   // Creator mode: scoped to the user's own content.
   // Reviewer mode: uses createdBy != to exclude the reviewer's own content directly.
-  // typeFilter is included so tab badges and stats update when a type is selected.
+  // typeFilter/transcriptFilter are included so tab badges and stats stay consistent
+  // with the filtered content list rather than showing unfiltered totals.
   const countsQuery = useQuery({
-    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter, searchQuery, secondaryView],
+    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter, searchQuery, secondaryView, transcriptFilter],
     queryFn: () =>
       contentService.contentSearch({
         filters: {
@@ -116,6 +120,7 @@ export function useWorkspace({
         facets: ['status'],
         limit: 1,
         offset: 0,
+        ...(transcriptFilter ? { exists: ['enrichment'] } : {}),
       }),
     enabled: queryEnabled,
     staleTime: 0,
@@ -168,11 +173,15 @@ export function useWorkspace({
       baseFilters.objectType = 'Content';
     }
 
+    // transcriptFilter deliberately does NOT touch status - exists: ['enrichment'] (added
+    // below) ANDs with whatever status the active tab/secondary view already narrowed to,
+    // so "Has Transcripts" on Drafts still only shows Drafts, and the reviewer queue's
+    // createdBy-scoped, status-narrowed filter isn't widened into leaking other users' drafts.
     return baseFilters;
   }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, secondaryView]);
 
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
-    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery, secondaryView],
+    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery, secondaryView, transcriptFilter],
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
         filters: getFiltersForTab(),
@@ -180,6 +189,7 @@ export function useWorkspace({
         limit: WORKSPACE_PAGE_LIMIT,
         offset: pageParam as number,
         sort_by: buildSortBy(sortBy),
+        ...(transcriptFilter ? { exists: ['enrichment'] } : {}),
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {

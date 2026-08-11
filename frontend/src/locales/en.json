@@ -587,6 +587,7 @@
     "roleCreator": "Creator",
     "roleReviewer": "Reviewer",
     "more": "More",
+    "hasTranscripts": "Transcripts",
     "searchPlaceholder": "Search content...",
     "clearSearch": "Clear search",
     "gridView": "Grid view",

@@ -15,7 +15,7 @@ const { mockNavigate, mockContentCreate, mockQuestionSetMutateAsync, mockQuestio
   mockQuestionSetRetireMutateAsync: vi.fn(),
 }));
 
-const mockUseWorkspace = vi.fn<() => UseWorkspaceReturn>();
+const mockUseWorkspace = vi.fn<(...args: unknown[]) => UseWorkspaceReturn>();
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
@@ -29,7 +29,7 @@ vi.mock('@/services/ContentService', () => ({
   },
 }));
 
-vi.mock('@/hooks/useWorkspace', () => ({ useWorkspace: () => mockUseWorkspace() }));
+vi.mock('@/hooks/useWorkspace', () => ({ useWorkspace: (...args: unknown[]) => mockUseWorkspace(...args) }));
 
 vi.mock('@/hooks/useUserRead', () => ({
   useUserRead: () => ({
@@ -136,7 +136,17 @@ vi.mock('@/hooks/useAppI18n', () => ({
 vi.mock('@/components/common/PageLoader', () => ({ default: ({ message }: { message: string }) => <div>{message}</div> }));
 
 vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
-  default: ({ onCreateClick, onViewChange }: { onCreateClick: () => void; onViewChange: (v: string) => void }) => (
+  default: ({
+    onCreateClick,
+    onViewChange,
+    transcriptFilter,
+    onTranscriptFilterChange,
+  }: {
+    onCreateClick: () => void;
+    onViewChange: (v: string) => void;
+    transcriptFilter: boolean;
+    onTranscriptFilterChange: (value: boolean) => void;
+  }) => (
     <div data-testid="segmented-control">
       <button type="button" onClick={onCreateClick}>createNew</button>
       <button type="button" onClick={() => onViewChange('all')}>All 0</button>
@@ -144,6 +154,7 @@ vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
       <button type="button" onClick={() => onViewChange('uploads')}>Uploads</button>
       <button type="button" onClick={() => onViewChange('collaborations')}>Collaborations</button>
       <button type="button" onClick={() => onViewChange('create')}>Create view</button>
+      <button type="button" onClick={() => onTranscriptFilterChange(!transcriptFilter)}>Transcripts</button>
     </div>
   ),
 }));
@@ -294,6 +305,16 @@ describe('WorkspacePage', () => {
     renderWithProviders(<WorkspacePage />);
     expect(screen.getByTestId('segmented-control')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'All 0' })).toBeInTheDocument();
+  });
+
+  it('re-queries useWorkspace with transcriptFilter: true after clicking Has Transcripts', async () => {
+    renderWithProviders(<WorkspacePage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Transcripts' }));
+    await waitFor(() =>
+      expect(mockUseWorkspace).toHaveBeenLastCalledWith(
+        expect.objectContaining({ transcriptFilter: true }),
+      ),
+    );
   });
 
   it('closes create modal when close button is clicked', async () => {

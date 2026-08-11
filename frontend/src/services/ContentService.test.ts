@@ -45,6 +45,24 @@ describe('ContentService', () => {
     );
   });
 
+  it('forwards exists to the composite search request when provided', async () => {
+    mockClient.post = vi.fn().mockResolvedValue({ data: { content: [] }, status: 200, headers: {} });
+    await service.contentSearch({ filters: { objectType: 'Content' }, exists: ['enrichment'] });
+    expect(mockClient.post).toHaveBeenCalledWith(
+      '/composite/v1/search',
+      expect.objectContaining({
+        request: expect.objectContaining({ exists: ['enrichment'] }),
+      })
+    );
+  });
+
+  it('omits exists from the composite search request when not provided (negative)', async () => {
+    mockClient.post = vi.fn().mockResolvedValue({ data: { content: [] }, status: 200, headers: {} });
+    await service.contentSearch({ sort_by: { lastUpdatedOn: 'desc' } });
+    const body = (mockClient.post as any).mock.calls[0][1];
+    expect(body.request.exists).toBeUndefined();
+  });
+
   describe('semanticSearch', () => {
     it('posts to /composite/v1/search with search_mode: semantic', async () => {
       mockClient.post = vi.fn().mockResolvedValue({ data: { content: [] }, status: 200, headers: {} });
