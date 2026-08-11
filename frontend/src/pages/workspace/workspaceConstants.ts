@@ -67,13 +67,15 @@ export function getPrimaryCategoryForTypeFilter(
 ): string[] | undefined {
   switch (filter) {
     case 'course':
-      return ['Course', 'Digital Textbook', 'Learning Path'];
+      return ['Course', 'Digital Textbook'];
     case 'content':
       return ['Learning Resource', 'Explanation Content', 'Teacher Resource', 'eTextbook'];
     case 'quiz':
       return ['Practice Question Set', 'Course Assessment', 'Exam Question', 'Question paper'];
     case 'collection':
       return ['Content Playlist', 'Digital Textbook'];
+    case 'learningPath':
+      return ['Learning Path'];
     case 'all':
     default:
       return undefined;

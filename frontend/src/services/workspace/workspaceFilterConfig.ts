@@ -17,5 +17,6 @@ export function getTypeLabels(t: TranslateFn): Record<ContentTypeFilter, string>
     content: t('content.label'),
     quiz: t('quiz'),
     collection: t('collection.label'),
+    learningPath: t('workspace.typeFilters.learningPath'),
   };
 }

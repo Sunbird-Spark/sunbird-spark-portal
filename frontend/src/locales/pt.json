@@ -602,7 +602,8 @@
       "course": "Curso",
       "content": "Conteúdo",
       "quiz": "Quiz",
-      "collection": "Coleção"
+      "collection": "Coleção",
+      "learningPath": "Trilha de Aprendizagem"
     },
     "segments": {
       "all": "Todos",
