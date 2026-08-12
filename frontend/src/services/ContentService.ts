@@ -50,6 +50,7 @@ export class ContentService {
         query: request.query ?? '',
         sort_by: request.sort_by ?? { lastUpdatedOn: 'desc' },
         ...(request.fields ? { fields: request.fields } : {}),
+        ...(request.exists ? { exists: request.exists } : {}),
       },
     });
   }

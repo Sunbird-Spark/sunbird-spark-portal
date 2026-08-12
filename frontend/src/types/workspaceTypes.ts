@@ -99,6 +99,8 @@ export interface ContentSearchRequest {
   fields?: string[];
   search_mode?: 'semantic';
   semantic?: { k: number; min_score: number };
+  /** Field names required to be present on the content (e.g. ['enrichment']). */
+  exists?: string[];
 }
 
 export interface ContentSearchItem {
