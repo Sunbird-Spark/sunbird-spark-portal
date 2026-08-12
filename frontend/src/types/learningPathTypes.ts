@@ -1,0 +1,88 @@
+/**
+ * Derived view model for a Learning Path (LP → Level → Course → CourseUnit →
+ * Resource hierarchy). Built from `HierarchyContentNode` by
+ * `services/learningPath/learningPathMapper.ts` — never persisted, never
+ * read back from the API.
+ */
+
+export type LearningPathPolicy = 'Fixed' | 'Diagnostic' | 'PriorLearning';
+
+export type LevelStatusKey =
+  | 'completed'
+  | 'active'
+  | 'notStarted'
+  | 'locked'
+  | 'waived'
+  | 'credited'
+  | 'creditedPending';
+
+export interface LPCourseNode {
+  identifier: string;
+  name: string;
+  primaryCategory?: string;
+  mimeType?: string;
+  leafNodesCount: number;
+  leafIds: string[];
+  skills: string[];
+  /** True when every leaf under this course is a QuML question set. */
+  isAssessmentCourse: boolean;
+  questionCount?: number;
+}
+
+export interface LPLevelNode {
+  identifier: string;
+  name: string;
+  index: number;
+  description?: string;
+  skills: string[];
+  courses: LPCourseNode[];
+}
+
+export interface LearningPathModel {
+  identifier: string;
+  name: string;
+  description?: string;
+  policy: LearningPathPolicy;
+  /** Content levels only — prior/outcome assessment levels are unwrapped and excluded. */
+  levels: LPLevelNode[];
+  /** Unwrapped from the first level, when it held exactly one assessment course. */
+  priorAssessment?: LPCourseNode;
+  /** Unwrapped from the last level, when it held exactly one assessment course. */
+  outcomeAssessment?: LPCourseNode;
+  allSkills: string[];
+  courseTotal: number;
+  leafTotal: number;
+}
+
+/** Per-course/level/path progress, derived from Viewer Service summary records. */
+export interface ProgressInfo {
+  pct: number;
+  completed: number;
+  total: number;
+}
+
+export interface LevelProgressInfo extends ProgressInfo {
+  doneCourses: number;
+}
+
+export interface PathProgressInfo extends ProgressInfo {
+  doneLevels: number;
+  levelCount: number;
+}
+
+/** Placeholder shape for future waiver/credit data — no backend endpoint exists yet. */
+export interface WaiverInfo {
+  status: 'waived' | 'credited' | 'creditedPending';
+  note: string;
+}
+
+export interface ResumeTarget {
+  collectionId: string;
+  contentId: string;
+  contextId: string;
+}
+
+export interface AssessmentScore {
+  score: number;
+  maxScore: number;
+}

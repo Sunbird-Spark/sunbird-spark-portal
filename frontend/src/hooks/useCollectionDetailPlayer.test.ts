@@ -2,11 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useCollectionDetailPlayer } from './useCollectionDetailPlayer';
 import { useContentStateUpdate } from './useContentStateUpdate';
+import { useContentView } from './useContentView';
 import { useContentPlayer } from './useContentPlayer';
 
 const mockHandleContentStateFromTelemetry = vi.fn();
 vi.mock('./useContentStateUpdate', () => ({
   useContentStateUpdate: vi.fn(() => mockHandleContentStateFromTelemetry),
+}));
+
+const mockHandleContentView = vi.fn();
+vi.mock('./useContentView', () => ({
+  useContentView: vi.fn(() => mockHandleContentView),
 }));
 
 vi.mock('./useContentPlayer', () => ({
@@ -106,5 +112,57 @@ describe('useCollectionDetailPlayer', () => {
     onTelemetryEvent(event);
 
     expect(mockHandleContentStateFromTelemetry).toHaveBeenCalledWith(event);
+  });
+
+  it('routes telemetry through useContentStateUpdate (not useContentView) when isLearningPathContext is absent', () => {
+    const mockHandleTelemetryEvent = vi.fn();
+    (useContentPlayer as ReturnType<typeof vi.fn>).mockReturnValue({
+      handlePlayerEvent: vi.fn(),
+      handleTelemetryEvent: mockHandleTelemetryEvent,
+    });
+
+    renderHook(() => useCollectionDetailPlayer(defaultParams));
+
+    const callArgs = (useContentPlayer as ReturnType<typeof vi.fn>).mock.calls[0]?.[0];
+    const event = { eid: 'START' };
+    callArgs.onTelemetryEvent(event);
+
+    expect(mockHandleContentStateFromTelemetry).toHaveBeenCalledWith(event);
+    expect(mockHandleContentView).not.toHaveBeenCalled();
+  });
+
+  it('still calls useContentView (rules of hooks) even when isLearningPathContext is false, but never invokes it', () => {
+    renderHook(() => useCollectionDetailPlayer(defaultParams));
+    expect(useContentView).toHaveBeenCalled();
+    expect(mockHandleContentView).not.toHaveBeenCalled();
+  });
+
+  it('routes telemetry through useContentView when isLearningPathContext is true', () => {
+    const mockHandleTelemetryEvent = vi.fn();
+    (useContentPlayer as ReturnType<typeof vi.fn>).mockReturnValue({
+      handlePlayerEvent: vi.fn(),
+      handleTelemetryEvent: mockHandleTelemetryEvent,
+    });
+
+    renderHook(() => useCollectionDetailPlayer({ ...defaultParams, isLearningPathContext: true }));
+
+    const callArgs = (useContentPlayer as ReturnType<typeof vi.fn>).mock.calls[0]?.[0];
+    const event = { eid: 'START' };
+    callArgs.onTelemetryEvent(event);
+
+    expect(mockHandleContentView).toHaveBeenCalledWith(event);
+    expect(mockHandleContentStateFromTelemetry).not.toHaveBeenCalled();
+  });
+
+  it('passes effectiveBatchId as contextId to useContentView', () => {
+    renderHook(() => useCollectionDetailPlayer({ ...defaultParams, isLearningPathContext: true }));
+
+    expect(useContentView).toHaveBeenCalledWith(
+      expect.objectContaining({
+        collectionId: 'course_1',
+        contentId: 'content_1',
+        contextId: 'batch_1',
+      })
+    );
   });
 });

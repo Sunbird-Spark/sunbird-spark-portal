@@ -28,6 +28,7 @@ import WorkspacePage from './pages/workspace/WorkspacePage';
 import ReportsPage from './pages/reports/ReportsPage';
 import CreateContentPage from './pages/content/CreateContentPage';
 import CollectionDetailPage from './pages/collection/CollectionDetailPage';
+import LearningPathPage from './pages/learningPath/LearningPathPage';
 import Index from './pages/Index';
 import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
@@ -161,6 +162,19 @@ const AppRoutes: React.FC = () => {
               <WorkspacePage />
             </ProtectedRoute>
           } />
+          <Route path="learning-path">
+            <Route path=":pathId" element={<LearningPathPage />} />
+            {/* Not-yet-enrolled variants (no contextId in the URL) - mirrors CollectionDetailPage's :collectionId vs :collectionId/batch/:batchId split. */}
+            <Route path=":pathId/level/:levelId" element={<LearningPathPage />} />
+            <Route path=":pathId/prior" element={<LearningPathPage />} />
+            <Route path=":pathId/complete" element={<LearningPathPage />} />
+            <Route path=":pathId/course/:courseId/content/:contentId" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId/level/:levelId" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId/prior" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId/complete" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId/course/:courseId/content/:contentId" element={<LearningPathPage />} />
+          </Route>
         </Route>
 
         {/* Catch-all redirect */}

@@ -4,6 +4,8 @@ import type { TrackableCollection } from "../../types/TrackableCollections";
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { getPlaceholderImage } from '@/utils/getPlaceholderImage';
 import { getCategoryLabel } from '@/utils/i18nUtils';
+import { getContentDetailPath } from '@/utils/getContentDetailPath';
+import { parseCourseContextId } from '@/services/viewer/summaryMapper';
 
 const HomeInProgressGrid = () => {
     const { t } = useAppI18n();
@@ -19,7 +21,11 @@ const HomeInProgressGrid = () => {
     }
 
     const inProgressCourses: TrackableCollection[] = (data?.data?.courses ?? [])
-        .filter((course: TrackableCollection) => course.status === 1 && course.completionPercentage < 100);
+        .filter((course: TrackableCollection) => course.status === 1 && course.completionPercentage < 100)
+        // Enrolling in a Learning Path fans out per-course records with a composite
+        // "<lpBatchId>:<courseId>" batchId - hide those, the Learning Path's own
+        // record (plain batchId) already represents the whole path as one card.
+        .filter((course: TrackableCollection) => !parseCourseContextId(course.batchId));
 
     if (inProgressCourses.length === 0) {
         return (
@@ -39,9 +45,11 @@ const HomeInProgressGrid = () => {
                     <Link
                         key={course.courseId || course.contentId}
                         to={
-                            course.lastReadContentId
-                                ? `/collection/${course.courseId}/batch/${course.batchId}/content/${course.lastReadContentId}`
-                                : `/collection/${course.courseId}/batch/${course.batchId}`
+                            (course.content?.primaryCategory ?? '').toLowerCase() === 'learning path'
+                                ? getContentDetailPath(course.courseId, course.content?.primaryCategory, course.batchId)
+                                : course.lastReadContentId
+                                    ? `/collection/${course.courseId}/batch/${course.batchId}/content/${course.lastReadContentId}`
+                                    : `/collection/${course.courseId}/batch/${course.batchId}`
                         }
                         state={{ from: '/home' }}
                         className="home-inprogress-card no-underline"

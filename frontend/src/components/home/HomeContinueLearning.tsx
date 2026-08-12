@@ -7,6 +7,7 @@ import { getFirstLeafContentIdFromHierarchy } from "@/services/collection/hierar
 import type { TrackableCollection } from "@/types/TrackableCollections";
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { getPlaceholderImage } from '@/utils/getPlaceholderImage';
+import { getContentDetailPath } from '@/utils/getContentDetailPath';
 
 // Circular progress component
 const CircularProgress = ({ progress }: { progress: number }) => {
@@ -54,17 +55,23 @@ const HomeContinueLearning = () => {
             (b.lastContentAccessTime ?? 0) - (a.lastContentAccessTime ?? 0)
         )[0];
 
+    const isLearningPath = (lastAccessedCourse?.content?.primaryCategory ?? '').toLowerCase() === 'learning path';
     const { data: collectionData } = useCollection(lastAccessedCourse?.courseId);
 
     if (isLoading || !lastAccessedCourse) return null;
 
-    // Determine the content ID to navigate to
-    const contentId = lastAccessedCourse?.lastReadContentId
-        ?? getFirstLeafContentIdFromHierarchy(collectionData?.hierarchyRoot ?? null);
-
-    if (!contentId) return null;
-
-    const continueTo = `/collection/${lastAccessedCourse.courseId}/batch/${lastAccessedCourse.batchId}/content/${contentId}`;
+    // A Learning Path resumes to its own Ledger overview - the resume-target
+    // logic there (useLearningPath's getResumeTarget) resolves the right
+    // inner course/content, which a bare content URL here cannot reach.
+    let continueTo: string;
+    if (isLearningPath) {
+        continueTo = getContentDetailPath(lastAccessedCourse.courseId, lastAccessedCourse.content?.primaryCategory, lastAccessedCourse.batchId);
+    } else {
+        const contentId = lastAccessedCourse?.lastReadContentId
+            ?? getFirstLeafContentIdFromHierarchy(collectionData?.hierarchyRoot ?? null);
+        if (!contentId) return null;
+        continueTo = `/collection/${lastAccessedCourse.courseId}/batch/${lastAccessedCourse.batchId}/content/${contentId}`;
+    }
 
     const thumbnail = lastAccessedCourse.content?.posterImage || lastAccessedCourse.content?.appIcon || lastAccessedCourse.courseLogoUrl;
     const title = lastAccessedCourse.courseName || lastAccessedCourse.content?.name || "Untitled Course";

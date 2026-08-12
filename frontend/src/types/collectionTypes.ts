@@ -60,6 +60,17 @@ export interface HierarchyContentNode {
   maxAttempts?: number;
   /** ISO timestamp of the course's most recent publish (from /course/v1/hierarchy). */
   lastPublishedOn?: string;
+  /** Sunbird object type (e.g. 'Content', 'QuestionSet') — used to detect assessment courses in a Learning Path. */
+  objectType?: string;
+  /** Learning Path consumption policy (root-level only): Fixed | Diagnostic | PriorLearning. */
+  policy?: string;
+  /** Sort order among siblings (Levels, framework categories). */
+  index?: number;
+  /** Framework "skill" category terms (USF) — used for Learning Path skill scoping. */
+  skill?: string[];
+  se_skills?: string[];
+  /** Level/Course skill tags persisted on the unit node (Learning Path authoring). */
+  competencies?: string[];
 }
 
 export interface CourseHierarchyResponse {

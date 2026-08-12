@@ -4,6 +4,7 @@ import { FiChevronDown } from "react-icons/fi";
 import { TrackableCollection } from "@/types/TrackableCollections";
 import TrackableCollectionCard from "../content/TrackableCollectionCard";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { parseCourseContextId } from "@/services/viewer/summaryMapper";
 
 
 const COURSES_PER_PAGE = 9;
@@ -14,7 +15,11 @@ interface MyLearningCoursesProps {
   courses?: TrackableCollection[];
 }
 
-const MyLearningCourses = ({ courses = [] }: MyLearningCoursesProps) => {
+const MyLearningCourses = ({ courses: coursesProp = [] }: MyLearningCoursesProps) => {
+  // Enrolling in a Learning Path fans out per-course records with a composite
+  // "<lpBatchId>:<courseId>" batchId - hide those, the Learning Path's own
+  // record (plain batchId) already represents the whole path as one card.
+  const courses = coursesProp.filter((c) => !parseCourseContextId(c.batchId));
   const { t } = useAppI18n();
   const [activeTab, setActiveTab] = useState<TabType>("active");
   const [visibleCount, setVisibleCount] = useState(COURSES_PER_PAGE);
