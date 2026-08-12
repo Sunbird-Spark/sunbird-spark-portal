@@ -566,7 +566,7 @@ const WorkspacePage = () => {
       return;
     }
     const route = getEditorRoute(id);
-    if (route) navigate(route, { state: { from: location.pathname + location.search } });
+    if (route) navigate(route, { state: { from: location.pathname + location.search, intent: 'view' } });
   };
 
   const handleEdit = (id: string) => {

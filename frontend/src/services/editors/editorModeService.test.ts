@@ -90,4 +90,20 @@ describe('getEditorMode', () => {
   it('returns "edit" for Unlisted status', () => {
     expect(getEditorMode('Unlisted', 'creator')).toBe('edit');
   });
+
+  it('returns "read" for Live status when creator opened via View', () => {
+    expect(getEditorMode('Live', 'creator', true)).toBe('read');
+  });
+
+  it('returns "read" for Live status when reviewer opened via View (unchanged)', () => {
+    expect(getEditorMode('Live', 'reviewer', true)).toBe('read');
+  });
+
+  it('returns "read" for Unlisted status when creator opened via View', () => {
+    expect(getEditorMode('Unlisted', 'creator', true)).toBe('read');
+  });
+
+  it('does not override the reviewer review flow for Review status when opened via View', () => {
+    expect(getEditorMode('Review', 'reviewer', true)).toBe('review');
+  });
 });

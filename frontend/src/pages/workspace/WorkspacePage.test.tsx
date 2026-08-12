@@ -160,12 +160,13 @@ vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
 }));
 
 vi.mock('./WorkspacePageContent', () => ({
-  default: ({ filteredItems, onDelete }: { filteredItems: WorkspaceItem[]; onDelete: (id: string) => void }) => (
+  default: ({ filteredItems, onDelete, onView }: { filteredItems: WorkspaceItem[]; onDelete: (id: string) => void; onView: (id: string) => void }) => (
     <div data-testid="workspace-content">
       {filteredItems.map((item) => (
         <div key={item.id} data-testid={`content-item-${item.id}`}>
           <span>{item.title}</span>
           <button type="button" onClick={() => onDelete(item.id)}>Delete {item.title}</button>
+          <button type="button" onClick={() => onView(item.id)}>View {item.title}</button>
         </div>
       ))}
     </div>
@@ -697,6 +698,46 @@ describe('WorkspacePage', () => {
       expect(screen.getByTestId('content-item-do_course_1')).toBeInTheDocument();
       expect(screen.getByText('My Course')).toBeInTheDocument();
     });
+  });
+
+  it('navigates with a view intent when View is clicked on a live collection-type item', () => {
+    const liveCourseItem: WorkspaceItem = {
+      id: 'do_course_live_1',
+      title: 'Live Course',
+      description: 'A published course',
+      type: 'course',
+      primaryCategory: 'Course',
+      mimeType: 'application/vnd.ekstep.content-collection',
+      status: 'published',
+      contentType: 'Course',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+      author: 'Test Author',
+      framework: 'NCF',
+      contentStatus: 'Live',
+    };
+    mockUseWorkspace.mockReturnValue({
+      contents: [liveCourseItem],
+      counts: { all: 1, drafts: 0, review: 0, published: 1, pendingReview: 0 },
+      totalCount: 1,
+      isLoading: false,
+      isLoadingMore: false,
+      isCountsLoading: false,
+      isRefreshing: false,
+      error: null,
+      hasMore: false,
+      loadMore: vi.fn(),
+      refetchCounts: vi.fn().mockResolvedValue(undefined),
+      refetchAll: vi.fn().mockResolvedValue(undefined),
+    });
+
+    renderWithProviders(<WorkspacePage />);
+    fireEvent.click(screen.getByRole('button', { name: 'View Live Course' }));
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      '/edit/collection-editor/do_course_live_1',
+      { state: { from: '/', intent: 'view' } }
+    );
   });
 
   /* ── Course creation via ContentNameDialog (handleContentNameSubmit, lines 429-453) ── */
