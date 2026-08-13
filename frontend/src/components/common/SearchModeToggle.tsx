@@ -11,10 +11,12 @@ interface SearchModeToggleProps {
   onModeChange: (mode: SearchMode) => void;
   placeholder?: string;
   className?: string;
+  /** Show the keyword/AI mode pills. Defaults to true. */
+  enableAiSearch?: boolean;
 }
 
 const SearchModeToggle = forwardRef<HTMLInputElement, SearchModeToggleProps>(
-  ({ query, onQueryChange, searchMode, onModeChange, placeholder, className = "" }, ref) => {
+  ({ query, onQueryChange, searchMode, onModeChange, placeholder, className = "", enableAiSearch = true }, ref) => {
     const { t } = useAppI18n();
     const localRef = useRef<HTMLInputElement>(null);
     useImperativeHandle(ref, () => localRef.current!);
@@ -57,20 +59,20 @@ const SearchModeToggle = forwardRef<HTMLInputElement, SearchModeToggleProps>(
         )}
 
         {/* AI Search toggle pill */}
-        <button
-          type="button"
-          onClick={() => onModeChange(isSemantic ? "keyword" : "semantic")}
-          className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-rubik font-medium transition-colors whitespace-nowrap ${
-            isSemantic
+        {enableAiSearch && (
+          <button
+            type="button"
+            onClick={() => onModeChange(isSemantic ? "keyword" : "semantic")}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-rubik font-medium transition-colors whitespace-nowrap ${isSemantic
               ? "bg-sunbird-brick text-white"
               : "text-gray-500 border border-gray-200 hover:bg-gray-50"
-          }`}
-          aria-pressed={isSemantic}
-        >
-          <SparkleIcon className="w-3.5 h-3.5" />
-          {t("search.semanticMode")}
-        </button>
-
+              }`}
+            aria-pressed={isSemantic}
+          >
+            <SparkleIcon className="w-3.5 h-3.5" />
+            {t("search.semanticMode")}
+          </button>
+        )}
       </div>
     );
   }

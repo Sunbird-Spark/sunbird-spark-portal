@@ -16,6 +16,7 @@ import useImpression from '../hooks/useImpression';
 import useInteract from '../hooks/useInteract';
 import SearchModeToggle from '../components/common/SearchModeToggle';
 import { SearchMode } from '../types/workspaceTypes';
+import { useAiSearchEnabled } from '../hooks/useAiSearchEnabled';
 
 // Keys are the API `code` field (e.g. "primaryCategory", "mimeType"), values are selected option values
 export type FilterState = Record<string, string[]>;
@@ -49,6 +50,9 @@ const Explore = () => {
     () => (searchParams.get('mode') === 'semantic' ? 'semantic' : 'keyword')
   );
 
+  // AI (semantic) search is gated by a backend env flag, surfaced via app-info.
+  const aiSearchEnabled = useAiSearchEnabled();
+
   const [sortLabelKey, setSortLabelKey] = useState(() => {
     const raw = searchParams.get('sort') ?? 'newest';
     return SORT_OPTIONS.find(opt => opt.key === raw)?.key ?? 'newest';
@@ -77,21 +81,29 @@ const Explore = () => {
   const rawGroups = (formData?.data as any)?.form?.data?.filters;
   const showFilters = isFiltersLoading || (!isFiltersError && Array.isArray(rawGroups) && rawGroups.length > 0);
 
-  // Sync search state when navigating here from the search modal
+  // Sync all state from URL when navigating here or using browser back/forward.
+  // Folds in the AI-search gate so a stale ?mode=semantic deep link never applies
+  // 'semantic' while the flag is off — keeps a single owner of setSearchMode.
   useEffect(() => {
     const q = searchParams.get('q') ?? '';
     setSearchQuery(q);
-    const mode = searchParams.get('mode') === 'semantic' ? 'semantic' : 'keyword';
-    setSearchMode(mode);
-  }, [searchParams]);
 
-  // Re-sync sort state when the URL changes (e.g. browser back/forward)
-  useEffect(() => {
+    const urlMode = searchParams.get('mode') === 'semantic' ? 'semantic' : 'keyword';
+    setSearchMode(!aiSearchEnabled && urlMode === 'semantic' ? 'keyword' : urlMode);
+
     const raw = searchParams.get('sort') ?? 'newest';
     const key = SORT_OPTIONS.find(opt => opt.key === raw)?.key ?? 'newest';
     setSortLabelKey(key);
     setSortBy(SORT_OPTIONS.find(opt => opt.key === key)!.value);
-  }, [searchParams]);
+
+    const urlFilters: FilterState = {};
+    searchParams.forEach((value, key) => {
+      if (key === 'q' || key === 'sort' || key === 'mode') return;
+      if (!urlFilters[key]) urlFilters[key] = [];
+      urlFilters[key].push(value);
+    });
+    setFilters(urlFilters);
+  }, [searchParams, aiSearchEnabled]);
 
   const setSearchParamsRef = useRef(setSearchParams);
   useEffect(() => {
@@ -155,6 +167,7 @@ const Explore = () => {
                     searchMode={searchMode}
                     onModeChange={setSearchMode}
                     placeholder={t('searchPlaceholder')}
+                    enableAiSearch={aiSearchEnabled}
                   />
                 </div>
 

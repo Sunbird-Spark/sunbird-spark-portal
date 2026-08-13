@@ -4,42 +4,32 @@ import appCoreService from '../../AppCoreService';
 import { OrganizationService } from '../../OrganizationService';
 import { ChannelService } from '../../ChannelService';
 import userProfileService from '../../UserProfileService';
-import { fetchFwCategoryMeta } from '../fwCategoryMetaService';
 import {
-  GENERIC_EDITOR_WINDOW_CONFIG,
-  DEFAULT_EXT_CONT_WHITELISTED_DOMAINS,
-  DEFAULT_VIDEO_MAX_SIZE,
-  DEFAULT_CONTENT_FILE_SIZE,
+  DEFAULT_PRIMARY_CATEGORIES,
   VALID_CONTENT_STATUSES,
   VALID_CONTENT_STATES,
-  EDITABLE_STATES,
-  DEFAULT_PRIMARY_CATEGORIES,
+  EDITOR_ASSET_CREATE_URL,
+  editorAssetUploadUrl,
+  EDITOR_TELEMETRY_URL,
 } from './editorConfig';
 import { GENERIC_EDITOR_MIME_TYPES } from './types';
 import type {
   GenericEditorContext,
-  GenericEditorWindowConfig,
   GenericEditorRouteParams,
-  GenericEditorQueryParams,
   ContentDetails,
-  LockContentResponse,
 } from './types';
+import type { TelemetryEvent } from '@project-sunbird/generic-editor-v2';
 
-declare global {
-  interface Window {
-    context: GenericEditorContext;
-    config: GenericEditorWindowConfig;
-  }
-}
-
+/**
+ * Builds the editor context consumed by the native @project-sunbird/generic-editor-v2
+ * editor (GenericEditor). The legacy iframe editor and its window-globals/lock/config
+ * plumbing have been removed — the v2 library manages its own lock and preview.
+ */
 export class GenericEditorService {
   private orgService = new OrganizationService();
   private channelService = new ChannelService();
 
-  getEditorUrl(): string {
-    return import.meta.env.VITE_GENERIC_EDITOR_URL || '/generic-editor/index.html';
-  }
-
+  /** Read content metadata (edit mode) for the permission pre-check. */
   async getContentDetails(contentId: string): Promise<ContentDetails> {
     const response = await getClient().get<{ content: ContentDetails }>(
       `/content/v1/read/${contentId}?mode=edit`
@@ -47,65 +37,35 @@ export class GenericEditorService {
     return response.data.content;
   }
 
-  async lockContent(
-    contentId: string,
-    userId: string,
-    userName: string,
-    framework?: string,
-    contentType?: string
-  ): Promise<LockContentResponse> {
-    const contentInfo = {
-      contentType: contentType || 'Resource',
-      framework: framework || '',
-      identifier: contentId,
-    };
-    const input = {
-      resourceId: contentId,
-      resourceType: 'Content',
-      resourceInfo: JSON.stringify(contentInfo),
-      creatorInfo: JSON.stringify({ name: userName, id: userId }),
-      createdBy: userId,
-    };
-    const response = await getClient().post<LockContentResponse>(
-      '/lock/v1/create',
-      { request: input }
-    );
-    return response.data;
-  }
-
-  async retireLock(contentId: string): Promise<void> {
-    await getClient().delete('/lock/v1/retire', {
-      request: {
-        resourceId: contentId,
-        resourceType: 'Content',
-      },
-    });
-  }
-
+  /**
+   * Client-side access gate mirroring the legacy editor: gates the editor UI by mime type,
+   * status and creator/collaborator/state. This is UX/defense-in-depth only — it is NOT a
+   * security boundary (a determined user can bypass it). Per-content authorization must be
+   * enforced upstream (knowledge-mw-service); the portal `/action` proxy only checks auth.
+   */
   validateRequest(
     contentDetails: ContentDetails,
     userId: string,
     routeState?: string
   ): boolean {
     const isGenericMime = GENERIC_EDITOR_MIME_TYPES.includes(
-      contentDetails.mimeType as any
+      contentDetails.mimeType as never
     );
     const isValidStatus = VALID_CONTENT_STATUSES.some(
       (s) => s.toLowerCase() === (contentDetails.status || '').toLowerCase()
     );
     const isValidState = routeState
-      ? VALID_CONTENT_STATES.includes(routeState as any)
+      ? VALID_CONTENT_STATES.includes(routeState as never)
       : false;
 
     if (!isGenericMime || !isValidStatus) {
       return false;
     }
-
     // Creator always has access
     if (contentDetails.createdBy === userId) {
       return true;
     }
-    // Collaborator with valid state
+    // Collaborator with a valid state
     if (isValidState && contentDetails.collaborators?.includes(userId)) {
       return true;
     }
@@ -113,8 +73,68 @@ export class GenericEditorService {
     if (isValidState) {
       return true;
     }
-
     return false;
+  }
+
+  /**
+   * Upload an image asset (thumbnail/appIcon) and return its artifactUrl.
+   * Uses the knowledge-mw `/action` asset endpoints (create → multipart upload).
+   */
+  async uploadAsset(file: File, creator?: string, createdBy?: string): Promise<string> {
+    const createResp = await fetch(EDITOR_ASSET_CREATE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        request: {
+          content: {
+            name: file.name,
+            mimeType: file.type || 'image/png',
+            mediaType: 'image',
+            contentType: 'Asset',
+            primaryCategory: 'Asset',
+            code: `asset-${Date.now()}`,
+            ...(creator ? { creator } : {}),
+            ...(createdBy ? { createdBy } : {}),
+          },
+        },
+      }),
+    });
+    const created = await createResp.json();
+    const assetId = created?.result?.identifier ?? created?.result?.node_id;
+    if (!assetId) throw new Error('Asset create failed');
+
+    const form = new FormData();
+    form.append('file', file);
+    const upResp = await fetch(editorAssetUploadUrl(assetId), {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: form,
+    });
+    const up = await upResp.json();
+    const url = up?.result?.artifactUrl ?? up?.result?.content_url;
+    if (!url) throw new Error('Asset upload failed');
+    return String(url);
+  }
+
+  /** Forward an editor telemetry event to the portal telemetry endpoint (best-effort). */
+  postTelemetry(event: TelemetryEvent): void {
+    try {
+      fetch(EDITOR_TELEMETRY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          id: 'api.telemetry',
+          ver: '3.0',
+          ts: new Date().toISOString(),
+          events: [event],
+          params: { msgid: event.mid },
+        }),
+      }).catch(() => {});
+    } catch {
+      /* non-fatal */
+    }
   }
 
   async buildEditorContext(
@@ -212,61 +232,5 @@ export class GenericEditorService {
     }
 
     return context;
-  }
-
-  async buildEditorConfig(
-    lockParams?: GenericEditorQueryParams,
-    headerLogo?: string,
-    framework?: string
-  ): Promise<GenericEditorWindowConfig> {
-    const { contentFields, fwCategoryDetails } =
-      await fetchFwCategoryMeta(framework);
-
-    return {
-      ...GENERIC_EDITOR_WINDOW_CONFIG,
-      build_number: '1.0',
-      headerLogo: headerLogo || '',
-      lock: {
-        lockKey: lockParams?.lockKey,
-        expiresAt: lockParams?.expiresAt,
-        expiresIn: lockParams?.expiresIn,
-      },
-      extContWhitelistedDomains: DEFAULT_EXT_CONT_WHITELISTED_DOMAINS,
-      enableTelemetryValidation: false,
-      videoMaxSize: DEFAULT_VIDEO_MAX_SIZE,
-      defaultContentFileSize: DEFAULT_CONTENT_FILE_SIZE,
-      contentFields,
-      fwCategoryDetails,
-    };
-  }
-
-  shouldLockContent(
-    routeState?: string,
-    contentStatus?: string,
-    queryParams?: GenericEditorQueryParams
-  ): boolean {
-    const hasExistingLock =
-      queryParams?.lockKey || queryParams?.expiresAt || queryParams?.expiresIn;
-    if (hasExistingLock) return false;
-
-    const isEditableState = EDITABLE_STATES.includes(routeState as any);
-    const isDraft = contentStatus
-      ? contentStatus.toLowerCase() === 'draft'
-      : false;
-
-    return isEditableState && isDraft;
-  }
-
-  setWindowGlobals(
-    context: GenericEditorContext,
-    config: GenericEditorWindowConfig
-  ): void {
-    (window as any).context = context;
-    (window as any).config = config;
-  }
-
-  clearWindowGlobals(): void {
-    delete (window as any).context;
-    delete (window as any).config;
   }
 }

@@ -30,6 +30,7 @@ export const envConfig = {
     KEYCLOAK_GOOGLE_ANDROID_CLIENT_SECRET: env.KEYCLOAK_GOOGLE_ANDROID_CLIENT_SECRET || '',
     GOOGLE_OAUTH_CLIENT_ID_IOS: env.GOOGLE_OAUTH_CLIENT_ID_IOS || '',
     OIDC_ISSUER_URL: env.OIDC_ISSUER_URL || '',
+    SUNBIRD_CLOUD_STORAGE_URLS: env.SUNBIRD_CLOUD_STORAGE_URLS || '',
 
     // OPTIONAL ENVIRONMENT VARIABLES
     PORT: parseInt(env.PORT || '3000'),
@@ -46,4 +47,5 @@ export const envConfig = {
     APPID: (env.ENVIRONMENT || 'local') + '.' + (env.SUNBIRD_PORTAL_INSTANCE || 'sunbird') + '.portal',
     LEARN_BASE_URL: env.LEARN_BASE_URL || 'http://userorg-service:9000',
     KNOWLG_MW_BASE_URL: env.KNOWLG_MW_BASE_URL || 'http://knowledge-mw-service:5000',
+    ENABLE_AI_SEARCH: env.ENABLE_AI_SEARCH || 'true',
 };

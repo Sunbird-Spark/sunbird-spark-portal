@@ -1,10 +1,18 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from './InputOTP';
+
+// input-otp schedules raw setTimeouts (0/10/50ms) on every value change and never
+// clears them on unmount — with real timers they can fire after happy-dom teardown
+// and crash with "window is not defined". Fake timers keep them from ever firing.
+beforeEach(() => {
+  vi.useFakeTimers();
+});
 
 afterEach(() => {
   cleanup();
   vi.clearAllTimers();
+  vi.useRealTimers();
 });
 
 // The `input-otp` library renders a real <input> element that we interact with.

@@ -1,113 +1,53 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import styles from './QumlEditor.module.css';
-import {
-  QumlEditorService,
-  type QumlEditorConfig,
-  type QuestionSetMetadata,
-  type QumlEditorEvent,
-  type QumlEditorContextOverrides,
-} from '../../services/editors/quml-editor';
-import { useFancytreeGuard } from '../../hooks/useFancytreeGuard';
-import PageLoader from '../common/PageLoader';
+import { useEffect, useState, type FC } from 'react';
+import { QuestionsetEditor } from '@project-sunbird/sunbird-questionset-editor-web-component-react';
+import '@project-sunbird/sunbird-questionset-editor-web-component-react/dist/style.css';
+import type { QumlEditorConfig, QumlEditorContextOverrides, QumlEditorEvent, QuestionSetMetadata } from '@/services/editors/quml-editor/types';
+import { QumlEditorService } from '@/services/editors/quml-editor/QumlEditorService';
+import PageLoader from '@/components/common/PageLoader';
+import EditorErrorState from '@/components/editors/EditorErrorState';
 import { useAppI18n } from '@/hooks/useAppI18n';
 
-type QumlEditorProps = {
-  metadata?: QuestionSetMetadata;
-  mode?: QumlEditorConfig['config']['mode'];
+interface QumlEditorProps {
+  metadata: QuestionSetMetadata;
+  mode: 'edit' | 'review' | 'read';
   contextOverrides?: QumlEditorContextOverrides;
   onEditorEvent?: (event: QumlEditorEvent) => void;
-  onTelemetryEvent?: (event: any) => void;
-};
+  onTelemetryEvent?: (event: unknown) => void;
+}
 
-const QumlEditor: React.FC<QumlEditorProps> = ({
+const service = new QumlEditorService();
+
+const QumlEditor: FC<QumlEditorProps> = ({
   metadata,
   mode,
   contextOverrides,
   onEditorEvent,
-  onTelemetryEvent,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const serviceRef = useRef<QumlEditorService>(new QumlEditorService());
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const { t } = useAppI18n();
-
-  // Use the fancytree guard hook to maintain jQuery with FancyTree
-  useFancytreeGuard(status === 'ready');
-
-  const handleEditorEvent = useCallback(
-    (event: QumlEditorEvent) => {
-      onEditorEvent?.(event);
-    },
-    [onEditorEvent],
-  );
-
-  const handleTelemetryEvent = useCallback(
-    (event: any) => {
-      onTelemetryEvent?.(event);
-    },
-    [onTelemetryEvent],
-  );
-
-  // CSS lifecycle: add quml-editor stylesheet on mount,
-  // remove it on unmount so it does not bleed into the rest of the portal.
-  useEffect(() => {
-    serviceRef.current.loadAssets();
-    return () => {
-      serviceRef.current.removeAssets();
-    };
-  }, []);
+  const [config, setConfig] = useState<QumlEditorConfig | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let editorElement: HTMLElement | null = null;
-    let cancelled = false;
+    setConfig(null);
+    setError(null);
+    service
+      .createConfig(metadata, { ...contextOverrides, mode })
+      .then(setConfig)
+      .catch(() => setError(t('content.failedToLoadEditor')));
+  }, [metadata.identifier, mode]);
 
-    const initEditor = async () => {
-      try {
-        if (!containerRef.current || !metadata) {
-          console.warn('[QumlEditor] Container or metadata not available');
-          return;
-        }
-
-        await serviceRef.current.initializeDependencies();
-
-        if (cancelled) return;
-
-        const service = serviceRef.current;
-        const config = await service.createConfig(metadata, { mode, ...contextOverrides });
-
-        if (cancelled) return;
-
-        editorElement = service.createElement(config);
-        service.attachEventListeners(editorElement, handleEditorEvent, handleTelemetryEvent);
-
-        containerRef.current.appendChild(editorElement);
-        setStatus('ready');
-      } catch (error: any) {
-        console.error('[QumlEditor] Failed to initialize editor:', error);
-        setStatus('error');
-      }
-    };
-
-    initEditor();
-
-    return () => {
-      cancelled = true;
-      if (editorElement) {
-        serviceRef.current.removeEventListeners(editorElement);
-        editorElement.remove();
-      }
-    };
-  }, [metadata, mode, contextOverrides, handleEditorEvent, handleTelemetryEvent]);
+  if (error) return <EditorErrorState message={error} />;
+  if (!config) return <PageLoader message={t('content.loadingEditor')} />;
 
   return (
-    <div className={styles.qumlEditorPage}>
-      {status === 'loading' && (
-        <div className="quml-editor-loader-wrapper">
-          <PageLoader message={t('editors.loading')} fullPage={true} />
-        </div>
-      )}
-      <div className={styles.qumlEditorHost} ref={containerRef} />
-    </div>
+    <QuestionsetEditor
+      context={config.context}
+      config={config.config}
+      metadata={config.metadata as unknown as Record<string, unknown>}
+      onToolbarEvent={(event: { action: string; data?: unknown }) => {
+        onEditorEvent?.({ type: 'editorEmitter', data: event });
+      }}
+    />
   );
 };
 

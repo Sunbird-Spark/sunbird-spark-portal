@@ -9,6 +9,8 @@ import { toast } from '@/hooks/useToast';
 import { useEditorLock } from '@/hooks/useEditorLock';
 import useImpression from '@/hooks/useImpression';
 import useInteract from '@/hooks/useInteract';
+import { useEditorBackNavigation } from '@/pages/workspace/editors/useEditorBackNavigation';
+import { useEditorViewIntent } from '@/pages/workspace/editors/useEditorViewIntent';
 
 import { useAppI18n } from '@/hooks/useAppI18n';
 
@@ -41,10 +43,15 @@ const QumlEditorPage = () => {
       .finally(() => setLoading(false));
   }, [contentId]);
 
+  const viewIntent = useEditorViewIntent();
+
   const { editorMode, lockError, isLocking, retireLock } = useEditorLock({
     contentId,
     metadata,
+    viewIntent,
   });
+
+  const backTo = useEditorBackNavigation();
 
   const contextOverrides: QumlEditorContextOverrides = useMemo(() => ({
     mode: editorMode,
@@ -58,12 +65,14 @@ const QumlEditorPage = () => {
       cdata: [{ id: contentId || '', type: 'ContentId' }],
     });
 
-    const closeEditor = (event.data as any)?.close;
+    // React editor emits {action: 'back'}; the old Angular editor sent {close: true}.
+    const data = event.data as { action?: string; close?: boolean } | undefined;
+    const closeEditor = data?.close || data?.action === 'back';
     if (closeEditor) {
       await retireLock();
-      navigate('/workspace');
+      navigate(backTo);
     }
-  }, [navigate, retireLock, interact, contentId]);
+  }, [navigate, retireLock, interact, contentId, backTo]);
 
   const handleTelemetryEvent = useCallback((_event: any) => { }, []);
 

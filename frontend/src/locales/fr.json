@@ -76,6 +76,7 @@
     "contentplaylist": "Liste de lecture de contenu",
     "digitaltextbook": "Manuel numérique",
     "questionpaper": "Sujet d'examen",
+    "learningpath": "Parcours d'apprentissage",
     "ecml": "ECML",
     "h5p": "H5P",
     "practicequestionset": "Ensemble de questions pratiques",
@@ -586,6 +587,7 @@
     "roleCreator": "Créateur",
     "roleReviewer": "Réviseur",
     "more": "Plus",
+    "hasTranscripts": "Transcriptions",
     "searchPlaceholder": "Rechercher du contenu...",
     "clearSearch": "Effacer la recherche",
     "gridView": "Vue grille",
@@ -601,7 +603,8 @@
       "course": "Cours",
       "content": "Contenu",
       "quiz": "Quiz",
-      "collection": "Collection"
+      "collection": "Collection",
+      "learningPath": "Parcours d'apprentissage"
     },
     "segments": {
       "all": "Tous",
@@ -620,6 +623,42 @@
       "course": "Cours",
       "collection": "Collection",
       "textbook": "Manuel",
+      "questionSet": "Ensemble de questions",
+      "questionEditor": "Éditeur de questions",
+      "uploadContent": "Télécharger du contenu",
+      "uploadLargeContent": "Télécharger un contenu volumineux",
+      "learningPath": "Parcours d'apprentissage"
+    },
+    "editorDescriptions": {
+      "course": "Concevez des cours avec des modules, des leçons et des évaluations.",
+      "learningPath": "Guidez les apprenants à travers une séquence structurée de cours et de ressources.",
+      "textbook": "Créez et organisez des manuels numériques avec chapitres et unités.",
+      "collection": "Organisez et sélectionnez des ressources en collections thématiques.",
+      "uploadContent": "Téléchargez des PDF, vidéos, présentations et documents pour les apprenants.",
+      "uploadLargeContent": "Téléchargez des fichiers vidéo volumineux depuis votre appareil local (MP4, etc.)",
+      "quiz": "Créez des quiz avec des QCM, des textes à trous et une correction automatique.",
+      "story": "Concevez des histoires interactives et des expériences d'apprentissage ludiques.",
+      "questionSet": "Créez et gérez des ensembles de questions pour les quiz et évaluations.",
+      "questionEditor": "Créez, modifiez et gérez des questions individuelles."
+    },
+    "categories": {
+      "collectionEditor": {
+        "title": "Éditeur de collections",
+        "subtitle": "Créer du contenu pédagogique structuré"
+      },
+      "uploadEditor": {
+        "title": "Éditeur de téléchargement",
+        "subtitle": "Télécharger et publier du contenu existant"
+      },
+      "resourceEditor": {
+        "title": "Éditeur de ressources",
+        "subtitle": "Créer des ressources pédagogiques interactives"
+      },
+      "qumlEditor": {
+        "title": "Éditeur QuML",
+        "subtitle": "Créer et gérer des évaluations"
+      },
+      "learningPath": "Parcours d'apprentissage",
       "questionSet": "Ensemble de questions"
     },
     "noAccessToCreate": "Vous n'avez pas accès pour créer ce contenu",
@@ -627,7 +666,8 @@
       "course": "Entrez une description pour le cours",
       "contentPlaylist": "Entrez une description pour la collection",
       "digitalTextbook": "Entrez une description pour le manuel numérique",
-      "questionPaper": "Entrez une description pour le questionnaire"
+      "questionPaper": "Entrez une description pour le questionnaire",
+      "learningPath": "Entrez une description pour le parcours d'apprentissage"
     },
     "errors": {
       "unexpectedResponse": "Réponse inattendue du serveur. Veuillez réessayer.",
@@ -1360,6 +1400,8 @@
     "errorTitle": "Erreur de l'éditeur",
     "goBack": "Retour",
     "loading": "Chargement de l'éditeur...",
+    "initError": "Échec de l'initialisation de l'éditeur. Veuillez réessayer.",
+    "noPermission": "Vous n'avez pas la permission de modifier ce contenu.",
     "preparing": "Préparation de l'environnement de l'éditeur...",
     "genericEditor": "Éditeur générique",
     "contentEditor": "Éditeur de contenu"
@@ -1405,4 +1447,3 @@
     "noMoreContent": "Plus de contenu à afficher"
   }
 }
-

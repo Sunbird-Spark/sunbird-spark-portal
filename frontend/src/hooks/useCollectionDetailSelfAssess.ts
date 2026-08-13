@@ -37,18 +37,13 @@ export function useCollectionDetailSelfAssess({
     () => (contentId && collectionData?.hierarchyRoot ? findNodeById(collectionData.hierarchyRoot, contentId) : undefined),
     [contentId, collectionData?.hierarchyRoot]
   );
+  const isScorm = (currentContentNode?.mimeType ?? "") === "application/vnd.ekstep.scorm-archive";
   const selfAssessWithBatch = Boolean(
-    currentContentNode && isSelfAssess(currentContentNode) && hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege
+    currentContentNode && (isSelfAssess(currentContentNode) || isScorm) && hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege
   );
   const attemptInfo = contentId ? contentAttemptInfoMap?.[contentId] : undefined;
   const attemptCount = attemptInfo?.attemptCount ?? 0;
   const maxAttempts = currentContentNode?.maxAttempts;
-  const maxAttemptsExceeded = Boolean(
-    selfAssessWithBatch &&
-    maxAttempts != null &&
-    typeof maxAttempts === "number" &&
-    attemptCount >= maxAttempts
-  );
 
   const attemptCountForPlayerRef = useRef(attemptCount);
   const prevContentIdRef = useRef(contentId);
@@ -61,16 +56,26 @@ export function useCollectionDetailSelfAssess({
     attemptCountForPlayerRef.current = attemptCount;
   }
 
+  const maxAttemptsExceeded = Boolean(
+    selfAssessWithBatch &&
+    maxAttempts != null &&
+    typeof maxAttempts === "number" &&
+    attemptCountForPlayerRef.current >= maxAttempts
+  );
+
   const playerMetadata = useMemo((): Record<string, unknown> | undefined => {
     if (!rawPlayerMetadata) return undefined;
     const base = rawPlayerMetadata as Record<string, unknown>;
-    if (!selfAssessWithBatch || maxAttemptsExceeded) return base;
+    // Always merge in the course-level attempt info (even once exceeded) —
+    // the player itself disables its Start/Resume CTA once attemptsLeft hits
+    // 0, so it needs the true count on every mount (e.g. after a refresh).
+    if (!selfAssessWithBatch) return base;
     return {
       ...base,
-      maxAttempt: maxAttempts,
+      maxAttempts: maxAttempts,
       currentAttempt: attemptCountForPlayerRef.current,
     };
-  }, [rawPlayerMetadata, selfAssessWithBatch, maxAttemptsExceeded, maxAttempts]);
+  }, [rawPlayerMetadata, selfAssessWithBatch, maxAttempts]);
 
   const handleGoBack = useCallback(() => navigate(-1), [navigate]);
 

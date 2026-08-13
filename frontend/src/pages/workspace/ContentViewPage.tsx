@@ -21,6 +21,7 @@ import ReviewPageHeader from '@/components/workspace/ReviewPageHeader';
 import ContentPlayerSection from '@/components/workspace/ReviewPlayerSection';
 import reviewCommentService from '@/services/ReviewCommentService';
 import './ContentViewPage.css';
+import { useEditorBackNavigation } from '@/pages/workspace/editors/useEditorBackNavigation';
 
 const contentService = new ContentService();
 const formService = new FormService();
@@ -41,6 +42,7 @@ const ContentReviewPage = ({ mode }: { mode: 'view' | 'review' }) => {
   const { contentId } = useParams();
   const isReviewMode = mode === 'review';
   const navigate = useNavigate();
+  const backTo = useEditorBackNavigation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { t } = useAppI18n();
@@ -53,7 +55,7 @@ const ContentReviewPage = ({ mode }: { mode: 'view' | 'review' }) => {
   const [isLoadingRequestChangesForm, setIsLoadingRequestChangesForm] = useState(false);
   const [showPublishWarning, setShowPublishWarning] = useState(false);
 
-  const { data, isLoading, error } = useContentRead(contentId || '', { mode: 'edit' });
+  const { data, isLoading, error } = useContentRead(contentId || '', { mode: 'edit', enrichTranscripts: true });
   const contentData = data?.data?.content;
   const isQumlContent =
     contentData?.mimeType === 'application/vnd.sunbird.questionset' ||
@@ -155,7 +157,7 @@ const ContentReviewPage = ({ mode }: { mode: 'view' | 'review' }) => {
     }
   }, [contentId, closeDialog, toast, t, clearWorkspaceQueries, navigate]);
 
-  const handleBack = useCallback(() => navigate('/workspace'), [navigate]);
+  const handleBack = useCallback(() => navigate(backTo), [navigate, backTo]);
 
   const handlePublishWarningConfirm = useCallback(() => { setShowPublishWarning(false); loadFormAndShow('publish', 'publish', setIsLoadingPublishForm); }, [loadFormAndShow]);
 

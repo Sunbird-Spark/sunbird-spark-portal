@@ -62,9 +62,18 @@ export function getContentStatusMap(contentList: ContentStateItem[]): Record<str
   return map;
 }
 
-/** Whether the hierarchy node is SelfAssess (quiz) — attempt limits apply only to these. */
+/**
+ * Whether the hierarchy node is SelfAssess (quiz) — attempt limits apply only
+ * to these. `contentType` is a creator-chosen taxonomy label and isn't always
+ * set to 'SelfAssess' even for genuine QuML content, so also match on the
+ * structural `mimeType` (both QuML mimeTypes — `questionset` and `question` —
+ * are treated as self-assess here, a broader match than ContentRow's
+ * isAssessmentContent, which only checks `questionset`).
+ */
 export function isSelfAssess(node: HierarchyContentNode | null | undefined): boolean {
-  return (node?.contentType ?? '') === 'SelfAssess';
+  if ((node?.contentType ?? '') === 'SelfAssess') return true;
+  const mimeType = node?.mimeType ?? '';
+  return mimeType === 'application/vnd.sunbird.questionset' || mimeType === 'application/vnd.sunbird.question';
 }
 
 export interface ContentScoreInfo {
@@ -88,10 +97,14 @@ export function getContentAttemptInfoMap(contentList: ContentStateItem[]): Recor
     if (Array.isArray(score) && score.length > 0) {
       let best: ContentScoreInfo | undefined;
       for (const s of score) {
-        const attempt = s as { totalScore?: number; totalMaxScore?: number } | undefined;
-        if (attempt && typeof attempt.totalScore === 'number' && typeof attempt.totalMaxScore === 'number') {
-          if (!best || attempt.totalScore > best.totalScore) {
-            best = { totalScore: attempt.totalScore, totalMaxScore: attempt.totalMaxScore };
+        const attempt = s as { totalScore?: number; totalMaxScore?: number; total_score?: number; total_max_score?: number } | undefined;
+        if (attempt) {
+          const ts = attempt.totalScore ?? attempt.total_score;
+          const tms = attempt.totalMaxScore ?? attempt.total_max_score;
+          if (typeof ts === 'number' && typeof tms === 'number') {
+            if (!best || ts > best.totalScore) {
+              best = { totalScore: ts, totalMaxScore: tms };
+            }
           }
         }
       }

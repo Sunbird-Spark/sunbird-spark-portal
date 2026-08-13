@@ -37,6 +37,8 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'workspace.typeFilters.content': 'Content',
         'workspace.typeFilters.quiz': 'Quiz',
         'workspace.typeFilters.collection': 'Collection',
+        'workspace.typeFilters.learningPath': 'Learning Path',
+        'workspace.hasTranscripts': 'Transcripts',
       };
       return translations[key] || key;
     },
@@ -80,6 +82,7 @@ const baseCounts = { all: 5, drafts: 2, review: 1, published: 2, pendingReview: 
 
 const renderToolbar = (overrides?: Partial<{
   activeView: WorkspaceView;
+  secondaryView: WorkspaceView | null;
   userRole: UserRole;
   viewMode: ViewMode;
   typeFilter: ContentTypeFilter;
@@ -87,26 +90,33 @@ const renderToolbar = (overrides?: Partial<{
   counts: typeof baseCounts;
   hasCreatorRole: boolean;
   hasReviewerRole: boolean;
+  transcriptFilter: boolean;
 }>) => {
   const onViewChange = vi.fn();
+  const onSecondaryActionChange = vi.fn();
   const onRoleChange = vi.fn();
   const onViewModeChange = vi.fn();
   const onTypeFilterChange = vi.fn();
+  const onTranscriptFilterChange = vi.fn();
   const onCreateClick = vi.fn();
 
   const props = {
     activeView: 'all' as WorkspaceView,
+    secondaryView: null as WorkspaceView | null,
     userRole: 'creator' as UserRole,
     counts: baseCounts,
     viewMode: 'grid' as ViewMode,
     typeFilter: 'all' as ContentTypeFilter,
+    transcriptFilter: false,
     contentCount: 5,
     hasCreatorRole: true,
     hasReviewerRole: true,
     onViewChange,
+    onSecondaryActionChange,
     onRoleChange,
     onViewModeChange,
     onTypeFilterChange,
+    onTranscriptFilterChange,
     onCreateClick,
     searchQuery: '',
     onSearchChange: vi.fn(),
@@ -114,7 +124,10 @@ const renderToolbar = (overrides?: Partial<{
   };
 
   render(<WorkspaceToolbar {...props} />);
-  return { ...props, onViewChange, onRoleChange, onViewModeChange, onTypeFilterChange, onCreateClick };
+  return {
+    ...props, onViewChange, onSecondaryActionChange, onRoleChange, onViewModeChange,
+    onTypeFilterChange, onTranscriptFilterChange, onCreateClick,
+  };
 };
 
 describe('WorkspaceToolbar', () => {
@@ -149,15 +162,26 @@ describe('WorkspaceToolbar', () => {
     expect(onViewChange).toHaveBeenCalledWith('pending-review');
   });
 
-  it('renders secondary actions for creator and calls onViewChange from More menu', () => {
-    const { onViewChange } = renderToolbar({ userRole: 'creator' });
+  it('renders secondary actions for creator and calls onSecondaryActionChange from More menu', () => {
+    const { onSecondaryActionChange } = renderToolbar({ userRole: 'creator' });
 
     // Our DropdownMenu mock always renders content
     expect(screen.getByText('More')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Uploads' }));
-    expect(onViewChange).toHaveBeenCalledWith('uploads');
+    expect(onSecondaryActionChange).toHaveBeenCalledWith('uploads');
     fireEvent.click(screen.getByRole('button', { name: 'Collaborations' }));
-    expect(onViewChange).toHaveBeenCalledWith('collaborations');
+    expect(onSecondaryActionChange).toHaveBeenCalledWith('collaborations');
+  });
+
+  it('shows secondary action label in trigger when secondaryView is set', () => {
+    renderToolbar({ userRole: 'creator', secondaryView: 'uploads' });
+    const uploadsElements = screen.getAllByText('Uploads');
+    expect(uploadsElements.length).toBe(2);
+  });
+
+  it('shows More when secondaryView is null', () => {
+    renderToolbar({ userRole: 'creator', secondaryView: null });
+    expect(screen.getByText('More')).toBeInTheDocument();
   });
 
   it('shows type filter and view mode controls when content filters are enabled', () => {
@@ -182,6 +206,23 @@ describe('WorkspaceToolbar', () => {
   it('hides filters when activeView is create', () => {
     renderToolbar({ activeView: 'create' });
     expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
+  });
+
+  it('toggles the Has Transcripts filter on click', () => {
+    const { onTranscriptFilterChange } = renderToolbar({ transcriptFilter: false });
+    fireEvent.click(screen.getByRole('button', { name: 'Transcripts' }));
+    expect(onTranscriptFilterChange).toHaveBeenCalledWith(true);
+  });
+
+  it('toggles the Has Transcripts filter off when already active', () => {
+    const { onTranscriptFilterChange } = renderToolbar({ transcriptFilter: true });
+    fireEvent.click(screen.getByRole('button', { name: 'Transcripts' }));
+    expect(onTranscriptFilterChange).toHaveBeenCalledWith(false);
+  });
+
+  it('hides the Has Transcripts filter when activeView is create (negative)', () => {
+    renderToolbar({ activeView: 'create' });
+    expect(screen.queryByRole('button', { name: 'Transcripts' })).not.toBeInTheDocument();
   });
 
   it('shows stats row only for creator with content filters and displays counts', () => {

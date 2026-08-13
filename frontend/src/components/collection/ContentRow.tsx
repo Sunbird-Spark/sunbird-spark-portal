@@ -45,16 +45,20 @@ export default function ContentRow({
   const showStatus = contentStatusMap !== undefined;
 
   const isSelfAssess = (node.contentType ?? "") === "SelfAssess";
+  const isQuestionSet = (node.mimeType ?? "") === "application/vnd.sunbird.questionset";
+  const isScorm = (node.mimeType ?? "") === "application/vnd.ekstep.scorm-archive";
+  const isAssessmentContent = isSelfAssess || isQuestionSet || isScorm;
+  const isHardBlockedAssessment = isSelfAssess || isQuestionSet;
   const maxAttempts = node.maxAttempts;
   const attemptInfo = contentAttemptInfoMap?.[node.identifier];
   const attemptCount = attemptInfo?.attemptCount ?? 0;
   const isDisabledByAttempts =
-    isSelfAssess &&
+    isHardBlockedAssessment &&
     maxAttempts != null &&
     typeof maxAttempts === "number" &&
     attemptCount >= maxAttempts;
   const isLastAttempt =
-    isSelfAssess &&
+    isAssessmentContent &&
     maxAttempts != null &&
     typeof maxAttempts === "number" &&
     maxAttempts - attemptCount === 1 &&
@@ -72,7 +76,7 @@ export default function ContentRow({
 
   const title = node.name ?? "Untitled";
   const showAttempts =
-    isSelfAssess &&
+    isAssessmentContent &&
     maxAttempts != null &&
     typeof maxAttempts === "number" &&
     contentAttemptInfoMap !== undefined;
@@ -110,7 +114,7 @@ export default function ContentRow({
             {status === 1 && <HiOutlineExclamationCircle className="w-3.5 h-3.5 text-sunbird-status-ongoing-border" />}
             {t(getStatusLabel(status))}
           </span>
-          {status === 2 && isSelfAssess && attemptInfo?.bestScore && (
+          {status === 2 && isAssessmentContent && attemptInfo?.bestScore && (
             <span className="text-[0.625rem] text-gray-600">
               {t("courseDetails.scoreLabel", { score: attemptInfo.bestScore.totalScore, max: attemptInfo.bestScore.totalMaxScore })}
             </span>
@@ -178,5 +182,6 @@ export default function ContentRow({
     >
       {content}
     </Link>
+    
   );
 }

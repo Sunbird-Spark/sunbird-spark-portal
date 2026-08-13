@@ -15,7 +15,7 @@ const { mockNavigate, mockContentCreate, mockQuestionSetMutateAsync, mockQuestio
   mockQuestionSetRetireMutateAsync: vi.fn(),
 }));
 
-const mockUseWorkspace = vi.fn<() => UseWorkspaceReturn>();
+const mockUseWorkspace = vi.fn<(...args: unknown[]) => UseWorkspaceReturn>();
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
@@ -29,7 +29,7 @@ vi.mock('@/services/ContentService', () => ({
   },
 }));
 
-vi.mock('@/hooks/useWorkspace', () => ({ useWorkspace: () => mockUseWorkspace() }));
+vi.mock('@/hooks/useWorkspace', () => ({ useWorkspace: (...args: unknown[]) => mockUseWorkspace(...args) }));
 
 vi.mock('@/hooks/useUserRead', () => ({
   useUserRead: () => ({
@@ -136,7 +136,17 @@ vi.mock('@/hooks/useAppI18n', () => ({
 vi.mock('@/components/common/PageLoader', () => ({ default: ({ message }: { message: string }) => <div>{message}</div> }));
 
 vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
-  default: ({ onCreateClick, onViewChange }: { onCreateClick: () => void; onViewChange: (v: string) => void }) => (
+  default: ({
+    onCreateClick,
+    onViewChange,
+    transcriptFilter,
+    onTranscriptFilterChange,
+  }: {
+    onCreateClick: () => void;
+    onViewChange: (v: string) => void;
+    transcriptFilter: boolean;
+    onTranscriptFilterChange: (value: boolean) => void;
+  }) => (
     <div data-testid="segmented-control">
       <button type="button" onClick={onCreateClick}>createNew</button>
       <button type="button" onClick={() => onViewChange('all')}>All 0</button>
@@ -144,17 +154,19 @@ vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
       <button type="button" onClick={() => onViewChange('uploads')}>Uploads</button>
       <button type="button" onClick={() => onViewChange('collaborations')}>Collaborations</button>
       <button type="button" onClick={() => onViewChange('create')}>Create view</button>
+      <button type="button" onClick={() => onTranscriptFilterChange(!transcriptFilter)}>Transcripts</button>
     </div>
   ),
 }));
 
 vi.mock('./WorkspacePageContent', () => ({
-  default: ({ filteredItems, onDelete }: { filteredItems: WorkspaceItem[]; onDelete: (id: string) => void }) => (
+  default: ({ filteredItems, onDelete, onView }: { filteredItems: WorkspaceItem[]; onDelete: (id: string) => void; onView: (id: string) => void }) => (
     <div data-testid="workspace-content">
       {filteredItems.map((item) => (
         <div key={item.id} data-testid={`content-item-${item.id}`}>
           <span>{item.title}</span>
           <button type="button" onClick={() => onDelete(item.id)}>Delete {item.title}</button>
+          <button type="button" onClick={() => onView(item.id)}>View {item.title}</button>
         </div>
       ))}
     </div>
@@ -296,6 +308,16 @@ describe('WorkspacePage', () => {
     expect(screen.getByRole('button', { name: 'All 0' })).toBeInTheDocument();
   });
 
+  it('re-queries useWorkspace with transcriptFilter: true after clicking Has Transcripts', async () => {
+    renderWithProviders(<WorkspacePage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Transcripts' }));
+    await waitFor(() =>
+      expect(mockUseWorkspace).toHaveBeenLastCalledWith(
+        expect.objectContaining({ transcriptFilter: true }),
+      ),
+    );
+  });
+
   it('closes create modal when close button is clicked', async () => {
     renderWithProviders(<WorkspacePage />);
     fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
@@ -349,7 +371,10 @@ describe('WorkspacePage', () => {
       );
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/quml-editor/do_qs_123');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/quml-editor/do_qs_123',
+        { state: { from: '/' } }
+      );
     });
   });
 
@@ -442,7 +467,10 @@ describe('WorkspacePage', () => {
       }));
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/content-editor/do_resource_123');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/content-editor/do_resource_123',
+        { state: { from: '/' } }
+      );
     });
 
     // Test quiz creation with different contentType
@@ -466,7 +494,10 @@ describe('WorkspacePage', () => {
       }));
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/content-editor/do_quiz_123');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/content-editor/do_quiz_123',
+        { state: { from: '/' } }
+      );
     });
   });
 
@@ -549,7 +580,10 @@ describe('WorkspacePage', () => {
       );
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/collection-editor/do_collection_123');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/collection-editor/do_collection_123',
+        { state: { from: '/' } }
+      );
     });
   });
 
@@ -585,7 +619,10 @@ describe('WorkspacePage', () => {
       );
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/collection-editor/do_textbook_456');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/collection-editor/do_textbook_456',
+        { state: { from: '/' } }
+      );
     });
   });
 
@@ -663,6 +700,46 @@ describe('WorkspacePage', () => {
     });
   });
 
+  it('navigates with a view intent when View is clicked on a live collection-type item', () => {
+    const liveCourseItem: WorkspaceItem = {
+      id: 'do_course_live_1',
+      title: 'Live Course',
+      description: 'A published course',
+      type: 'course',
+      primaryCategory: 'Course',
+      mimeType: 'application/vnd.ekstep.content-collection',
+      status: 'published',
+      contentType: 'Course',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+      author: 'Test Author',
+      framework: 'NCF',
+      contentStatus: 'Live',
+    };
+    mockUseWorkspace.mockReturnValue({
+      contents: [liveCourseItem],
+      counts: { all: 1, drafts: 0, review: 0, published: 1, pendingReview: 0 },
+      totalCount: 1,
+      isLoading: false,
+      isLoadingMore: false,
+      isCountsLoading: false,
+      isRefreshing: false,
+      error: null,
+      hasMore: false,
+      loadMore: vi.fn(),
+      refetchCounts: vi.fn().mockResolvedValue(undefined),
+      refetchAll: vi.fn().mockResolvedValue(undefined),
+    });
+
+    renderWithProviders(<WorkspacePage />);
+    fireEvent.click(screen.getByRole('button', { name: 'View Live Course' }));
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      '/edit/collection-editor/do_course_live_1',
+      { state: { from: '/', intent: 'view' } }
+    );
+  });
+
   /* ── Course creation via ContentNameDialog (handleContentNameSubmit, lines 429-453) ── */
 
   it('creates a course via ContentNameDialog and navigates to collection-editor', async () => {
@@ -698,7 +775,10 @@ describe('WorkspacePage', () => {
       );
     });
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/edit/collection-editor/do_course_new_123');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/edit/collection-editor/do_course_new_123',
+        { state: { from: '/' } }
+      );
     });
   });
 

@@ -126,10 +126,10 @@ describe('QumlPlayerService', () => {
       });
     });
 
-    it('should initialize config as empty object', async () => {
+    it('sets the API slug in config', async () => {
       const config = await service.createConfig(mockMetadata);
 
-      expect(config.config).toEqual({});
+      expect(config.config).toEqual({ apiSlug: '/portal' });
     });
   });
 

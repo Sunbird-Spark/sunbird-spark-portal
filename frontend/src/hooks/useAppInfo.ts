@@ -5,6 +5,8 @@ interface AppInfo {
   appId: string;
   version: string;
   buildHash: string;
+  /** 'true' | 'false' (string from backend env). Defaults to enabled when absent. */
+  enableAiSearch?: string;
 }
 
 export const useAppInfo = (): UseQueryResult<ApiResponse<AppInfo>, Error> => {

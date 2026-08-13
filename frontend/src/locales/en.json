@@ -18,8 +18,8 @@
   "confirm": "Confirm",
   "back": "Back",
   "next": "Next",
-    "yes": "Yes",
-    "no": "No",
+  "yes": "Yes",
+  "no": "No",
   "changeLanguage": "Change Language",
   "home": "Home",
   "dashboard": "Dashboard",
@@ -76,6 +76,7 @@
     "contentplaylist": "Content Playlist",
     "digitaltextbook": "Digital Textbook",
     "questionpaper": "Question Paper",
+    "learningpath": "Learning Path",
     "ecml": "ECML",
     "h5p": "H5P",
     "practicequestionset": "Practice Question Set",
@@ -586,6 +587,7 @@
     "roleCreator": "Creator",
     "roleReviewer": "Reviewer",
     "more": "More",
+    "hasTranscripts": "Transcripts",
     "searchPlaceholder": "Search content...",
     "clearSearch": "Clear search",
     "gridView": "Grid view",
@@ -601,7 +603,8 @@
       "course": "Course",
       "content": "Content",
       "quiz": "Quiz",
-      "collection": "Collection"
+      "collection": "Collection",
+      "learningPath": "Learning Path"
     },
     "segments": {
       "all": "All",
@@ -620,6 +623,42 @@
       "course": "Course",
       "collection": "Collection",
       "textbook": "TextBook",
+      "questionSet": "Question Set",
+      "questionEditor": "Question Editor",
+      "uploadContent": "Upload Content",
+      "uploadLargeContent": "Upload Large Content",
+      "learningPath": "Learning Path"
+    },
+    "editorDescriptions": {
+      "course": "Design courses with modules, lessons, and assessments.",
+      "learningPath": "Guide learners through a structured sequence of courses and resources.",
+      "textbook": "Create and organize digital textbooks with chapters and units.",
+      "collection": "Organize and curate resources into thematic collections.",
+      "uploadContent": "Upload PDFs, videos, presentations, and documents for learners.",
+      "uploadLargeContent": "Upload large video files from your local device (MP4, etc.)",
+      "quiz": "Create quizzes with MCQs, fill-in-the-blanks, and auto-grading.",
+      "story": "Design interactive stories and gamified learning experiences.",
+      "questionSet": "Create and manage sets of questions for quizzes and assessments.",
+      "questionEditor": "Create, edit, and manage individual questions."
+    },
+    "categories": {
+      "collectionEditor": {
+        "title": "Collection Editor",
+        "subtitle": "Create structured learning content"
+      },
+      "uploadEditor": {
+        "title": "Upload Editor",
+        "subtitle": "Upload and publish existing content"
+      },
+      "resourceEditor": {
+        "title": "Resource Editor",
+        "subtitle": "Create interactive learning resources"
+      },
+      "qumlEditor": {
+        "title": "QuML Editor",
+        "subtitle": "Create and manage assessments"
+      },
+      "learningPath": "Learning Path",
       "questionSet": "Question Set"
     },
     "noAccessToCreate": "You do not have access to create this content",
@@ -627,7 +666,8 @@
       "course": "Enter description for Course",
       "contentPlaylist": "Enter description for Collection",
       "digitalTextbook": "Enter description for Digital Textbook",
-      "questionPaper": "Enter description for Question Paper"
+      "questionPaper": "Enter description for Question Paper",
+      "learningPath": "Enter description for Learning Path"
     },
     "errors": {
       "unexpectedResponse": "Unexpected server response. Please try again.",
@@ -1256,7 +1296,6 @@
     "filter": "Filter",
     "untitledCourse": "Untitled Course"
   },
-
   "trackableCollection": {
     "completed": "Completed"
   },
@@ -1362,6 +1401,8 @@
     "errorTitle": "Editor Error",
     "goBack": "Go Back",
     "loading": "Loading Editor...",
+    "initError": "Failed to initialize the editor. Please try again.",
+    "noPermission": "You do not have permission to edit this content.",
     "preparing": "Preparing the editor environment...",
     "genericEditor": "Generic Editor",
     "contentEditor": "Content Editor"
@@ -1407,4 +1448,3 @@
     "noMoreContent": "No more content to show"
   }
 }
-
