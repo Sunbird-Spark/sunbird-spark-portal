@@ -77,6 +77,10 @@ const AppRoutes: React.FC = () => {
           </Route>
           <Route path=":collectionId/dashboard/:tab" element={<CourseDashboardPage />} />
         </Route>
+        {/* Learning Path creator dashboard - same page as the Course dashboard above (see
+            CourseDashboardPage's isLearningPath branch); kept outside the shared-sidebar
+            `learning-path` block below since this page renders its own Header/Footer. */}
+        <Route path="learning-path/:pathId/dashboard/:tab" element={<CourseDashboardPage />} />
 
         {/* Full-screen routes (own layout, no shared sidebar) */}
         <Route path="/workspace/review/:contentId" element={

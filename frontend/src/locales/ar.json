@@ -485,7 +485,11 @@
     "learningProgress": "تقدم التعلم",
     "lessonVisited": "الدروس المزارة",
     "contentsCompleted": "المحتويات المكتملة",
-    "noUpcomingBatches": "لا توجد دفعات قادمة مجدولة."
+    "noUpcomingBatches": "لا توجد دفعات قادمة مجدولة.",
+    "learningPaths": "مسارات التعلم",
+    "switchType": "تبديل نوع المحتوى",
+    "noItemsFound": "لم يتم العثور على {{type}} في هذه الفئة.",
+    "noMoreToShow": "لا مزيد من {{type}} لعرضها"
   },
   "onboarding": {
     "altSunbird": "صن بيرد",
@@ -1120,6 +1124,7 @@
   "courseDashboard": {
     "title": "لوحة تحكم الدورة",
     "backToCoursePage": "العودة إلى صفحة الدورة",
+    "backToPathPage": "العودة إلى صفحة المسار",
     "checkingPermissions": "جارٍ التحقق من الصلاحيات\u2026",
     "failedToLoad": "فشل تحميل الدورة.",
     "manageDashboard": "إدارة لوحة التحكم لهذه الدورة"
@@ -1520,6 +1525,11 @@
     "playerCrumb": "المستوى {{num}} • {{levelName}} • الوحدة {{unitIndex}} من {{unitTotal}}",
     "autoSaveNote": "يُحفظ تقدمك في هذا الدرس تلقائيًا.",
     "markedComplete": "تم وضع علامة مكتمل",
-    "mustJoinPath": "يجب عليك الانضمام إلى مسار التعلم هذا للوصول إلى محتواه."
+    "mustJoinPath": "يجب عليك الانضمام إلى مسار التعلم هذا للوصول إلى محتواه.",
+    "viewPathDashboard": "عرض لوحة تحكم المسار",
+    "manageBatches": "إدارة مجموعات هذا المسار",
+    "dashboardTitle": "لوحة تحكم مسار التعلم",
+    "manageDashboard": "إدارة لوحة التحكم لهذا المسار",
+    "selectBatchHint": "اختر مجموعة من القائمة أعلاه لعرض تقرير المسار."
   }
 }

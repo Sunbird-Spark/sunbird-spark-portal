@@ -2,6 +2,7 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 import { PathProgressCard } from '@/components/learningPath/PathProgressCard';
 import { CertificateLockCard } from '@/components/learningPath/CertificateLockCard';
 import { EnrolCard } from '@/components/learningPath/EnrolCard';
+import { LearningPathCreatorPanel } from '@/components/learningPath/LearningPathCreatorPanel';
 import { PolicyNoteBanner } from '@/components/learningPath/PolicyNoteBanner';
 import { LedgerTable } from '@/components/learningPath/LedgerTable';
 import { LearningPathGoBackButton } from '@/components/learningPath/LearningPathGoBackButton';
@@ -20,8 +21,22 @@ interface LearningPathOverviewProps {
 /** Overview screen (Style B · Ledger): sticky progress rail + ledger table, or an enrol prompt when not yet enrolled. */
 export function LearningPathOverview({ lp, isAuthenticated, onOpenLevel, onOpenPrior, onOpenCourse }: LearningPathOverviewProps) {
   const { t } = useAppI18n();
-  const { model, policy, progress, levelProgress, levelStatuses, priorState, outcomeState, enrollment, pathSummary, summaryByCollectionId } =
-    lp;
+  const {
+    model,
+    policy,
+    progress,
+    levelProgress,
+    levelStatuses,
+    priorState,
+    outcomeState,
+    enrollment,
+    pathSummary,
+    summaryByCollectionId,
+    isTrackable,
+    isCreatorViewingOwnPath,
+    isMentorViewingPath,
+  } = lp;
+  const isCreatorOrMentor = isTrackable && isAuthenticated && (isCreatorViewingOwnPath || isMentorViewingPath);
 
   return (
     <div className="flex-1 min-w-0 mx-auto max-w-[85rem] px-6 py-7">
@@ -35,7 +50,9 @@ export function LearningPathOverview({ lp, isAuthenticated, onOpenLevel, onOpenP
             scopeCount={model.allSkills.length}
             batchEndDate={enrollment.batchEndDate}
           />
-          {enrollment.isEnrolled ? (
+          {isCreatorOrMentor ? (
+            <LearningPathCreatorPanel pathId={model.identifier} pathName={model.name} />
+          ) : enrollment.isEnrolled ? (
             <CertificateLockCard
               levelCount={model.levels.length}
               doneLevels={progress.doneLevels}

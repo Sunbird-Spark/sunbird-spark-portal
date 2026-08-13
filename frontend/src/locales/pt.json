@@ -485,7 +485,11 @@
     "learningProgress": "Progresso de aprendizado",
     "lessonVisited": "Lição visitada",
     "contentsCompleted": "Conteúdos concluídos",
-    "noUpcomingBatches": "Nenhuma turma próxima agendada."
+    "noUpcomingBatches": "Nenhuma turma próxima agendada.",
+    "learningPaths": "Trilhas de Aprendizagem",
+    "switchType": "Alternar tipo de conteúdo",
+    "noItemsFound": "Nenhum {{type}} encontrado nesta categoria.",
+    "noMoreToShow": "Não há mais {{type}} para mostrar"
   },
   "onboarding": {
     "altSunbird": "Sunbird",
@@ -1120,6 +1124,7 @@
   "courseDashboard": {
     "title": "Painel do curso",
     "backToCoursePage": "Voltar à página do curso",
+    "backToPathPage": "Voltar à página da trilha",
     "checkingPermissions": "Verificando permissões\u2026",
     "failedToLoad": "Falha ao carregar o curso.",
     "manageDashboard": "Gerenciar painel deste curso"
@@ -1519,6 +1524,11 @@
     "playerCrumb": "Nível {{num}} • {{levelName}} • Unidade {{unitIndex}} de {{unitTotal}}",
     "autoSaveNote": "Seu progresso nesta lição é salvo automaticamente.",
     "markedComplete": "Marcado como concluído",
-    "mustJoinPath": "Você precisa se inscrever nesta trilha de aprendizagem para acessar o conteúdo."
+    "mustJoinPath": "Você precisa se inscrever nesta trilha de aprendizagem para acessar o conteúdo.",
+    "viewPathDashboard": "Ver painel da trilha",
+    "manageBatches": "Gerenciar turmas desta trilha",
+    "dashboardTitle": "Painel da Trilha de Aprendizagem",
+    "manageDashboard": "Gerenciar painel desta trilha",
+    "selectBatchHint": "Selecione uma turma no menu acima para ver o relatório da trilha."
   }
 }

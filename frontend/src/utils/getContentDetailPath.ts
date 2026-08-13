@@ -1,3 +1,5 @@
+import { isLearningPathCategory } from './isLearningPath';
+
 /**
  * Resolves the consumption route for a piece of content: Learning Paths get
  * their own Ledger flow (`/learning-path/:id`), everything else keeps the
@@ -8,7 +10,6 @@ export function getContentDetailPath(
   primaryCategory: string | undefined,
   batchId?: string
 ): string {
-  const isLearningPath = (primaryCategory ?? '').toLowerCase() === 'learning path';
-  const base = isLearningPath ? `/learning-path/${identifier}` : `/collection/${identifier}`;
+  const base = isLearningPathCategory(primaryCategory) ? `/learning-path/${identifier}` : `/collection/${identifier}`;
   return batchId ? `${base}/batch/${batchId}` : base;
 }

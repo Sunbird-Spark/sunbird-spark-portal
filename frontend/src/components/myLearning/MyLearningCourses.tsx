@@ -4,28 +4,40 @@ import { FiChevronDown } from "react-icons/fi";
 import { TrackableCollection } from "@/types/TrackableCollections";
 import TrackableCollectionCard from "../content/TrackableCollectionCard";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { parseCourseContextId } from "@/services/viewer/summaryMapper";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/common/DropdownMenu";
 
 
 const COURSES_PER_PAGE = 9;
 
 type TabType = "active" | "completed" | "upcoming";
 
+export type LearningTypeFilter = "course" | "learningPath";
+
+const TYPE_OPTIONS: LearningTypeFilter[] = ["course", "learningPath"];
+
 interface MyLearningCoursesProps {
   courses?: TrackableCollection[];
+  typeFilter: LearningTypeFilter;
+  onTypeFilterChange: (type: LearningTypeFilter) => void;
 }
 
-const MyLearningCourses = ({ courses: coursesProp = [] }: MyLearningCoursesProps) => {
-  // Enrolling in a Learning Path fans out per-course records with a composite
-  // "<lpBatchId>:<courseId>" batchId - hide those, the Learning Path's own
-  // record (plain batchId) already represents the whole path as one card.
-  const courses = coursesProp.filter((c) => !parseCourseContextId(c.batchId));
+const MyLearningCourses = ({ courses = [], typeFilter, onTypeFilterChange }: MyLearningCoursesProps) => {
   const { t } = useAppI18n();
   const [activeTab, setActiveTab] = useState<TabType>("active");
   const [visibleCount, setVisibleCount] = useState(COURSES_PER_PAGE);
 
+  const typeLabels: Record<LearningTypeFilter, string> = {
+    course: t('courses'),
+    learningPath: t('myLearning.learningPaths'),
+  };
+
   const tabs: { id: TabType; label: string }[] = [
-    { id: "active", label: t('status.active') + ' ' + t('courses') },
+    { id: "active", label: t('status.active') + ' ' + typeLabels[typeFilter] },
     { id: "completed", label: t('status.completed') },
     { id: "upcoming", label: t('status.upcoming') },
   ];
@@ -59,18 +71,39 @@ const MyLearningCourses = ({ courses: coursesProp = [] }: MyLearningCoursesProps
   const currentCourses = allFilteredCourses.slice(0, visibleCount);
   const hasMore = visibleCount < allFilteredCourses.length;
 
-  // Reset visible count when tab changes
+  // Reset visible count when the tab or the content type changes
   useEffect(() => {
     setVisibleCount(COURSES_PER_PAGE);
-  }, [activeTab]);
+  }, [activeTab, typeFilter]);
 
   return (
     <div className="bg-white rounded-2xl p-6 h-full flex flex-col shadow-sunbird-sm">
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-6 cursor-pointer hover:opacity-80 transition-opacity w-fit shrink-0">
-        <h3 className="text-[1.375rem] font-bold text-sunbird-obsidian font-rubik">{t('courses')}</h3>
-        <FiChevronDown className="text-sunbird-obsidian w-[1.25rem] h-[1.25rem] mt-1" />
-      </div>
+      {/* Header - content type switcher (Courses / Learning Paths) */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="flex items-center gap-2 mb-6 cursor-pointer hover:opacity-80 transition-opacity w-fit shrink-0"
+            data-testid="learning-type-trigger"
+            aria-label={t('myLearning.switchType')}
+          >
+            <h3 className="text-[1.375rem] font-bold text-sunbird-obsidian font-rubik">{typeLabels[typeFilter]}</h3>
+            <FiChevronDown className="text-sunbird-obsidian w-[1.25rem] h-[1.25rem] mt-1" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="rounded-xl">
+          {TYPE_OPTIONS.map((type) => (
+            <DropdownMenuItem
+              key={type}
+              onClick={() => onTypeFilterChange(type)}
+              className="font-rubik"
+              data-testid={`learning-type-option-${type}`}
+            >
+              {typeLabels[type]}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Filter Tabs */}
       <div className="flex flex-wrap gap-3 mb-8 shrink-0">
@@ -100,7 +133,7 @@ const MyLearningCourses = ({ courses: coursesProp = [] }: MyLearningCoursesProps
                 index={index}
               />
             ))}
-            
+
             {/* Show More Button */}
             {hasMore && (
               <div className="flex justify-center py-6 mt-4">
@@ -112,17 +145,17 @@ const MyLearningCourses = ({ courses: coursesProp = [] }: MyLearningCoursesProps
                 </button>
               </div>
             )}
-            
+
             {/* End of List Message */}
             {!hasMore && allFilteredCourses.length > COURSES_PER_PAGE && (
               <div className="text-center py-4 text-gray-500 text-[0.875rem] font-rubik">
-                No more courses to show
+                {t('myLearning.noMoreToShow', { type: typeLabels[typeFilter] })}
               </div>
             )}
           </>
         ) : (
           <div className="text-center py-10 text-gray-500 font-rubik">
-            No courses found in this category.
+            {t('myLearning.noItemsFound', { type: typeLabels[typeFilter] })}
           </div>
         )}
       </div>

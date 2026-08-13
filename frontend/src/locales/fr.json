@@ -485,7 +485,11 @@
     "learningProgress": "Progression de l'apprentissage",
     "lessonVisited": "Leçon visitée",
     "contentsCompleted": "Contenus terminés",
-    "noUpcomingBatches": "Aucun lot à venir programmé."
+    "noUpcomingBatches": "Aucun lot à venir programmé.",
+    "learningPaths": "Parcours d'apprentissage",
+    "switchType": "Changer le type de contenu",
+    "noItemsFound": "Aucun {{type}} trouvé dans cette catégorie.",
+    "noMoreToShow": "Plus de {{type}} à afficher"
   },
   "onboarding": {
     "altSunbird": "Sunbird",
@@ -1120,6 +1124,7 @@
   "courseDashboard": {
     "title": "Tableau de bord du cours",
     "backToCoursePage": "Retour à la page du cours",
+    "backToPathPage": "Retour à la page du parcours",
     "checkingPermissions": "Vérification des permissions\u2026",
     "failedToLoad": "Échec du chargement du cours.",
     "manageDashboard": "Gérer le tableau de bord de ce cours"
@@ -1519,6 +1524,11 @@
     "playerCrumb": "Niveau {{num}} • {{levelName}} • Unité {{unitIndex}} sur {{unitTotal}}",
     "autoSaveNote": "Votre progression sur cette leçon est enregistrée automatiquement.",
     "markedComplete": "Marqué comme terminé",
-    "mustJoinPath": "Vous devez rejoindre ce parcours d'apprentissage pour accéder à son contenu."
+    "mustJoinPath": "Vous devez rejoindre ce parcours d'apprentissage pour accéder à son contenu.",
+    "viewPathDashboard": "Voir le tableau de bord du parcours",
+    "manageBatches": "Gérer les cohortes de ce parcours",
+    "dashboardTitle": "Tableau de bord du parcours d'apprentissage",
+    "manageDashboard": "Gérer le tableau de bord de ce parcours",
+    "selectBatchHint": "Sélectionnez une cohorte dans la liste ci-dessus pour voir son rapport de parcours."
   }
 }

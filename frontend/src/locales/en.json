@@ -485,7 +485,11 @@
     "learningProgress": "Learning Progress",
     "lessonVisited": "Lesson visited",
     "contentsCompleted": "Contents completed",
-    "noUpcomingBatches": "No upcoming batches scheduled."
+    "noUpcomingBatches": "No upcoming batches scheduled.",
+    "learningPaths": "Learning Paths",
+    "switchType": "Switch content type",
+    "noItemsFound": "No {{type}} found in this category.",
+    "noMoreToShow": "No more {{type}} to show"
   },
   "onboarding": {
     "altSunbird": "Sunbird",
@@ -1135,6 +1139,7 @@
   "courseDashboard": {
     "title": "Course Dashboard",
     "backToCoursePage": "Back to Course Page",
+    "backToPathPage": "Back to Path Page",
     "checkingPermissions": "Checking permissions\u2026",
     "failedToLoad": "Failed to load course.",
     "manageDashboard": "Manage dashboard for this course"
@@ -1520,6 +1525,11 @@
     "playerCrumb": "Level {{num}} • {{levelName}} • Unit {{unitIndex}} of {{unitTotal}}",
     "autoSaveNote": "Your progress on this lesson auto-saves.",
     "markedComplete": "Marked complete",
-    "mustJoinPath": "You must join this Learning Path to access its content."
+    "mustJoinPath": "You must join this Learning Path to access its content.",
+    "viewPathDashboard": "View Path Dashboard",
+    "manageBatches": "Manage batches for this path",
+    "dashboardTitle": "Learning Path Dashboard",
+    "manageDashboard": "Manage dashboard for this path",
+    "selectBatchHint": "Select a batch from the dropdown above to view its path report."
   }
 }

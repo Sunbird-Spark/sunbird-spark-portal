@@ -15,6 +15,8 @@ const mockCollectionData: CollectionData = {
   audience: [],
   children: LP_HIERARCHY_NO_ASSESSMENTS.children ?? [],
   hierarchyRoot: LP_HIERARCHY_NO_ASSESSMENTS,
+  createdBy: 'u1',
+  trackable: { enabled: 'Yes' },
 };
 
 let mockUseCollectionData: CollectionData | undefined = mockCollectionData;
@@ -42,6 +44,18 @@ vi.mock('./useLevelWaivers', () => ({
   useLevelWaivers: () => ({}),
 }));
 
+vi.mock('./useBatch', () => ({
+  useBatchListForMentor: () => ({ data: [] }),
+}));
+
+vi.mock('./useUser', () => ({
+  useIsMentor: () => false,
+}));
+
+vi.mock('../services/userAuthInfoService/userAuthInfoService', () => ({
+  default: { getUserId: () => 'u1' },
+}));
+
 describe('useLearningPath', () => {
   it('parses the hierarchy into a model and reports zero progress when not enrolled', () => {
     mockUseCollectionData = mockCollectionData;
@@ -53,6 +67,27 @@ describe('useLearningPath', () => {
     expect(result.current.progress.pct).toBe(0);
     expect(result.current.levelStatuses).toEqual(['notStarted', 'locked']);
     expect(result.current.resumeTarget).toBeNull();
+  });
+
+  it('flags the current user as the creator when createdBy matches, and exposes isTrackable', () => {
+    mockUseCollectionData = mockCollectionData;
+    mockSummaryRecords = [];
+
+    const { result } = renderHook(() => useLearningPath(LP_HIERARCHY_NO_ASSESSMENTS.identifier, undefined));
+
+    expect(result.current.createdBy).toBe('u1');
+    expect(result.current.isTrackable).toBe(true);
+    expect(result.current.isCreatorViewingOwnPath).toBe(true);
+    expect(result.current.isMentorViewingPath).toBe(false);
+  });
+
+  it('does not flag a different user as the creator', () => {
+    mockUseCollectionData = { ...mockCollectionData, createdBy: 'someone-else' };
+    mockSummaryRecords = [];
+
+    const { result } = renderHook(() => useLearningPath(LP_HIERARCHY_NO_ASSESSMENTS.identifier, undefined));
+
+    expect(result.current.isCreatorViewingOwnPath).toBe(false);
   });
 
   it('reports full progress and no locked levels for the known-good, fully-completed account', () => {

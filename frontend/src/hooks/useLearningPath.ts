@@ -4,6 +4,9 @@ import { useViewerSummary } from './useViewerSummary';
 import { useLearningPathEnrollment } from './useLearningPathEnrollment';
 import { useLevelWaivers } from './useLevelWaivers';
 import { useIsAuthenticated } from './useAuthInfo';
+import { useBatchListForMentor } from './useBatch';
+import { useIsMentor } from './useUser';
+import userAuthInfoService from '../services/userAuthInfoService/userAuthInfoService';
 import { parseLearningPath } from '../services/learningPath/learningPathMapper';
 import {
   computeCourseProgress,
@@ -25,6 +28,20 @@ export function useLearningPath(pathId: string | undefined, contextIdParam: stri
   const { data: summaryRecords = [], isLoading: summaryLoading } = useViewerSummary();
   const enrollment = useLearningPathEnrollment(pathId, contextIdParam, summaryRecords, isAuthenticated);
   const waivers = useLevelWaivers(pathId);
+
+  // Creator/mentor detection mirrors CollectionDetailPage.tsx: the path's own creator (or a
+  // batch mentor) gets the management rail instead of the learner enrol prompt.
+  const currentUserId = userAuthInfoService.getUserId();
+  const isCreatorViewingOwnPath =
+    !!isAuthenticated &&
+    !!hierarchyData?.createdBy &&
+    !!currentUserId &&
+    hierarchyData.createdBy === currentUserId;
+  const isTrackable = (hierarchyData?.trackable?.enabled?.toLowerCase() ?? '') === 'yes';
+
+  const isMentorRole = useIsMentor();
+  const { data: mentorBatches } = useBatchListForMentor(pathId, { enabled: isMentorRole });
+  const isMentorViewingPath = (mentorBatches?.length ?? 0) > 0;
 
   const model = useMemo(() => parseLearningPath(hierarchyData?.hierarchyRoot ?? null), [hierarchyData]);
   const pathSummary = useMemo(
@@ -87,6 +104,10 @@ export function useLearningPath(pathId: string | undefined, contextIdParam: stri
     pathSummary,
     summaryByCollectionId,
     summaryRecords,
+    createdBy: hierarchyData?.createdBy,
+    isTrackable,
+    isCreatorViewingOwnPath,
+    isMentorViewingPath,
     isLoading: authLoading || hierarchyLoading || summaryLoading,
     isError: hierarchyError,
   };
