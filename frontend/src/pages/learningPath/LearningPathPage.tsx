@@ -9,6 +9,7 @@ import { PriorAssessmentGate } from '@/components/learningPath/PriorAssessmentGa
 import { PathCompletionView } from '@/components/learningPath/PathCompletionView';
 import { LearningPathOverview } from './LearningPathOverview';
 import { LearningPathPlayerView } from './LearningPathPlayerView';
+import { LearningPathStatusView } from './LearningPathStatusView';
 import { getAssessmentScore } from '@/services/learningPath/learningPathProgress';
 import type { ScoreRow } from '@/components/learningPath/ScoreRows';
 
@@ -112,6 +113,10 @@ const LearningPathPage = () => {
         />
       </div>
     );
+  }
+
+  if (location.pathname.endsWith('/status')) {
+    return <LearningPathStatusView lp={lp} pathLink={basePath} />;
   }
 
   if (levelId) {

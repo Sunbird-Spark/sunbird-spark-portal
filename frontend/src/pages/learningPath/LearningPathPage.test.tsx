@@ -148,11 +148,13 @@ function renderAt(path: string, state?: unknown) {
         <Route path="/learning-path/:pathId/level/:levelId" element={<LearningPathPage />} />
         <Route path="/learning-path/:pathId/prior" element={<LearningPathPage />} />
         <Route path="/learning-path/:pathId/complete" element={<LearningPathPage />} />
+        <Route path="/learning-path/:pathId/status" element={<LearningPathPage />} />
         <Route path="/learning-path/:pathId/course/:courseId/content/:contentId" element={<LearningPathPage />} />
         <Route path="/learning-path/:pathId/batch/:contextId" element={<LearningPathPage />} />
         <Route path="/learning-path/:pathId/batch/:contextId/level/:levelId" element={<LearningPathPage />} />
         <Route path="/learning-path/:pathId/batch/:contextId/prior" element={<LearningPathPage />} />
         <Route path="/learning-path/:pathId/batch/:contextId/complete" element={<LearningPathPage />} />
+        <Route path="/learning-path/:pathId/batch/:contextId/status" element={<LearningPathPage />} />
         <Route
           path="/learning-path/:pathId/batch/:contextId/course/:courseId/content/:contentId"
           element={<LearningPathPage />}
@@ -240,5 +242,18 @@ describe('LearningPathPage', () => {
     mockLpData = buildLp();
     renderAt('/learning-path/lp_1', { from: '/my-learning' });
     expect(screen.getByText('button.goBack')).toBeInTheDocument();
+  });
+
+  it('renders the status timeline view at /status', () => {
+    mockLpData = buildLp();
+    renderAt('/learning-path/lp_1/batch/batch_1/status');
+    expect(screen.getByTestId('status-path-header-node')).toBeInTheDocument();
+    expect(screen.getAllByTestId('status-timeline-node')).toHaveLength(1);
+  });
+
+  it('renders the status timeline view at /status with no contextId in the URL', () => {
+    mockLpData = buildLp();
+    renderAt('/learning-path/lp_1/status');
+    expect(screen.getByTestId('status-path-header-node')).toBeInTheDocument();
   });
 });

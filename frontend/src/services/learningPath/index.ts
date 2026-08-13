@@ -8,3 +8,4 @@ export {
   getAssessmentScore,
   getResumeTarget,
 } from './learningPathProgress';
+export { getAttainedLevels, getGainedSkills, SKILL_GAINING_STATUSES } from './skillAttainment';

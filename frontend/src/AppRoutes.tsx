@@ -172,11 +172,13 @@ const AppRoutes: React.FC = () => {
             <Route path=":pathId/level/:levelId" element={<LearningPathPage />} />
             <Route path=":pathId/prior" element={<LearningPathPage />} />
             <Route path=":pathId/complete" element={<LearningPathPage />} />
+            <Route path=":pathId/status" element={<LearningPathPage />} />
             <Route path=":pathId/course/:courseId/content/:contentId" element={<LearningPathPage />} />
             <Route path=":pathId/batch/:contextId" element={<LearningPathPage />} />
             <Route path=":pathId/batch/:contextId/level/:levelId" element={<LearningPathPage />} />
             <Route path=":pathId/batch/:contextId/prior" element={<LearningPathPage />} />
             <Route path=":pathId/batch/:contextId/complete" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId/status" element={<LearningPathPage />} />
             <Route path=":pathId/batch/:contextId/course/:courseId/content/:contentId" element={<LearningPathPage />} />
           </Route>
         </Route>

@@ -3,7 +3,8 @@ import { FiDownload } from "react-icons/fi";
 import { TrackableCollection, IssuedCertificate } from "@/types/TrackableCollections";
 import { ProgressRing } from "./ProfileIcons";
 import { getPlaceholderImage } from "@/utils/getPlaceholderImage";
-import { getContentDetailPath } from "@/utils/getContentDetailPath";
+import { getContentDetailPath, getLearningPathStatusPath } from "@/utils/getContentDetailPath";
+import { isLearningPathCategory } from "@/utils/isLearningPath";
 import { getCompletionStatus } from "./profileLearningStatus";
 
 export interface CourseRowProps {
@@ -22,11 +23,15 @@ const CourseRow = ({ course, downloadCertificate, hasCertificate, downloadingCou
     const title = course.courseName || course.content?.name || t('profileLearning.untitledCourse');
 
     const isDownloading = downloadingCourseId === course.courseId;
+    const isLearningPath = isLearningPathCategory(course.content?.primaryCategory);
+    const linkTo = isLearningPath
+        ? getLearningPathStatusPath(course.courseId, course.batchId)
+        : getContentDetailPath(course.courseId, course.content?.primaryCategory);
 
     return (
         <div className="profile-learning-item relative">
             <Link
-                to={getContentDetailPath(course.courseId, course.content?.primaryCategory)}
+                to={linkTo}
                 state={{ from: location.pathname + location.search }}
                 className="absolute inset-0"
                 aria-label={title}
