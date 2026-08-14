@@ -2,6 +2,8 @@
 
 Playwright-based end-to-end tests for the Sunbird Spark Portal.
 
+> **Scope:** This suite covers the *consumption* flow only (browsing, enrolling in, and consuming existing content as a learner) — it does not create content. Content needs to be created and published outside this suite which can then be tested end to end here.
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) v24+
