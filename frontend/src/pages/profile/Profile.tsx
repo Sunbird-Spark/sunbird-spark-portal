@@ -2,6 +2,7 @@ import PageLoader from "@/components/common/PageLoader";
 import ProfileCard from "@/components/profile/ProfileCard";
 import PersonalInformation from "@/components/profile/PersonalInformation";
 import ProfileLearningList from "@/components/profile/ProfileLearningList";
+import ProfileSkillsLink from "@/components/profile/ProfileSkillsLink";
 import ProfileStatsCards from "@/components/profile/ProfileStatsCards";
 import AccountManagement from "@/components/profile/AccountManagement";
 import { useUserRead } from "@/hooks/useUserRead";
@@ -39,6 +40,9 @@ const Profile = () => {
 
                     {/* My Learning Section */}
                     <ProfileLearningList />
+
+                    {/* My Skills entry point */}
+                    <ProfileSkillsLink />
 
                     {/* Account Management Section */}
                     <AccountManagement />
