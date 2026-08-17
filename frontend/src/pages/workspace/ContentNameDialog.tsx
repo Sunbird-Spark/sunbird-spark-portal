@@ -27,8 +27,8 @@ export default function ContentNameDialog({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  // Only show description for Course/Learning Path creation
-  const showDescription = optionId === 'course' || optionId === 'learning-path';
+  // Only show description for Course creation
+  const showDescription = optionId === 'course';
 
   const submitCdata = useMemo(
     () => JSON.stringify([...(cdata ?? []), { id: name, type: 'ContentName' }]),

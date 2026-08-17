@@ -76,7 +76,6 @@
     "contentplaylist": "Content Playlist",
     "digitaltextbook": "Digital Textbook",
     "questionpaper": "Question Paper",
-    "learningpath": "Learning Path",
     "ecml": "ECML",
     "h5p": "H5P",
     "practicequestionset": "Practice Question Set",
@@ -603,8 +602,7 @@
       "course": "Course",
       "content": "Content",
       "quiz": "Quiz",
-      "collection": "Collection",
-      "learningPath": "Learning Path"
+      "collection": "Collection"
     },
     "segments": {
       "all": "All",
@@ -626,12 +624,10 @@
       "questionSet": "Question Set",
       "questionEditor": "Question Editor",
       "uploadContent": "Upload Content",
-      "uploadLargeContent": "Upload Large Content",
-      "learningPath": "Learning Path"
+      "uploadLargeContent": "Upload Large Content"
     },
     "editorDescriptions": {
       "course": "Design courses with modules, lessons, and assessments.",
-      "learningPath": "Guide learners through a structured sequence of courses and resources.",
       "textbook": "Create and organize digital textbooks with chapters and units.",
       "collection": "Organize and curate resources into thematic collections.",
       "uploadContent": "Upload PDFs, videos, presentations, and documents for learners.",
@@ -658,7 +654,6 @@
         "title": "QuML Editor",
         "subtitle": "Create and manage assessments"
       },
-      "learningPath": "Learning Path",
       "questionSet": "Question Set"
     },
     "noAccessToCreate": "You do not have access to create this content",
@@ -666,8 +661,7 @@
       "course": "Enter description for Course",
       "contentPlaylist": "Enter description for Collection",
       "digitalTextbook": "Enter description for Digital Textbook",
-      "questionPaper": "Enter description for Question Paper",
-      "learningPath": "Enter description for Learning Path"
+      "questionPaper": "Enter description for Question Paper"
     },
     "errors": {
       "unexpectedResponse": "Unexpected server response. Please try again.",

@@ -74,9 +74,7 @@ export async function buildCollectionEditorConfig(
     primaryCategory: metadata.primaryCategory || 'Content Playlist',
     framework: framework ? [framework] : [],
     targetFWIds: (metadata.targetFWIds as string[]) || [],
-    // Learning Path's category definition caps maxDepth at 1 (Levels can't nest);
-    // an explicit maxDepth here would override that, so leave it unset for Learning Path.
-    ...(metadata.primaryCategory !== 'Learning Path' ? { maxDepth: 4 } : {}),
+    maxDepth: 4,
     categoryDefinitionApiVersion: 'v1',
     apiSlug: '/portal',
   };

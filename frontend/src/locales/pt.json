@@ -76,7 +76,6 @@
     "contentplaylist": "Lista de reprodução de conteúdo",
     "digitaltextbook": "Livro didático digital",
     "questionpaper": "Prova de questões",
-    "learningpath": "Trilha de Aprendizagem",
     "ecml": "ECML",
     "h5p": "H5P",
     "practicequestionset": "Conjunto de questões práticas",
@@ -603,8 +602,7 @@
       "course": "Curso",
       "content": "Conteúdo",
       "quiz": "Quiz",
-      "collection": "Coleção",
-      "learningPath": "Trilha de Aprendizagem"
+      "collection": "Coleção"
     },
     "segments": {
       "all": "Todos",
@@ -626,12 +624,10 @@
       "questionSet": "Conjunto de perguntas",
       "questionEditor": "Editor de perguntas",
       "uploadContent": "Enviar conteúdo",
-      "uploadLargeContent": "Enviar conteúdo grande",
-      "learningPath": "Trilha de Aprendizagem"
+      "uploadLargeContent": "Enviar conteúdo grande"
     },
     "editorDescriptions": {
       "course": "Crie cursos com módulos, aulas e avaliações.",
-      "learningPath": "Guie os alunos por uma sequência estruturada de cursos e recursos.",
       "textbook": "Crie e organize livros didáticos digitais com capítulos e unidades.",
       "collection": "Organize e selecione recursos em coleções temáticas.",
       "uploadContent": "Envie PDFs, vídeos, apresentações e documentos para os alunos.",
@@ -658,7 +654,6 @@
         "title": "Editor QuML",
         "subtitle": "Criar e gerenciar avaliações"
       },
-      "learningPath": "Trilha de Aprendizagem",
       "questionSet": "Conjunto de perguntas"
     },
     "noAccessToCreate": "Você não tem acesso para criar este conteúdo",
@@ -666,8 +661,7 @@
       "course": "Digite uma descrição para o curso",
       "contentPlaylist": "Digite uma descrição para a coleção",
       "digitalTextbook": "Digite uma descrição para o livro digital",
-      "questionPaper": "Digite uma descrição para o questionário",
-      "learningPath": "Digite uma descrição para a Trilha de Aprendizagem"
+      "questionPaper": "Digite uma descrição para o questionário"
     },
     "errors": {
       "unexpectedResponse": "Resposta inesperada do servidor. Por favor, tente novamente.",
