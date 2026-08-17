@@ -6,7 +6,6 @@ import {
   FiList,
   FiEdit2,
   FiUpload,
-  FiMap,
 } from 'react-icons/fi';
 import type { EditorCategory } from '../../types/workspaceTypes';
 
@@ -20,14 +19,6 @@ export function getEditorCategories(forBookCreator = false): EditorCategory[] {
       titleKey: 'workspace.editorOptions.course',
       descriptionKey: 'workspace.editorDescriptions.course',
       icon: FiBook,
-      iconBg: 'bg-sunbird-wave/15',
-      iconColor: 'text-sunbird-ink',
-    },
-    {
-      id: 'learning-path',
-      titleKey: 'workspace.editorOptions.learningPath',
-      descriptionKey: 'workspace.editorDescriptions.learningPath',
-      icon: FiMap,
       iconBg: 'bg-sunbird-wave/15',
       iconColor: 'text-sunbird-ink',
     }, ...(forBookCreator ? [{
