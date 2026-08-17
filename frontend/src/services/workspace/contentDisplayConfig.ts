@@ -12,6 +12,7 @@ import {
   FiLayers,
   FiUsers,
   FiStar,
+  FiMap,
 } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
 import type { WorkspaceItem } from '../../types/workspaceTypes';
@@ -196,7 +197,8 @@ const withId = (id: string, base: Omit<CardTheme, 'id'>): CardTheme => ({ id, ..
 /**
  * Colour themes keyed by normalised primaryCategory.
  *
- *  Course / Digital Textbook   → Wave + Ink        (cool teal)
+ *  Course / Digital Textbook /
+ *  Learning Path               → Wave + Ink        (cool teal)
  *  eTextbook / Textbook        → Sunflower + Ginger (warm gold)
  *  Learning Resource (Video)   → Ginger + Brick    (warm amber)
  *  Teacher Resource / PDF      → Forest + Moss     (fresh green)
@@ -207,6 +209,7 @@ const PRIMARY_CATEGORY_THEMES: Record<string, CardTheme> = {
   // Course family
   course: withId('crs', THEME_WAVE),
   'digital textbook': withId('dtb', THEME_WAVE),
+  'learning path': withId('lnp', THEME_WAVE),
 
   // Textbook family
   etextbook: withId('etb', THEME_SUNFLOWER),
@@ -256,6 +259,7 @@ export function getPrimaryCategoryCardTheme(
  *
  *  Course              → FiBookOpen   (open book – active learning)
  *  Digital Textbook    → FiBook       (traditional book – digital edition)
+ *  Learning Path       → FiMap        (structured path through content)
  *  eTextbook / Textbook→ FiBook       (book)
  *  Learning Resource   → FiVideo      (video content)
  *  Explanation Content → FiPlay       (playable explainer)
@@ -271,6 +275,7 @@ export function getPrimaryCategoryCardTheme(
 const PRIMARY_CATEGORY_ICONS: Record<string, IconType> = {
   course: FiBookOpen,
   'digital textbook': FiBook,
+  'learning path': FiMap,
   etextbook: FiBook,
   textbook: FiBook,
   'learning resource': FiVideo,

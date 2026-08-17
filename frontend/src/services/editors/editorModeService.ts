@@ -35,6 +35,7 @@ export function getUserRole(
 export function getEditorMode(
   status: string | undefined,
   userRole: UserRole,
+  viewIntent = false,
 ): EditorMode {
   if (!status) return 'edit';
 
@@ -49,9 +50,9 @@ export function getEditorMode(
 
     case 'Live':
       if (userRole === 'reviewer') return 'read';
-      return 'edit'; // Explicitly return edit for Live if not a reviewer
+      return viewIntent ? 'read' : 'edit';
 
     default:
-      return 'edit';
+      return viewIntent ? 'read' : 'edit';
   }
 }

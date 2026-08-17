@@ -1,4 +1,4 @@
-import { FiPlus, FiGrid, FiList, FiChevronDown } from "react-icons/fi";
+import { FiPlus, FiChevronDown } from "react-icons/fi";
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/common/Button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/common/DropdownMenu";
@@ -7,6 +7,7 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 import { getCreatorSegments, getReviewerSegments, getSecondaryActions, shouldShowContentFilters} from "@/services/workspace";
 import type { WorkspaceView, UserRole, ViewMode, ContentTypeFilter } from "@/types/workspaceTypes";
 import WorkspaceSearch from "./WorkspaceSearch";
+import WorkspaceContentFilters from "./WorkspaceContentFilters";
 
 interface WorkspaceToolbarProps {
   activeView: WorkspaceView;
@@ -26,6 +27,8 @@ interface WorkspaceToolbarProps {
   onViewModeChange: (mode: ViewMode) => void;
   typeFilter: ContentTypeFilter;
   onTypeFilterChange: (filter: ContentTypeFilter) => void;
+  transcriptFilter: boolean;
+  onTranscriptFilterChange: (value: boolean) => void;
   contentCount?: number;
   totalCount?: number;
   onCreateClick: () => void;
@@ -49,6 +52,8 @@ const WorkspaceToolbar = ({
   onViewModeChange,
   typeFilter,
   onTypeFilterChange,
+  transcriptFilter,
+  onTranscriptFilterChange,
   contentCount,
   totalCount,
   onCreateClick,
@@ -182,54 +187,16 @@ const WorkspaceToolbar = ({
 
             {/* Filters + View Mode (show when content is visible) */}
             {showContentFilters && (
-              <>
-                {/* Type Filter - hidden for book-only creators/reviewers who always see Digital Textbook */}
-                {!isBookCreatorOnly && !isBookReviewerOnly && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="font-rubik rounded-xl flex-shrink-0">
-                        {t(`workspace.typeFilters.${typeFilter}`)}
-                        <FiChevronDown className="w-4 h-4 ml-1" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="rounded-xl">
-                      {(['all', 'course', 'content', 'quiz', 'collection'] as ContentTypeFilter[]).map((type) => (
-                        <DropdownMenuItem
-                          key={type}
-                          onClick={() => onTypeFilterChange(type)}
-                          className="font-rubik"
-                        >
-                          {t(`workspace.typeFilters.${type}`)}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-
-                {/* View Toggle */}
-                <div className="flex bg-gray-100 rounded-lg p-0.5 flex-shrink-0">
-                  <button
-                    onClick={() => onViewModeChange('grid')}
-                    aria-label={t('workspace.gridView')}
-                    className={cn(
-                      "p-2 rounded-md transition-colors",
-                      viewMode === 'grid' ? "bg-white text-sunbird-theme-accent shadow-sm" : "text-muted-foreground"
-                    )}
-                  >
-                    <FiGrid className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => onViewModeChange('list')}
-                    aria-label={t('workspace.listView')}
-                    className={cn(
-                      "p-2 rounded-md transition-colors",
-                      viewMode === 'list' ? "bg-white text-sunbird-theme-accent shadow-sm" : "text-muted-foreground"
-                    )}
-                  >
-                    <FiList className="w-4 h-4" />
-                  </button>
-                </div>
-              </>
+              <WorkspaceContentFilters
+                isBookCreatorOnly={isBookCreatorOnly}
+                isBookReviewerOnly={isBookReviewerOnly}
+                typeFilter={typeFilter}
+                onTypeFilterChange={onTypeFilterChange}
+                transcriptFilter={transcriptFilter}
+                onTranscriptFilterChange={onTranscriptFilterChange}
+                viewMode={viewMode}
+                onViewModeChange={onViewModeChange}
+              />
             )}
           </div>
         </div>

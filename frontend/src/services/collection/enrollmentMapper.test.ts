@@ -333,6 +333,13 @@ describe('enrollmentMapper', () => {
       expect(isSelfAssess(node)).toBe(false);
       expect(isSelfAssess({ ...node, contentType: '' })).toBe(false);
     });
+
+    it('returns true for a QuML mimeType even when contentType is not SelfAssess (e.g. missing/mislabeled)', () => {
+      const node: HierarchyContentNode = { identifier: 'q2', mimeType: 'application/vnd.sunbird.questionset' };
+      expect(isSelfAssess(node)).toBe(true);
+      expect(isSelfAssess({ ...node, mimeType: 'application/vnd.sunbird.question' })).toBe(true);
+      expect(isSelfAssess({ ...node, contentType: 'Resource', mimeType: 'application/vnd.sunbird.questionset' })).toBe(true);
+    });
   });
 
   describe('getContentAttemptInfoMap', () => {
