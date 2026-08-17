@@ -90,6 +90,7 @@ function buildLp(overrides: Record<string, unknown> = {}) {
     enrollment: { isEnrolled: true, effectiveContextId: 'lpbatch' },
     pathSummary: { contentStatus: { res_1: 2, res_2: 0 } },
     summaryRecords: [],
+    summaryByCollectionId: new Map(),
     ...overrides,
   } as unknown as Parameters<typeof LearningPathPlayerView>[0]['lp'];
 }
@@ -184,10 +185,15 @@ describe('LearningPathPlayerView', () => {
     );
   });
 
-  // Regression: with duplicate Learning Path enrolments, writes must target the
-  // per-course fan-out record's own contextId, not a blindly constructed
-  // `<lpContextId>:<courseId>` that may point at a batch with no enrolment record.
-  it('resolves courseContextId from the fan-out record instead of constructing it', () => {
+  // Regression: verified live against the deployed lern-service that a
+  // synthetic `<lpContextId>:<courseId>` composite context (constructed
+  // whether or not a "fan-out" summary record exists) has no backing
+  // `user_enrolments` row - view/start|update|end all return SUCCESS against
+  // it, but summary/read for that exact courseId+batchId comes back empty, so
+  // nothing is ever readable/resumable. Writes must instead target the
+  // Learning Path ROOT (model.identifier) + its own plain batch id, which the
+  // learner has a real enrolment row for.
+  it('scopes writes to the Learning Path root + plain batch id, not a per-course composite', () => {
     mockCollectionData = { hierarchyRoot: { identifier: 'course_1', mimeType: 'application/vnd.ekstep.content-collection', children: [] } };
     mockContentData = { data: { content: { mimeType: 'video/mp4', identifier: 'res_1' } } };
     mockUseContentView.mockClear();
@@ -217,7 +223,7 @@ describe('LearningPathPlayerView', () => {
     );
 
     expect(mockUseContentView).toHaveBeenCalledWith(
-      expect.objectContaining({ contextId: 'FANOUT_BATCH:course_1' })
+      expect.objectContaining({ collectionId: 'lp_1', contextId: 'lpbatch' })
     );
   });
 });

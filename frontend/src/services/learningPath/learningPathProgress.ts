@@ -20,14 +20,24 @@ function round(n: number): number {
 }
 
 /**
- * Progress for a single Course, sourced from its own summary record, falling
- * back to the path record's contentStatus map.
+ * Progress for a single Course, sourced from its own summary record, merged
+ * with the path record's contentStatus map (per leaf, the course's own entry
+ * wins when both have one).
  *
- * Takes the MAX of both available signals rather than preferring
- * `completionPercentage` outright: that aggregate is only as fresh as the
- * last full summary refetch, while `contentStatus` is patched optimistically
- * (and confirmed via `/v1/summary/read`) the instant a write succeeds. A
- * stale `completionPercentage: 0` must never mask a just-completed leaf.
+ * A course inside a Learning Path can end up with its own near-empty summary
+ * record - e.g. a standalone/legacy enrolment for that same course id, or one
+ * created before the Viewer Service's per-course fan-out existed - whose
+ * `contentStatus` is `{}` rather than `null`/`undefined`. An `??` fallback
+ * would treat that empty-but-present object as authoritative and never look
+ * at the path record at all, silently losing every leaf's real status (see
+ * bug: a fully-completed Level still showing as not started). Merging instead
+ * of falling back means a leaf recorded on EITHER record still counts.
+ *
+ * Takes the MAX of both available `completionPercentage` signals rather than
+ * preferring one outright: that aggregate is only as fresh as the last full
+ * summary refetch, while `contentStatus` is patched optimistically (and
+ * confirmed via `/v1/summary/read`) the instant a write succeeds. A stale
+ * `completionPercentage: 0` must never mask a just-completed leaf.
  */
 export function computeCourseProgress(
   course: LPCourseNode,
@@ -36,7 +46,10 @@ export function computeCourseProgress(
 ): ProgressInfo & { status: 'completed' | 'active' | 'notStarted' } {
   const total = course.leafIds.length || course.leafNodesCount || 0;
   const courseRecord = summaryByCollectionId.get(course.identifier);
-  const contentStatus = courseRecord?.contentStatus ?? pathSummary?.contentStatus;
+  const contentStatus: Record<string, number> | undefined =
+    pathSummary?.contentStatus || courseRecord?.contentStatus
+      ? { ...(pathSummary?.contentStatus ?? {}), ...(courseRecord?.contentStatus ?? {}) }
+      : undefined;
 
   const aggregatePct = typeof courseRecord?.completionPercentage === 'number' ? courseRecord.completionPercentage : 0;
 

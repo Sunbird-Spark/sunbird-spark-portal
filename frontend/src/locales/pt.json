@@ -1337,7 +1337,16 @@
     "noSkillResults": "Nenhuma habilidade corresponde à sua busca.",
     "today": "Hoje",
     "yesterday": "Ontem",
-    "daysAgo": "Há {{count}} dias"
+    "daysAgo": "Há {{count}} dias",
+    "growthTitle": "Crescimento de habilidades",
+    "growthUndated": "{{count}} habilidade(s) não exibida(s) — nenhuma data de conclusão registrada.",
+    "suggestionsTitle": "Habilidades que você pode adquirir a seguir",
+    "suggestionsSubtitle": "Trilhas de Aprendizagem que adicionariam novas habilidades ao seu perfil.",
+    "sourceEnrolled": "Em andamento",
+    "sourceDiscover": "Nova trilha",
+    "newSkillCount": "{{count}} nova(s) habilidade(s)",
+    "moreSkills": "+{{count}} mais",
+    "viewAll": "Ver tudo"
   },
   "profileSkills": {
     "cardTitle": "Minhas habilidades",

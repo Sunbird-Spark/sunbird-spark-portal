@@ -5,7 +5,6 @@ import { useContentRead } from '@/hooks/useContent';
 import { useQumlContent } from '@/hooks/useQumlContent';
 import { useContentView } from '@/hooks/useContentView';
 import { getLeafContentIdsFromHierarchy } from '@/services/collection/hierarchyTree';
-import { getCourseContextId } from '@/services/viewer/summaryMapper';
 import { normalizeQumlPlayerEvent } from '@/services/players/playerEventNormalizer';
 import { LearningPathPlayerCard } from '@/components/learningPath/LearningPathPlayerCard';
 import { LearningPathRail } from '@/components/learningPath/LearningPathRail';
@@ -41,7 +40,7 @@ export function LearningPathPlayerView({
   onNavigateContent,
 }: LearningPathPlayerViewProps) {
   const { t } = useAppI18n();
-  const { model, progress, levelProgress, levelStatuses, priorState, outcomeState, enrollment, pathSummary, summaryRecords } = lp;
+  const { model, progress, levelProgress, levelStatuses, priorState, outcomeState, enrollment, pathSummary, summaryByCollectionId } = lp;
 
   const { data: courseData, isLoading: courseLoading } = useCollection(courseId);
   const leafIds = useMemo(
@@ -65,17 +64,25 @@ export function LearningPathPlayerView({
   const playerError = isQumlContent ? qumlError : contentError;
 
   const lpContextId = enrollment.effectiveContextId;
-  // Resolved from the per-course fan-out record's own contextId (falls back to
-  // constructing `<lpContextId>:<courseId>` only when no fan-out record exists
-  // yet) - see summaryMapper.ts. Avoids writing to a batch with no enrolment
-  // record when the learner has duplicate Learning Path enrolments.
-  const courseContextId = lpContextId ? getCourseContextId(summaryRecords, lpContextId, courseId) : undefined;
   const currentContentStatus = pathSummary?.contentStatus?.[contentId];
 
+  // Scoped to the Learning Path ROOT (model.identifier) + its own plain batch
+  // id, NOT the inner course + a synthetic `<lpContextId>:<courseId>` composite.
+  // Verified live against the deployed lern-service: the composite context has
+  // no backing `user_enrolments` row (the child-batch fan-out that would create
+  // one is an explicitly deferred Learning-Path-progression feature, not yet
+  // shipped server-side - view/start|update|end all return SUCCESS against it,
+  // but summary/read for that exact courseId+batchId comes back empty, so
+  // nothing is ever readable/resumable). The LP root's enrolment row DOES exist
+  // (the learner joined the path itself), and `ViewerAggregatorActor`'s rollup
+  // is built to be driven by courseId=root/batchId=plain-batch: it reads every
+  // leaf under the root's own published hierarchy and rolls the per-content
+  // status up into that root row, which is exactly the record `pathSummary`
+  // above already reads from.
   const handleContentView = useContentView({
-    collectionId: courseId,
+    collectionId: model.identifier,
     contentId,
-    contextId: courseContextId,
+    contextId: lpContextId,
     isEnrolledInCurrentBatch: enrollment.isEnrolled,
     mimeType: (playerMetadata as { mimeType?: string } | undefined)?.mimeType,
     currentContentStatus,
@@ -143,9 +150,12 @@ export function LearningPathPlayerView({
         levelStatuses={levelStatuses}
         priorDone={priorState.done}
         outcomeUnlocked={outcomeState.unlocked}
+        summaryByCollectionId={summaryByCollectionId}
+        pathSummary={pathSummary}
         onBackToPath={onBackToPath}
         onOpenLevel={onOpenLevel}
         onOpenPrior={onOpenPrior}
+        onOpenCourse={onNavigateContent}
       />
     </div>
   );

@@ -1338,7 +1338,16 @@
     "noSkillResults": "No skills match your search.",
     "today": "Today",
     "yesterday": "Yesterday",
-    "daysAgo": "{{count}} days ago"
+    "daysAgo": "{{count}} days ago",
+    "growthTitle": "Skill growth",
+    "growthUndated": "{{count}} skill(s) aren't shown — no completion date recorded.",
+    "suggestionsTitle": "Skills you could gain next",
+    "suggestionsSubtitle": "Learning Paths that would add new skills to your profile.",
+    "sourceEnrolled": "In progress",
+    "sourceDiscover": "New path",
+    "newSkillCount": "{{count}} new skill(s)",
+    "moreSkills": "+{{count}} more",
+    "viewAll": "View all"
   },
   "profileSkills": {
     "cardTitle": "My Skills",

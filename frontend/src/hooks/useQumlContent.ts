@@ -25,6 +25,12 @@ export const useQumlContent = (
   return useQuery({
     queryKey: ['quml', 'questionset', questionSetId],
     enabled: enabled && Boolean(questionSetId),
+    // Matches useContentRead's staleTime (useContent.ts) - without it, any window-focus
+    // event mid-attempt (e.g. tabbing away and back) refetches this hierarchy+question-list
+    // and returns a new metadata object reference, which resets the QumlPlayer web component
+    // to question 1 - indistinguishable from a page refresh from the learner's perspective,
+    // and can happen right after a Submit if that action also causes a focus event.
+    staleTime: 60 * 60 * 1000,
     queryFn: async () => {
       // Fetch hierarchy
       const hierarchyResp = await questionSetService.getHierarchy<any>(questionSetId);

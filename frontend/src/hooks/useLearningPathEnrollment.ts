@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBatchListForLearner, useBatchRead, useEnrol, useUnenrol } from './useBatch';
-import { getEnrollableBatches, getFirstCertPreviewUrl } from '../services/collection/enrollmentMapper';
+import { useUserEnrolledCollections } from './useUserEnrolledCollections';
+import { getEnrollableBatches, getEnrollmentForCollection, getFirstCertPreviewUrl } from '../services/collection/enrollmentMapper';
 import { useAppI18n } from './useAppI18n';
 import { useToast } from './useToast';
 import { useTelemetry } from './useTelemetry';
@@ -33,8 +34,21 @@ export function useLearningPathEnrollment(
     () => getPathSummary(summaryRecords, pathId, contextIdParam),
     [summaryRecords, pathId, contextIdParam]
   );
-  const isEnrolled = !!pathSummary;
-  const effectiveContextId = contextIdParam ?? pathSummary?.contextId;
+
+  // The Viewer Service summary above only exists once progress activity has
+  // been recorded — a freshly-enrolled learner has none yet. The Learner
+  // Service enrollment list is the source of truth the enrol/join API itself
+  // checks, so it can't drift out of sync with "already enrolled" the way a
+  // summary-only check can (see bug: Enrol card shown to already-enrolled
+  // learners, whose join attempt then bounces off the backend).
+  const { data: enrollmentsResponse } = useUserEnrolledCollections({ enabled: isAuthenticated });
+  const enrollmentRecord = useMemo(
+    () => getEnrollmentForCollection(enrollmentsResponse?.data?.courses, pathId),
+    [enrollmentsResponse, pathId]
+  );
+
+  const isEnrolled = !!enrollmentRecord || !!pathSummary;
+  const effectiveContextId = contextIdParam ?? enrollmentRecord?.batchId ?? pathSummary?.contextId;
 
   const {
     data: batchListResponse,
@@ -72,10 +86,6 @@ export function useLearningPathEnrollment(
     resetEnrol();
     try {
       await enrol({ courseId: pathId, userId, batchId: contextId });
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['viewerSummary', userId] }),
-        queryClient.invalidateQueries({ queryKey: ['userEnrollments'] }),
-      ]);
       toast({
         title: t('success'),
         description: t('learningPath.enrolled'),
@@ -87,7 +97,15 @@ export function useLearningPathEnrollment(
       });
       navigate(`/learning-path/${pathId}/batch/${contextId}`, { state: location.state });
     } catch {
-      // Error is exposed via enrolError below.
+      // Error is exposed via enrolError below. If the backend rejected this as
+      // an already-enrolled learner (a stale cache, not a real failure), the
+      // invalidation below still fixes it: isEnrolled re-derives correctly on
+      // the next render and the page swaps to the enrolled view on its own.
+    } finally {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['viewerSummary', userId] }),
+        queryClient.invalidateQueries({ queryKey: ['userEnrollments'] }),
+      ]);
     }
   };
 

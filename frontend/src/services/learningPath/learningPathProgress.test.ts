@@ -140,6 +140,38 @@ describe('computeCourseProgress', () => {
     expect(result.status).toBe('completed');
   });
 
+  // Regression (found live): an unrelated near-empty summary record for this exact course id -
+  // e.g. a stray/legacy standalone enrolment, or one created before the per-course fan-out
+  // existed - has `contentStatus: {}` (present, not null/undefined). An `??` fallback to
+  // pathSummary would never trigger since `{}` is truthy, silently reporting 0% for a Level
+  // whose leaves are actually all complete on the path record.
+  it('merges the path record contentStatus in even when a near-empty per-course record exists', () => {
+    const emptyStandaloneRecord = {
+      collectionId: course1.identifier,
+      contextId: 'unrelated-standalone-batch',
+      active: true,
+      status: 0,
+      progress: 0,
+      completionPercentage: null,
+      contentStatus: {},
+    } as unknown as ViewerSummaryRecord;
+    const byId = indexSummaryByCollectionId([emptyStandaloneRecord]);
+    const pathSummary = {
+      collectionId: 'lp-root',
+      contextId: 'lp-batch',
+      active: true,
+      status: 1,
+      progress: 2,
+      completionPercentage: 75,
+      contentStatus: { do_21463158442296934411: 2, do_214631592231313408130: 2 },
+    } as unknown as ViewerSummaryRecord;
+
+    const result = computeCourseProgress(course1, byId, pathSummary);
+    expect(result.pct).toBe(100);
+    expect(result.completed).toBe(2);
+    expect(result.status).toBe('completed');
+  });
+
   it('takes the max the other way round: a fresh aggregate is not masked by a stale/empty contentStatus', () => {
     const record = {
       collectionId: course1.identifier,

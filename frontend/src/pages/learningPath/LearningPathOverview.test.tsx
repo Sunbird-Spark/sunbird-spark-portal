@@ -113,4 +113,19 @@ describe('LearningPathOverview', () => {
 
     expect(screen.queryByTestId('lp-creator-panel')).not.toBeInTheDocument();
   });
+
+  it('renders Path Progress as a full-width banner above the ledger/side-panel row', () => {
+    render(
+      <MemoryRouter>
+        <LearningPathOverview lp={buildLp()} isAuthenticated onOpenLevel={noop} onOpenPrior={noop} onOpenCourse={noop} />
+      </MemoryRouter>
+    );
+
+    const progressCard = screen.getByTestId('path-progress-card');
+    const policyBanner = screen.getByTestId('policy-note-banner');
+
+    // DOCUMENT_POSITION_FOLLOWING (4) — progressCard must precede policyBanner in the DOM,
+    // which in turn precedes the ledger/side-panel row, so it never slides back into a sidebar.
+    expect(progressCard.compareDocumentPosition(policyBanner) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
 });

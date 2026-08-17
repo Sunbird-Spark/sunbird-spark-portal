@@ -1338,7 +1338,16 @@
     "noSkillResults": "لا توجد مهارات تطابق بحثك.",
     "today": "اليوم",
     "yesterday": "أمس",
-    "daysAgo": "قبل {{count}} يومًا"
+    "daysAgo": "قبل {{count}} يومًا",
+    "growthTitle": "نمو المهارات",
+    "growthUndated": "{{count}} مهارة/مهارات غير معروضة — لا يوجد تاريخ إتمام مسجّل.",
+    "suggestionsTitle": "مهارات يمكنك اكتسابها لاحقًا",
+    "suggestionsSubtitle": "مسارات تعلّم من شأنها إضافة مهارات جديدة إلى ملفك الشخصي.",
+    "sourceEnrolled": "قيد التقدم",
+    "sourceDiscover": "مسار جديد",
+    "newSkillCount": "{{count}} مهارة/مهارات جديدة",
+    "moreSkills": "+{{count}} أخرى",
+    "viewAll": "عرض الكل"
   },
   "profileSkills": {
     "cardTitle": "مهاراتي",

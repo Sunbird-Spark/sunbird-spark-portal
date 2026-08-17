@@ -35,9 +35,12 @@ export function LearningPathRailContainer({ courseContextId }: LearningPathRailC
       levelStatuses={lp.levelStatuses}
       priorDone={lp.priorState.done}
       outcomeUnlocked={lp.outcomeState.unlocked}
+      summaryByCollectionId={lp.summaryByCollectionId}
+      pathSummary={lp.pathSummary}
       onBackToPath={() => navigate(basePath)}
       onOpenLevel={(levelId) => navigate(`${basePath}/level/${levelId}`)}
       onOpenPrior={() => navigate(`${basePath}/prior`)}
+      onOpenCourse={(courseId, contentId) => navigate(`${basePath}/course/${courseId}/content/${contentId}`)}
     />
   );
 }

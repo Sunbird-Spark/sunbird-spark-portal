@@ -1337,7 +1337,16 @@
     "noSkillResults": "Aucune compétence ne correspond à votre recherche.",
     "today": "Aujourd'hui",
     "yesterday": "Hier",
-    "daysAgo": "Il y a {{count}} jours"
+    "daysAgo": "Il y a {{count}} jours",
+    "growthTitle": "Progression des compétences",
+    "growthUndated": "{{count}} compétence(s) non affichée(s) — aucune date d'achèvement enregistrée.",
+    "suggestionsTitle": "Compétences que vous pourriez acquérir ensuite",
+    "suggestionsSubtitle": "Parcours d'apprentissage qui ajouteraient de nouvelles compétences à votre profil.",
+    "sourceEnrolled": "En cours",
+    "sourceDiscover": "Nouveau parcours",
+    "newSkillCount": "{{count}} nouvelle(s) compétence(s)",
+    "moreSkills": "+{{count}} de plus",
+    "viewAll": "Voir tout"
   },
   "profileSkills": {
     "cardTitle": "Mes compétences",

@@ -1,7 +1,10 @@
 import { FiHelpCircle, FiAward } from 'react-icons/fi';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { CertificateLockCard } from './CertificateLockCard';
+import { LedgerCourseRow } from './LedgerCourseRow';
+import { computeCourseProgress } from '@/services/learningPath/learningPathProgress';
 import type { LearningPathModel, LevelProgressInfo, LevelStatusKey, PathProgressInfo } from '@/types/learningPathTypes';
+import type { ViewerSummaryRecord } from '@/types/viewerServiceTypes';
 
 interface LearningPathRailProps {
   pathTitle: string;
@@ -11,9 +14,14 @@ interface LearningPathRailProps {
   levelStatuses: LevelStatusKey[];
   priorDone: boolean;
   outcomeUnlocked: boolean;
+  /** Needed to show each Level's own courses (with their live progress) while consuming - see `onOpenCourse`. */
+  summaryByCollectionId: Map<string, ViewerSummaryRecord>;
+  pathSummary?: ViewerSummaryRecord;
   onBackToPath: () => void;
   onOpenLevel: (levelId: string) => void;
   onOpenPrior: () => void;
+  /** Opens a course directly from its row in the rail (jumps to its first leaf). */
+  onOpenCourse: (courseId: string, contentId: string) => void;
 }
 
 /**
@@ -29,9 +37,12 @@ export function LearningPathRail({
   levelStatuses,
   priorDone,
   outcomeUnlocked,
+  summaryByCollectionId,
+  pathSummary,
   onBackToPath,
   onOpenLevel,
   onOpenPrior,
+  onOpenCourse,
 }: LearningPathRailProps) {
   const { t } = useAppI18n();
 
@@ -74,24 +85,39 @@ export function LearningPathRail({
             const status = levelStatuses[i];
             const locked = status === 'locked';
             return (
-              <div
-                key={level.identifier}
-                onClick={locked ? undefined : () => onOpenLevel(level.identifier)}
-                className={`flex items-start gap-2.5 rounded-xl border border-sunbird-gray-e5 px-3 py-2.5 ${locked ? 'cursor-default opacity-60' : 'cursor-pointer'}`}
-              >
+              <div key={level.identifier} className="rounded-xl border border-sunbird-gray-e5">
                 <div
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white ${locked ? 'bg-sunbird-gray-b2' : 'bg-sunbird-brick'}`}
+                  onClick={locked ? undefined : () => onOpenLevel(level.identifier)}
+                  className={`flex items-start gap-2.5 px-3 py-2.5 ${locked ? 'cursor-default opacity-60' : 'cursor-pointer'}`}
                 >
-                  {(lp?.pct ?? 0) >= 100 ? '✓' : i + 1}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <span className="block truncate text-[0.8125rem] font-medium text-foreground">
-                    {t('learningPath.levelOf', { num: i + 1 })} · {level.name}
-                  </span>
-                  <div className="mt-1.5 h-1 overflow-hidden rounded-pill bg-sunbird-gray-e5">
-                    <div className="h-full rounded-pill bg-sunbird-brick" style={{ width: `${lp?.pct ?? 0}%` }} />
+                  <div
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white ${locked ? 'bg-sunbird-gray-b2' : 'bg-sunbird-brick'}`}
+                  >
+                    {(lp?.pct ?? 0) >= 100 ? '✓' : i + 1}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate text-[0.8125rem] font-medium text-foreground">
+                      {t('learningPath.levelOf', { num: i + 1 })} · {level.name}
+                    </span>
+                    <div className="mt-1.5 h-1 overflow-hidden rounded-pill bg-sunbird-gray-e5">
+                      <div className="h-full rounded-pill bg-sunbird-brick" style={{ width: `${lp?.pct ?? 0}%` }} />
+                    </div>
                   </div>
                 </div>
+                {/* This Level's own courses, so a learner can see (and jump straight to) exactly
+                    what's inside it while consuming - not just the Level's rolled-up percentage. */}
+                {!locked && level.courses.length > 0 && (
+                  <div className="flex flex-col gap-2 border-t border-sunbird-gray-e5 p-2.5 pl-3">
+                    {level.courses.map((course) => (
+                      <LedgerCourseRow
+                        key={course.identifier}
+                        course={course}
+                        progress={computeCourseProgress(course, summaryByCollectionId, pathSummary)}
+                        onOpen={() => onOpenCourse(course.identifier, course.leafIds[0] ?? '')}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}

@@ -2,13 +2,17 @@ import { useMemo, useState } from 'react';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import useImpression from '@/hooks/useImpression';
 import { useMySkills } from '@/hooks/useMySkills';
+import { useSkillSuggestions } from '@/hooks/useSkillSuggestions';
 import PageLoader from '@/components/common/PageLoader';
 import { MySkillsHero } from '@/components/mySkills/MySkillsHero';
 import { MySkillsControls } from '@/components/mySkills/MySkillsControls';
 import { SkillInsights } from '@/components/mySkills/SkillInsights';
+import { SkillGrowthChart } from '@/components/mySkills/SkillGrowthChart';
+import { SkillSuggestionRow } from '@/components/mySkills/SkillSuggestionRow';
 import { SkillCard } from '@/components/mySkills/SkillCard';
 import { SkillPathAccordion } from '@/components/mySkills/SkillPathAccordion';
 import { filterPathSummaries } from '@/services/learningPath/skillAggregation';
+import { buildSkillGrowthSeries } from '@/services/learningPath/skillGrowth';
 import {
   buildSkillIndex,
   filterSkillEntries,
@@ -38,6 +42,10 @@ const MySkills = () => {
   const skillIndex = useMemo(() => buildSkillIndex(summaries), [summaries]);
   const recentlyGained = useMemo(() => getRecentlyGainedSkills(skillIndex), [skillIndex]);
   const mostReinforced = useMemo(() => getMostReinforcedSkills(skillIndex), [skillIndex]);
+  const growthSeries = useMemo(() => buildSkillGrowthSeries(skillIndex), [skillIndex]);
+
+  const enrolledPathIds = useMemo(() => entries.map((entry) => entry.path.pathId), [entries]);
+  const { suggestions } = useSkillSuggestions(summaries, enrolledPathIds);
 
   const visibleSkills = useMemo(
     () => filterSkillEntries(skillIndex, { query, status: skillFilter }).slice(0, visibleCount),
@@ -101,6 +109,7 @@ const MySkills = () => {
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[19rem_1fr] lg:items-start">
           <aside className="flex flex-col gap-4 lg:sticky lg:top-[8.625rem]">
             <MySkillsHero aggregate={aggregate} analyzedCount={analyzedCount} totalCount={totalCount} />
+            <SkillGrowthChart series={growthSeries} />
             <SkillInsights
               recentlyGained={recentlyGained}
               mostReinforced={mostReinforced}
@@ -109,6 +118,7 @@ const MySkills = () => {
           </aside>
 
           <div className="flex min-w-0 flex-col gap-4">
+            <SkillSuggestionRow suggestions={suggestions} />
             <MySkillsControls
               view={view}
               onViewChange={(next) => {

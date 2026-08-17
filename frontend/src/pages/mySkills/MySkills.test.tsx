@@ -1,8 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import MySkills from './MySkills';
 import { useMySkills } from '@/hooks/useMySkills';
+import { useSkillSuggestions } from '@/hooks/useSkillSuggestions';
 import type { PathSkillSummary } from '@/services/learningPath/skillAggregation';
 
 vi.mock('@/hooks/useAppI18n', () => ({
@@ -14,8 +15,10 @@ vi.mock('@/hooks/useAppI18n', () => ({
 vi.mock('@/hooks/useImpression', () => ({ default: vi.fn() }));
 
 vi.mock('@/hooks/useMySkills', () => ({ useMySkills: vi.fn() }));
+vi.mock('@/hooks/useSkillSuggestions', () => ({ useSkillSuggestions: vi.fn() }));
 
 const mockUseMySkills = vi.mocked(useMySkills);
+const mockUseSkillSuggestions = vi.mocked(useSkillSuggestions);
 
 function summary(overrides: Partial<PathSkillSummary>): PathSkillSummary {
   return {
@@ -56,6 +59,10 @@ function renderPage() {
 }
 
 describe('MySkills', () => {
+  beforeEach(() => {
+    mockUseSkillSuggestions.mockReturnValue({ suggestions: [], isLoading: false });
+  });
+
   it('shows a loading state', () => {
     mockUseMySkills.mockReturnValue(baseResult({ isLoading: true }));
     renderPage();
@@ -176,5 +183,60 @@ describe('MySkills', () => {
     expect(screen.queryByText('Skill 29')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('mySkills.loadMore'));
     expect(screen.getByText('Skill 29')).toBeInTheDocument();
+  });
+
+  it('shows the skills-you-could-gain-next row when suggestions exist', () => {
+    const s = summary({});
+    mockUseMySkills.mockReturnValue(
+      baseResult({
+        entries: [{ path: { pathId: 'p1', contextId: 'ctx1', name: 'Data Foundations' }, summary: s, isLoading: false, isError: false }],
+        summaries: [s],
+        analyzedCount: 1,
+        totalCount: 1,
+      })
+    );
+    mockUseSkillSuggestions.mockReturnValue({
+      suggestions: [
+        {
+          pathId: 'p2',
+          pathName: 'Cloud Basics',
+          source: 'discover',
+          progressPct: 0,
+          newSkills: ['Cloud'],
+          totalSkills: 1,
+        },
+      ],
+      isLoading: false,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('skill-suggestion-row')).toBeInTheDocument();
+    expect(screen.getByText('Cloud Basics')).toBeInTheDocument();
+  });
+
+  it('shows the skill growth chart once at least two distinct completion days exist', () => {
+    const s = summary({
+      allSkills: ['SQL', 'Python'],
+      gainedSkills: new Set(['SQL', 'Python']),
+      gainedCount: 2,
+      pendingCount: 0,
+      skillSources: [
+        { skill: 'SQL', levelId: 'l1', levelName: 'Foundations', levelIndex: 1, gained: true, gainedAt: 10 * 86_400_000 },
+        { skill: 'Python', levelId: 'l2', levelName: 'Advanced', levelIndex: 2, gained: true, gainedAt: 12 * 86_400_000 },
+      ],
+    });
+    mockUseMySkills.mockReturnValue(
+      baseResult({
+        entries: [{ path: { pathId: 'p1', name: 'Data Foundations' }, summary: s, isLoading: false, isError: false }],
+        summaries: [s],
+        analyzedCount: 1,
+        totalCount: 1,
+      })
+    );
+
+    renderPage();
+
+    expect(screen.getByTestId('skill-growth-chart')).toBeInTheDocument();
   });
 });

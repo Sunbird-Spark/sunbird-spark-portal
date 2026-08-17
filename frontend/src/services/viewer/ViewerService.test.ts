@@ -26,6 +26,12 @@ vi.mock('../../lib/http-client', () => ({
  *   POST   /v1/summary/read
  *   DELETE /v1/summary/delete/:userId
  *   GET    /v1/summary/download/:userId
+ *
+ * Also locks in the wire-naming translation: the portal speaks
+ * `collectionId`/`contextId` internally, but `ViewerRequestKeys.scala` reads
+ * ONLY `courseId`/`batchId` ("no fallback here"). Every write below must send
+ * `courseId`/`batchId` and must NOT send `collectionId`/`contextId` - sending
+ * the latter is what silently broke Learning Path progress save/resume.
  */
 describe('ViewerService', () => {
   let service: ViewerService;
@@ -38,22 +44,38 @@ describe('ViewerService', () => {
     mockDelete.mockReset().mockResolvedValue(okResponse);
   });
 
-  it('viewStart posts to /v1/view/start with the request wrapped', async () => {
+  it('viewStart posts to /v1/view/start with collectionId/contextId translated to courseId/batchId', async () => {
     const request = { userId: 'u1', contentId: 'do_1', collectionId: 'do_c', contextId: 'batch_1' };
     await service.viewStart(request);
-    expect(mockPost).toHaveBeenCalledWith('/v1/view/start', { request });
+    expect(mockPost).toHaveBeenCalledWith('/v1/view/start', {
+      request: { userId: 'u1', contentId: 'do_1', courseId: 'do_c', batchId: 'batch_1' },
+    });
   });
 
-  it('viewUpdate posts to /v1/view/update', async () => {
+  it('viewUpdate posts to /v1/view/update without collectionId/contextId when absent', async () => {
     const request = { userId: 'u1', contentId: 'do_1', progressDetails: { progress: 50 }, timespent: 12.63 };
     await service.viewUpdate(request);
     expect(mockPost).toHaveBeenCalledWith('/v1/view/update', { request });
   });
 
-  it('viewAssess posts to /v1/assessment/submit (not /v1/view/assess)', async () => {
-    const request = { userId: 'u1', contentId: 'do_1', assessments: [{ eid: 'ASSESS' }] };
+  it('viewAssess posts to /v1/assessment/submit (not /v1/view/assess) with courseId/batchId', async () => {
+    const request = {
+      userId: 'u1',
+      contentId: 'do_1',
+      collectionId: 'do_c',
+      contextId: 'batch_1',
+      assessments: [{ eid: 'ASSESS' }],
+    };
     await service.viewAssess(request);
-    expect(mockPost).toHaveBeenCalledWith('/v1/assessment/submit', { request });
+    expect(mockPost).toHaveBeenCalledWith('/v1/assessment/submit', {
+      request: {
+        userId: 'u1',
+        contentId: 'do_1',
+        courseId: 'do_c',
+        batchId: 'batch_1',
+        assessments: [{ eid: 'ASSESS' }],
+      },
+    });
   });
 
   it('viewEnd posts to /v1/view/end', async () => {
@@ -62,10 +84,12 @@ describe('ViewerService', () => {
     expect(mockPost).toHaveBeenCalledWith('/v1/view/end', { request });
   });
 
-  it('viewRead posts to /v1/view/read', async () => {
-    const request = { userId: 'u1', contentId: ['do_1', 'do_2'] };
+  it('viewRead posts to /v1/view/read with courseId/batchId', async () => {
+    const request = { userId: 'u1', contentId: ['do_1', 'do_2'], collectionId: 'do_c', contextId: 'batch_1' };
     await service.viewRead(request);
-    expect(mockPost).toHaveBeenCalledWith('/v1/view/read', { request });
+    expect(mockPost).toHaveBeenCalledWith('/v1/view/read', {
+      request: { userId: 'u1', contentId: ['do_1', 'do_2'], courseId: 'do_c', batchId: 'batch_1' },
+    });
   });
 
   it('assessmentRead posts to /v1/assessment/read', async () => {
@@ -79,10 +103,12 @@ describe('ViewerService', () => {
     expect(mockGet).toHaveBeenCalledWith('/v1/summary/list/u1');
   });
 
-  it('summaryRead posts to /v1/summary/read', async () => {
+  it('summaryRead posts to /v1/summary/read with courseId/batchId, not collectionId/contextId', async () => {
     const request = { userId: 'u1', collectionId: 'do_lp', contextId: 'batch_1' };
     await service.summaryRead(request);
-    expect(mockPost).toHaveBeenCalledWith('/v1/summary/read', { request });
+    expect(mockPost).toHaveBeenCalledWith('/v1/summary/read', {
+      request: { userId: 'u1', courseId: 'do_lp', batchId: 'batch_1' },
+    });
   });
 
   it('summaryDelete DELETEs /v1/summary/delete/:userId with ?all=true for every enrolment', async () => {
@@ -90,9 +116,9 @@ describe('ViewerService', () => {
     expect(mockDelete).toHaveBeenCalledWith('/v1/summary/delete/u1?all=true');
   });
 
-  it('summaryDelete DELETEs /v1/summary/delete/:userId with collectionId/contextId for a specific enrolment', async () => {
+  it('summaryDelete DELETEs /v1/summary/delete/:userId with courseId/batchId for a specific enrolment', async () => {
     await service.summaryDelete({ userId: 'u1', collectionId: 'do_lp', contextId: 'batch_1' });
-    expect(mockDelete).toHaveBeenCalledWith('/v1/summary/delete/u1?collectionId=do_lp&contextId=batch_1');
+    expect(mockDelete).toHaveBeenCalledWith('/v1/summary/delete/u1?courseId=do_lp&batchId=batch_1');
   });
 
   it('summaryDelete DELETEs /v1/summary/delete/:userId with no query string when nothing else is specified', async () => {
