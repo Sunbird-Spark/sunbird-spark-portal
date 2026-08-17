@@ -76,6 +76,7 @@
     "contentplaylist": "قائمة تشغيل المحتوى",
     "digitaltextbook": "كتاب مدرسي رقمي",
     "questionpaper": "ورقة الأسئلة",
+    "learningpath": "مسار تعلم",
     "ecml": "إي سي إم إل",
     "h5p": "إتش فايف بي",
     "practicequestionset": "مجموعة أسئلة تدريبية",
@@ -602,7 +603,8 @@
       "course": "دورة",
       "content": "محتوى",
       "quiz": "اختبار",
-      "collection": "مجموعة"
+      "collection": "مجموعة",
+      "learningPath": "مسار التعلم"
     },
     "segments": {
       "all": "الكل",
@@ -624,10 +626,12 @@
       "questionSet": "مجموعة أسئلة",
       "questionEditor": "محرر الأسئلة",
       "uploadContent": "رفع محتوى",
-      "uploadLargeContent": "رفع محتوى كبير"
+      "uploadLargeContent": "رفع محتوى كبير",
+      "learningPath": "مسار تعلم"
     },
     "editorDescriptions": {
       "course": "صمّم دورات تحتوي على وحدات ودروس وتقييمات.",
+      "learningPath": "وجّه المتعلمين عبر تسلسل منظم من الدورات والموارد.",
       "textbook": "أنشئ ونظّم كتباً رقمية مقسّمة إلى فصول ووحدات.",
       "collection": "نظّم وجمّع الموارد في مجموعات موضوعية.",
       "uploadContent": "قم برفع ملفات PDF والفيديو والعروض التقديمية والوثائق للمتعلمين.",
@@ -654,6 +658,7 @@
         "title": "محرر QuML",
         "subtitle": "إنشاء وإدارة التقييمات"
       },
+      "learningPath": "مسار تعلم",
       "questionSet": "مجموعة أسئلة"
     },
     "noAccessToCreate": "ليس لديك صلاحية لإنشاء هذا المحتوى",
@@ -661,7 +666,8 @@
       "course": "أدخل وصفاً للدورة",
       "contentPlaylist": "أدخل وصفاً للمجموعة",
       "digitalTextbook": "أدخل وصفاً للكتاب الرقمي",
-      "questionPaper": "أدخل وصفاً لورقة الأسئلة"
+      "questionPaper": "أدخل وصفاً لورقة الأسئلة",
+      "learningPath": "أدخل وصفاً لمسار التعلم"
     },
     "errors": {
       "unexpectedResponse": "استجابة غير متوقعة من الخادم. يرجى المحاولة مرة أخرى.",

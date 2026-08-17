@@ -40,7 +40,7 @@ const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
 
 // Option IDs that use the simple name+description dialog and map directly to a
 // COLLECTION_CONTENT_CONFIG entry keyed by the option id itself
-const SIMPLE_COLLECTION_OPTIONS = ['course'];
+const SIMPLE_COLLECTION_OPTIONS = ['course', 'learning-path'];
 
 const EDITOR_OPTION_LABELS: Record<string, string> = {
   'quiz': 'workspace.editorOptions.quiz',
@@ -48,6 +48,7 @@ const EDITOR_OPTION_LABELS: Record<string, string> = {
   'course': 'workspace.editorOptions.course',
   'collection': 'workspace.editorOptions.collection',
   'textbook': 'workspace.editorOptions.textbook',
+  'learning-path': 'workspace.editorOptions.learningPath',
   'question-set': 'workspace.editorOptions.questionSet',
   'question-editor': 'workspace.editorOptions.questionSet',
 };
@@ -86,6 +87,13 @@ const COLLECTION_CONTENT_CONFIG: Record<string, {
     primaryCategory: 'Question paper',
     resourceType: 'Collection',
     descriptionKey: 'workspace.collectionDescriptions.questionPaper'
+  },
+  'learning-path': {
+    mimeType: 'application/vnd.ekstep.content-collection',
+    contentType: 'LearningPath',
+    primaryCategory: 'Learning Path',
+    resourceType: 'Collection',
+    descriptionKey: 'workspace.collectionDescriptions.learningPath'
   },
 };
 
@@ -372,7 +380,7 @@ const WorkspacePage = () => {
       setShowDynamicFormDialog(true);
       return;
     }
-    // Course and question-set use the simple name dialog
+    // Course, Learning Path, and question-set use the simple name dialog
     if (SIMPLE_COLLECTION_OPTIONS.includes(optionId) || QUML_EDITOR_OPTIONS.includes(optionId)) {
       setSelectedOption(optionId);
       setShowNameDialog(true);
@@ -491,7 +499,7 @@ const WorkspacePage = () => {
     setIsCreating(true);
     try {
       if (selectedOption && SIMPLE_COLLECTION_OPTIONS.includes(selectedOption)) {
-        // Course creation: inline collection creation logic
+        // Course / Learning Path creation: inline collection creation logic
         const { creator, createdBy, organisation, createdFor } = getCreatorMeta();
         const config = COLLECTION_CONTENT_CONFIG[selectedOption]!;
         const { descriptionKey, ...apiConfig } = config;
@@ -526,11 +534,11 @@ const WorkspacePage = () => {
   };
 
   // Determines the editor route from the cached WorkspaceItem type from search API.
-  // Only Course, TextBook, and Collection go to collection editor; everything else goes to content editor.
+  // Only Course, TextBook, Collection, and LearningPath go to collection editor; everything else goes to content editor.
   const getEditorRoute = (id: string): string | null => {
     const item = visibleContents.find((c) => c.id === id);
     if (!item) return null;
-    if (["Course", "TextBook", "Collection"].includes(item.contentType)) {
+    if (["Course", "TextBook", "Collection", "LearningPath"].includes(item.contentType)) {
       return `/edit/collection-editor/${id}`;
     }
     if (item.primaryCategory === 'Practice Question Set') {
