@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { FiHelpCircle, FiAward } from 'react-icons/fi';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { CertificateLockCard } from './CertificateLockCard';
 import { LedgerCourseRow } from './LedgerCourseRow';
-import { computeCourseProgress } from '@/services/learningPath/learningPathProgress';
+import { computeCourseProgress, getCourseContentStatus } from '@/services/learningPath/learningPathProgress';
 import type { LearningPathModel, LevelProgressInfo, LevelStatusKey, PathProgressInfo } from '@/types/learningPathTypes';
 import type { ViewerSummaryRecord } from '@/types/viewerServiceTypes';
 
@@ -14,12 +15,20 @@ interface LearningPathRailProps {
   levelStatuses: LevelStatusKey[];
   priorDone: boolean;
   outcomeUnlocked: boolean;
+  /** Levels AND the outcome assessment complete — see `isCertificateUnlocked`. */
+  certificateUnlocked?: boolean;
+  outcomeDone?: boolean;
   /** Needed to show each Level's own courses (with their live progress) while consuming - see `onOpenCourse`. */
   summaryByCollectionId: Map<string, ViewerSummaryRecord>;
   pathSummary?: ViewerSummaryRecord;
+  /** The course currently being consumed — its units are shown expanded by default. */
+  activeCourseId?: string | undefined;
+  activeContentId?: string | undefined;
   onBackToPath: () => void;
   onOpenLevel: (levelId: string) => void;
   onOpenPrior: () => void;
+  /** Opens the outcome assessment — only wired up once `outcomeUnlocked` is true. */
+  onOpenOutcome?: () => void;
   /** Opens a course directly from its row in the rail (jumps to its first leaf). */
   onOpenCourse: (courseId: string, contentId: string) => void;
 }
@@ -37,14 +46,28 @@ export function LearningPathRail({
   levelStatuses,
   priorDone,
   outcomeUnlocked,
+  certificateUnlocked = false,
+  outcomeDone = false,
   summaryByCollectionId,
   pathSummary,
+  activeCourseId,
+  activeContentId,
   onBackToPath,
   onOpenLevel,
   onOpenPrior,
+  onOpenOutcome,
   onOpenCourse,
 }: LearningPathRailProps) {
   const { t } = useAppI18n();
+  // `null` = untouched, so the active course stays open until the learner
+  // explicitly collapses it; after that their choice wins.
+  const [expandedCourseIds, setExpandedCourseIds] = useState<string[] | null>(null);
+  const expanded = expandedCourseIds ?? (activeCourseId ? [activeCourseId] : []);
+
+  const toggleCourse = (courseId: string) =>
+    setExpandedCourseIds(
+      expanded.includes(courseId) ? expanded.filter((id) => id !== courseId) : [...expanded, courseId]
+    );
 
   return (
     <div className="flex flex-col gap-4" data-testid="learning-path-rail">
@@ -114,6 +137,11 @@ export function LearningPathRail({
                         course={course}
                         progress={computeCourseProgress(course, summaryByCollectionId, pathSummary)}
                         onOpen={() => onOpenCourse(course.identifier, course.leafIds[0] ?? '')}
+                        isExpanded={expanded.includes(course.identifier)}
+                        onToggle={() => toggleCourse(course.identifier)}
+                        onOpenContent={(contentId) => onOpenCourse(course.identifier, contentId)}
+                        contentStatus={getCourseContentStatus(course, summaryByCollectionId, pathSummary)}
+                        activeContentId={activeContentId ?? null}
                       />
                     ))}
                   </div>
@@ -123,18 +151,33 @@ export function LearningPathRail({
           })}
         </div>
         {model.outcomeAssessment && (
-          <div className="mt-2 flex items-center gap-2.5 rounded-xl border border-dashed border-sunbird-gray-b2 px-3 py-2.5 opacity-75">
+          <div
+            onClick={outcomeUnlocked ? onOpenOutcome : undefined}
+            className={`mt-2 flex items-center gap-2.5 rounded-xl border border-dashed border-sunbird-gray-b2 px-3 py-2.5 ${
+              outcomeUnlocked && onOpenOutcome ? 'cursor-pointer' : 'opacity-75'
+            }`}
+            data-testid="rail-outcome-row"
+          >
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sunbird-jamun/10 text-sunbird-jamun">
               <FiAward className="h-3.5 w-3.5" />
             </div>
-            <span className="text-[0.8125rem] font-medium text-foreground">
-              {outcomeUnlocked ? t('learningPath.start') : t('learningPath.locked')}
-            </span>
+            <div className="min-w-0 flex-1">
+              <span className="block truncate text-[0.8125rem] font-medium text-foreground">
+                {model.outcomeAssessment.name}
+              </span>
+              <span className="text-[0.6875rem] text-sunbird-gray-75">
+                {outcomeDone
+                  ? t('learningPath.statusCompleted')
+                  : outcomeUnlocked
+                    ? t('learningPath.start')
+                    : t('learningPath.locked')}
+              </span>
+            </div>
           </div>
         )}
       </div>
 
-      <CertificateLockCard levelCount={model.levels.length} doneLevels={progress.doneLevels} unlocked={outcomeUnlocked && progress.pct >= 100} />
+      <CertificateLockCard levelCount={model.levels.length} doneLevels={progress.doneLevels} unlocked={certificateUnlocked} />
     </div>
   );
 }

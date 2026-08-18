@@ -5,6 +5,7 @@ import {
   computeLevelProgress,
   computePathProgress,
   deriveLevelStatuses,
+  isCertificateUnlocked,
   isOutcomeUnlocked,
   getAssessmentScore,
   getResumeTarget,
@@ -285,6 +286,33 @@ describe('isOutcomeUnlocked', () => {
       ])
     ).toBe(false);
     expect(isOutcomeUnlocked([])).toBe(false);
+  });
+});
+
+describe('isCertificateUnlocked', () => {
+  const doneLevels = [{ pct: 100, completed: 1, total: 1, doneCourses: 1 }];
+  const done = { pct: 100, completed: 1, total: 1, status: 'completed' as const };
+  const notStarted = { pct: 0, completed: 0, total: 1, status: 'notStarted' as const };
+
+  it('stays locked while any Level is incomplete', () => {
+    const partial = [...doneLevels, { pct: 50, completed: 0, total: 1, doneCourses: 0 }];
+    expect(isCertificateUnlocked(true, partial, done)).toBe(false);
+  });
+
+  it('stays locked when the Levels are done but the outcome assessment is not attempted', () => {
+    expect(isCertificateUnlocked(true, doneLevels, notStarted)).toBe(false);
+    expect(isCertificateUnlocked(true, doneLevels, null)).toBe(false);
+  });
+
+  it('unlocks once the Levels and the outcome assessment are both complete', () => {
+    expect(isCertificateUnlocked(true, doneLevels, done)).toBe(true);
+  });
+
+  // Regression: gating on the whole-path percentage left this permanently locked,
+  // because that figure counts the outcome assessment's own still-incomplete leaf.
+  it('unlocks on Levels alone when the path has no outcome assessment', () => {
+    expect(isCertificateUnlocked(false, doneLevels, null)).toBe(true);
+    expect(isCertificateUnlocked(false, [], null)).toBe(false);
   });
 });
 

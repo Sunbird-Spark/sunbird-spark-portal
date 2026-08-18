@@ -3,10 +3,12 @@ import { render, screen } from '@testing-library/react';
 import { LearningPathRailContainer } from './LearningPathRailContainer';
 
 let mockSearchParams = new URLSearchParams();
+let mockParams: Record<string, string | undefined> = {};
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', () => ({
   useSearchParams: () => [mockSearchParams],
   useNavigate: () => mockNavigate,
+  useParams: () => mockParams,
 }));
 
 let mockLpResult: any;

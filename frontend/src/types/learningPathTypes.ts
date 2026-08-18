@@ -16,6 +16,23 @@ export type LevelStatusKey =
   | 'credited'
   | 'creditedPending';
 
+/**
+ * A node inside a Course's own hierarchy — either a CourseUnit (`isUnit`, may
+ * nest further) or a playable leaf. Kept alongside the course's flattened
+ * `leafIds` so the rail can show what's actually inside a course without
+ * refetching its hierarchy.
+ */
+export interface LPUnitNode {
+  identifier: string;
+  name: string;
+  mimeType?: string;
+  primaryCategory?: string;
+  isUnit: boolean;
+  /** Leaf ids under this node (the node's own id when it is a leaf). */
+  leafIds: string[];
+  children: LPUnitNode[];
+}
+
 export interface LPCourseNode {
   identifier: string;
   name: string;
@@ -23,6 +40,8 @@ export interface LPCourseNode {
   mimeType?: string;
   leafNodesCount: number;
   leafIds: string[];
+  /** The course's own children (units/leaves), preserved for the expandable rail rows. */
+  units?: LPUnitNode[];
   skills: string[];
   /** True when every leaf under this course is a QuML question set. */
   isAssessmentCourse: boolean;

@@ -29,6 +29,7 @@ export function LearningPathOverview({ lp, isAuthenticated, onOpenLevel, onOpenP
     levelStatuses,
     priorState,
     outcomeState,
+    certificateUnlocked,
     enrollment,
     pathSummary,
     summaryByCollectionId,
@@ -73,10 +74,20 @@ export function LearningPathOverview({ lp, isAuthenticated, onOpenLevel, onOpenP
               priorProgress={priorState.progress}
               priorDone={priorState.done}
               outcomeUnlocked={outcomeState.unlocked}
+              outcomeProgress={outcomeState.progress}
               summaryByCollectionId={summaryByCollectionId}
               pathSummary={pathSummary}
               onOpenLevel={onOpenLevel}
               onOpenPrior={onOpenPrior}
+              onOpenOutcome={
+                model.outcomeAssessment
+                  ? () =>
+                      onOpenCourse(
+                        model.outcomeAssessment!.identifier,
+                        model.outcomeAssessment!.leafIds[0] ?? ''
+                      )
+                  : undefined
+              }
               onOpenCourse={onOpenCourse}
             />
           )}
@@ -89,7 +100,7 @@ export function LearningPathOverview({ lp, isAuthenticated, onOpenLevel, onOpenP
             <CertificateLockCard
               levelCount={model.levels.length}
               doneLevels={progress.doneLevels}
-              unlocked={outcomeState.unlocked && progress.pct >= 100}
+              unlocked={certificateUnlocked}
             />
           ) : (
             <EnrolCard

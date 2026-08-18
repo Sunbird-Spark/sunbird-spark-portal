@@ -13,6 +13,7 @@ import {
   computeLevelProgress,
   computePathProgress,
   deriveLevelStatuses,
+  isCertificateUnlocked,
   isOutcomeUnlocked,
   getResumeTarget,
 } from '../services/learningPath/learningPathProgress';
@@ -79,7 +80,10 @@ export function useLearningPath(pathId: string | undefined, contextIdParam: stri
   const outcomeState = {
     progress: outcomeProgress,
     unlocked: isOutcomeUnlocked(levelProgress),
+    done: (outcomeProgress?.pct ?? 0) >= 100,
   };
+
+  const certificateUnlocked = isCertificateUnlocked(!!model.outcomeAssessment, levelProgress, outcomeProgress);
 
   const levelStatuses = useMemo(
     () => deriveLevelStatuses(model, model.policy, levelProgress, priorState.done, waivers),
@@ -99,6 +103,7 @@ export function useLearningPath(pathId: string | undefined, contextIdParam: stri
     levelStatuses,
     priorState,
     outcomeState,
+    certificateUnlocked,
     enrollment,
     resumeTarget,
     pathSummary,

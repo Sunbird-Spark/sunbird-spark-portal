@@ -4,6 +4,7 @@ import type {
   LearningPathPolicy,
   LPCourseNode,
   LPLevelNode,
+  LPUnitNode,
 } from '../../types/learningPathTypes';
 import { getLeafContentIdsFromHierarchy } from '../collection/hierarchyTree';
 
@@ -50,6 +51,32 @@ function collectLeafNodes(node: HierarchyContentNode): HierarchyContentNode[] {
   return children.flatMap(collectLeafNodes);
 }
 
+const COLLECTION_MIME = 'application/vnd.ekstep.content-collection';
+
+function isCollectionNode(node: HierarchyContentNode): boolean {
+  return (node.mimeType ?? '').toLowerCase() === COLLECTION_MIME;
+}
+
+/**
+ * Maps a node under a Course into the `LPUnitNode` tree the rail renders when a
+ * course row is expanded. Unlike `getLeafContentIdsFromHierarchy` (which
+ * flattens everything to ids), this keeps the CourseUnit nesting intact so the
+ * sidebar can show "what's inside this course" as a tree.
+ */
+function mapUnitNode(node: HierarchyContentNode): LPUnitNode {
+  const isUnit = isCollectionNode(node);
+  const children = isUnit ? (node.children ?? []).map(mapUnitNode) : [];
+  return {
+    identifier: node.identifier,
+    name: node.name ?? '',
+    mimeType: node.mimeType,
+    primaryCategory: node.primaryCategory,
+    isUnit,
+    leafIds: isUnit ? children.flatMap((c) => c.leafIds) : [node.identifier],
+    children,
+  };
+}
+
 function unionSkills(...lists: Array<string[] | undefined>): string[] {
   const set = new Set<string>();
   lists.forEach((list) => (list ?? []).forEach((s) => s && set.add(s)));
@@ -67,6 +94,7 @@ function mapCourseNode(courseNode: HierarchyContentNode): LPCourseNode {
     mimeType: courseNode.mimeType,
     leafNodesCount: courseNode.leafNodesCount ?? leafIds.length,
     leafIds,
+    units: (courseNode.children ?? []).map(mapUnitNode),
     skills,
     isAssessmentCourse: isAssessment,
     ...(isAssessment ? { questionCount: leafIds.length } : {}),

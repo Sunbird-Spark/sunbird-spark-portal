@@ -107,6 +107,25 @@ describe('parseLearningPath', () => {
     expect(model.allSkills).toEqual([]);
   });
 
+  it('preserves each course\'s own units (with their leaves) alongside the flattened leafIds', () => {
+    const model = parseLearningPath(LP_HIERARCHY_NO_ASSESSMENTS);
+    const course = model.levels[0]!.courses[0]!;
+
+    expect(course.units).toHaveLength(2);
+    expect(course.units!.map((u) => u.name)).toEqual(['Unit-1', 'Unit-2']);
+    expect(course.units!.every((u) => u.isUnit)).toBe(true);
+
+    const unit1 = course.units![0]!;
+    expect(unit1.children).toHaveLength(1);
+    expect(unit1.children[0]!.name).toBe('LP-Content-1-JavaProg');
+    expect(unit1.children[0]!.isUnit).toBe(false);
+    // A unit rolls up the leaf ids beneath it; a leaf carries its own id.
+    expect(unit1.leafIds).toEqual(['do_21463158442296934411']);
+    expect(unit1.children[0]!.leafIds).toEqual(['do_21463158442296934411']);
+    // The flattened list stays the source of truth for progress maths.
+    expect(course.leafIds).toEqual(course.units!.flatMap((u) => u.leafIds));
+  });
+
   it('returns an empty model for a null/undefined root', () => {
     expect(parseLearningPath(null)).toMatchObject({ identifier: '', levels: [], policy: 'Fixed' });
     expect(parseLearningPath(undefined)).toMatchObject({ identifier: '', levels: [], policy: 'Fixed' });

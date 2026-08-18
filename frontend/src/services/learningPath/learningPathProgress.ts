@@ -39,6 +39,21 @@ function round(n: number): number {
  * confirmed via `/v1/summary/read`) the instant a write succeeds. A stale
  * `completionPercentage: 0` must never mask a just-completed leaf.
  */
+export function getCourseContentStatus(
+  course: Pick<LPCourseNode, 'identifier'>,
+  summaryByCollectionId: Map<string, ViewerSummaryRecord>,
+  pathSummary?: ViewerSummaryRecord
+): Record<string, number> | undefined {
+  const courseRecord = summaryByCollectionId.get(course.identifier);
+  if (!pathSummary?.contentStatus && !courseRecord?.contentStatus) return undefined;
+  return { ...(pathSummary?.contentStatus ?? {}), ...(courseRecord?.contentStatus ?? {}) };
+}
+
+/** True when a leaf is recorded complete on either the course's or the path's summary record. */
+export function isLeafComplete(contentStatus: Record<string, number> | undefined, leafId: string): boolean {
+  return contentStatus?.[leafId] === COMPLETE_STATUS;
+}
+
 export function computeCourseProgress(
   course: LPCourseNode,
   summaryByCollectionId: Map<string, ViewerSummaryRecord>,
@@ -46,10 +61,7 @@ export function computeCourseProgress(
 ): ProgressInfo & { status: 'completed' | 'active' | 'notStarted' } {
   const total = course.leafIds.length || course.leafNodesCount || 0;
   const courseRecord = summaryByCollectionId.get(course.identifier);
-  const contentStatus: Record<string, number> | undefined =
-    pathSummary?.contentStatus || courseRecord?.contentStatus
-      ? { ...(pathSummary?.contentStatus ?? {}), ...(courseRecord?.contentStatus ?? {}) }
-      : undefined;
+  const contentStatus = getCourseContentStatus(course, summaryByCollectionId, pathSummary);
 
   const aggregatePct = typeof courseRecord?.completionPercentage === 'number' ? courseRecord.completionPercentage : 0;
 
@@ -154,6 +166,27 @@ export function deriveLevelStatuses(
 /** The outcome assessment unlocks only once every content Level is complete. */
 export function isOutcomeUnlocked(progressList: LevelProgressInfo[]): boolean {
   return progressList.length > 0 && progressList.every((p) => p.pct >= 100);
+}
+
+/**
+ * The certificate unlocks once every content Level AND the outcome assessment
+ * itself are complete.
+ *
+ * Deliberately NOT gated on the whole-path `completionPercentage`: that figure
+ * counts the outcome assessment's own leaf, which is by definition still
+ * incomplete at the moment the last Level closes — so a path could never reach
+ * 100% at the only point the gate is evaluated, leaving the card permanently
+ * "Locked" even with every level done (see bug: certificate locked at 2/2
+ * levels complete). A path with no outcome assessment unlocks on Levels alone.
+ */
+export function isCertificateUnlocked(
+  hasOutcomeAssessment: boolean,
+  progressList: LevelProgressInfo[],
+  outcomeProgress: ProgressInfo | null
+): boolean {
+  if (!isOutcomeUnlocked(progressList)) return false;
+  if (!hasOutcomeAssessment) return true;
+  return (outcomeProgress?.pct ?? 0) >= 100;
 }
 
 /** Best score for an assessment course/content id, from the path record's `assessmentStatus`. */

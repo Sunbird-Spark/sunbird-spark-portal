@@ -226,4 +226,50 @@ describe('LearningPathPlayerView', () => {
       expect.objectContaining({ collectionId: 'lp_1', contextId: 'lpbatch' })
     );
   });
+
+  // Regression: this screen renders LearningPathRail directly (the rail container
+  // is only used inside CollectionSidePanel), so it must wire the outcome
+  // assessment up itself - otherwise the rail's outcome row is inert here even
+  // though it works on the path overview screen.
+  it('starts the outcome assessment from the rail once every Level is complete', () => {
+    mockCollectionData = { hierarchyRoot: { identifier: 'course_1', mimeType: 'application/vnd.ekstep.content-collection', children: [] } };
+    mockContentData = { data: { content: { mimeType: 'video/mp4', identifier: 'res_1' } } };
+    const onNavigateContent = vi.fn();
+
+    render(
+      <LearningPathPlayerView
+        lp={buildLp({
+          model: {
+            identifier: 'lp_1',
+            name: 'Data Foundations',
+            policy: 'Fixed' as const,
+            levels: [level1],
+            outcomeAssessment: {
+              identifier: 'course_outcome',
+              name: 'LP-PostAssess-Course',
+              leafNodesCount: 1,
+              leafIds: ['leaf_outcome'],
+              skills: [],
+              isAssessmentCourse: true,
+            },
+            allSkills: [],
+            courseTotal: 2,
+            leafTotal: 3,
+          },
+          levelProgress: [{ pct: 100, completed: 1, total: 1, doneCourses: 1 }],
+          levelStatuses: ['completed' as const],
+          outcomeState: { progress: null, unlocked: true, done: false },
+        })}
+        courseId="course_1"
+        contentId="res_1"
+        onBackToPath={vi.fn()}
+        onOpenLevel={vi.fn()}
+        onOpenPrior={vi.fn()}
+        onNavigateContent={onNavigateContent}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('rail-outcome-row'));
+    expect(onNavigateContent).toHaveBeenCalledWith('course_outcome', 'leaf_outcome');
+  });
 });

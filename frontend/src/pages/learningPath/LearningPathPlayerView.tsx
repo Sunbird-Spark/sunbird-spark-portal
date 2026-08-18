@@ -40,7 +40,7 @@ export function LearningPathPlayerView({
   onNavigateContent,
 }: LearningPathPlayerViewProps) {
   const { t } = useAppI18n();
-  const { model, progress, levelProgress, levelStatuses, priorState, outcomeState, enrollment, pathSummary, summaryByCollectionId } = lp;
+  const { model, progress, levelProgress, levelStatuses, priorState, outcomeState, certificateUnlocked, enrollment, pathSummary, summaryByCollectionId } = lp;
 
   const { data: courseData, isLoading: courseLoading } = useCollection(courseId);
   const leafIds = useMemo(
@@ -150,11 +150,24 @@ export function LearningPathPlayerView({
         levelStatuses={levelStatuses}
         priorDone={priorState.done}
         outcomeUnlocked={outcomeState.unlocked}
+        certificateUnlocked={certificateUnlocked}
+        outcomeDone={outcomeState.done}
         summaryByCollectionId={summaryByCollectionId}
         pathSummary={pathSummary}
+        activeCourseId={courseId}
+        activeContentId={contentId}
         onBackToPath={onBackToPath}
         onOpenLevel={onOpenLevel}
         onOpenPrior={onOpenPrior}
+        onOpenOutcome={
+          model.outcomeAssessment
+            ? () =>
+                onNavigateContent(
+                  model.outcomeAssessment!.identifier,
+                  model.outcomeAssessment!.leafIds[0] ?? ''
+                )
+            : undefined
+        }
         onOpenCourse={onNavigateContent}
       />
     </div>

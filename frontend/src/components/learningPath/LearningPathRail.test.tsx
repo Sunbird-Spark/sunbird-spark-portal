@@ -25,6 +25,26 @@ function buildModel(): LearningPathModel {
             name: 'LP-Course-1-JP-PP',
             leafNodesCount: 2,
             leafIds: ['leaf_1', 'leaf_2'],
+            units: [
+              {
+                identifier: 'unit_1',
+                name: 'Unit-1',
+                isUnit: true,
+                leafIds: ['leaf_1'],
+                children: [
+                  { identifier: 'leaf_1', name: 'LP-Content-1', isUnit: false, leafIds: ['leaf_1'], children: [] },
+                ],
+              },
+              {
+                identifier: 'unit_2',
+                name: 'Unit-2',
+                isUnit: true,
+                leafIds: ['leaf_2'],
+                children: [
+                  { identifier: 'leaf_2', name: 'LP-Content-2', isUnit: false, leafIds: ['leaf_2'], children: [] },
+                ],
+              },
+            ],
             skills: [],
             isAssessmentCourse: false,
           },
@@ -100,5 +120,57 @@ describe('LearningPathRail', () => {
     fireEvent.click(screen.getByText('LP-Course-1-JP-PP'));
     expect(onOpenCourse).toHaveBeenCalledWith('course_1', 'leaf_1');
     expect(onOpenLevel).not.toHaveBeenCalled();
+  });
+
+  describe('course units', () => {
+    it('keeps a course collapsed until its chevron is clicked, then lists its units and leaves', () => {
+      renderRail();
+      expect(screen.queryByText('Unit-1')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+
+      expect(screen.getByText('Unit-1')).toBeInTheDocument();
+      expect(screen.getByText('Unit-2')).toBeInTheDocument();
+      expect(screen.getByText('LP-Content-1')).toBeInTheDocument();
+    });
+
+    // Regression: the chevron must not fall through to the row's own navigate handler.
+    it('does not open the course when the expand chevron is clicked', () => {
+      const { onOpenCourse } = renderRail();
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+      expect(onOpenCourse).not.toHaveBeenCalled();
+    });
+
+    it('collapses again on a second chevron click', () => {
+      renderRail();
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+      expect(screen.queryByText('Unit-1')).not.toBeInTheDocument();
+    });
+
+    it('opens the course at the clicked leaf when a unit leaf is clicked', () => {
+      const { onOpenCourse } = renderRail();
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+      fireEvent.click(screen.getByText('LP-Content-2'));
+      expect(onOpenCourse).toHaveBeenCalledWith('course_1', 'leaf_2');
+    });
+
+    it('shows the course being consumed already expanded', () => {
+      renderRail({ activeCourseId: 'course_1' });
+      expect(screen.getByText('Unit-1')).toBeInTheDocument();
+    });
+
+    it('lets the learner collapse the active course', () => {
+      renderRail({ activeCourseId: 'course_1' });
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+      expect(screen.queryByText('Unit-1')).not.toBeInTheDocument();
+    });
+
+    it('renders no chevron for a course that has no units', () => {
+      const model = buildModel();
+      model.levels[0]!.courses[0]!.units = [];
+      renderRail({ model });
+      expect(screen.queryByTestId('ledger-course-row-toggle')).not.toBeInTheDocument();
+    });
   });
 });

@@ -13,10 +13,13 @@ interface LedgerTableProps {
   priorProgress: (ProgressInfo & { status: 'completed' | 'active' | 'notStarted' }) | null;
   priorDone: boolean;
   outcomeUnlocked: boolean;
+  outcomeProgress?: (ProgressInfo & { status: 'completed' | 'active' | 'notStarted' }) | null;
   summaryByCollectionId: Map<string, ViewerSummaryRecord>;
   pathSummary?: ViewerSummaryRecord;
   onOpenLevel: (levelId: string) => void;
   onOpenPrior: () => void;
+  /** Opens the outcome assessment. Only reachable once `outcomeUnlocked` is true. */
+  onOpenOutcome?: () => void;
   onOpenCourse: (courseId: string, contentId: string) => void;
 }
 
@@ -31,10 +34,12 @@ export function LedgerTable({
   priorProgress,
   priorDone,
   outcomeUnlocked,
+  outcomeProgress,
   summaryByCollectionId,
   pathSummary,
   onOpenLevel,
   onOpenPrior,
+  onOpenOutcome,
   onOpenCourse,
 }: LedgerTableProps) {
   const { t } = useAppI18n();
@@ -92,8 +97,17 @@ export function LedgerTable({
       ))}
 
       {model.outcomeAssessment && (
+        // Unlike the prior row, this one is only interactive once every content
+        // Level is complete - before that the badge reads "Locked" and clicking
+        // it must do nothing.
         <div
-          className="grid grid-cols-[2.375rem_1fr_10rem_8.25rem_6.75rem] items-center gap-3.5 border-t border-sunbird-gray-e5 bg-sunbird-jamun/5 px-[1.125rem] py-3.5 opacity-90"
+          onClick={outcomeUnlocked ? onOpenOutcome : undefined}
+          role={outcomeUnlocked && onOpenOutcome ? 'button' : undefined}
+          tabIndex={outcomeUnlocked && onOpenOutcome ? 0 : undefined}
+          onKeyDown={(e) => outcomeUnlocked && e.key === 'Enter' && onOpenOutcome?.()}
+          className={`grid grid-cols-[2.375rem_1fr_10rem_8.25rem_6.75rem] items-center gap-3.5 border-t border-sunbird-gray-e5 bg-sunbird-jamun/5 px-[1.125rem] py-3.5 ${
+            outcomeUnlocked && onOpenOutcome ? 'cursor-pointer' : 'opacity-90'
+          }`}
           data-testid="ledger-outcome-row"
         >
           <div className="flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-lg bg-sunbird-jamun/10 text-sunbird-jamun">
@@ -104,9 +118,17 @@ export function LedgerTable({
             <span className="text-xs text-sunbird-gray-75">{t('learningPath.outcomeAssessmentSub')}</span>
           </div>
           <span className="text-xs text-sunbird-gray-75">{t('learningPath.allScopedSkills')}</span>
-          <span />
+          <span className="text-sm font-medium text-sunbird-ink">
+            {outcomeProgress ? `${outcomeProgress.completed}/${outcomeProgress.total}` : '—'}
+          </span>
           <span className="text-right">
-            <Badge variant="outline">{outcomeUnlocked ? t('learningPath.start') : t('learningPath.locked')}</Badge>
+            <Badge variant={outcomeProgress?.status === 'completed' ? 'default' : 'outline'}>
+              {outcomeProgress?.status === 'completed'
+                ? t('learningPath.statusCompleted')
+                : outcomeUnlocked
+                  ? t('learningPath.start')
+                  : t('learningPath.locked')}
+            </Badge>
           </span>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useLearningPath } from '@/hooks/useLearningPath';
 import { parseCourseContextId } from '@/services/viewer/summaryMapper';
 import { LearningPathRail } from './LearningPathRail';
@@ -17,8 +17,12 @@ interface LearningPathRailContainerProps {
 export function LearningPathRailContainer({ courseContextId }: LearningPathRailContainerProps) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { collectionId, contentId } = useParams();
   const pathId = searchParams.get('lp') ?? undefined;
-  const lpContextId = courseContextId ? parseCourseContextId(courseContextId)?.lpContextId : undefined;
+  const parsedContext = courseContextId ? parseCourseContextId(courseContextId) : null;
+  const lpContextId = parsedContext?.lpContextId;
+  /** The course being consumed right now — its row in the rail opens expanded. */
+  const activeCourseId = parsedContext?.courseId ?? collectionId;
 
   const lp = useLearningPath(pathId, lpContextId);
 
@@ -35,11 +39,23 @@ export function LearningPathRailContainer({ courseContextId }: LearningPathRailC
       levelStatuses={lp.levelStatuses}
       priorDone={lp.priorState.done}
       outcomeUnlocked={lp.outcomeState.unlocked}
+      certificateUnlocked={lp.certificateUnlocked}
+      outcomeDone={lp.outcomeState.done}
       summaryByCollectionId={lp.summaryByCollectionId}
       pathSummary={lp.pathSummary}
+      activeCourseId={activeCourseId}
+      activeContentId={contentId}
       onBackToPath={() => navigate(basePath)}
       onOpenLevel={(levelId) => navigate(`${basePath}/level/${levelId}`)}
       onOpenPrior={() => navigate(`${basePath}/prior`)}
+      onOpenOutcome={
+        lp.model.outcomeAssessment
+          ? () =>
+              navigate(
+                `${basePath}/course/${lp.model.outcomeAssessment!.identifier}/content/${lp.model.outcomeAssessment!.leafIds[0] ?? ''}`
+              )
+          : undefined
+      }
       onOpenCourse={(courseId, contentId) => navigate(`${basePath}/course/${courseId}/content/${contentId}`)}
     />
   );
