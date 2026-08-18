@@ -43,7 +43,7 @@ const WorkspaceContentFilters = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="rounded-xl">
-            {(['all', 'course', 'content', 'quiz', 'collection', 'learningPath'] as ContentTypeFilter[]).map((type) => (
+            {(['all', 'course', 'content', 'quiz', 'collection'] as ContentTypeFilter[]).map((type) => (
               <DropdownMenuItem
                 key={type}
                 onClick={() => onTypeFilterChange(type)}
