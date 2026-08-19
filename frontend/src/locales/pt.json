@@ -1553,6 +1553,8 @@
     "start": "Iniciar",
     "startAssessment": "Iniciar avaliação",
     "skipAndStartLevel1": "Pular e iniciar o Nível 1",
+    "beforeTheFinalAssessment": "Antes da avaliação final",
+    "outcomeAssessmentNote": "Esta é a avaliação final da trilha. Complete-a para desbloquear seu certificado.",
     "beforeThePathOpens": "Antes de abrir a trilha",
     "questions": "Perguntas",
     "time": "Tempo",

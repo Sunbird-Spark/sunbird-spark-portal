@@ -5,7 +5,8 @@ import { calculateContentProgress, progressToStatus } from '../services/collecti
 import type { ConsumptionSummary } from '../services/collection/contentProgressCalculator';
 import { useUserId } from './useAuthInfo';
 import { useInvalidateViewerSummary, useOptimisticViewerSummaryPatch, useMergeViewerSummaryRecord } from './useViewerSummary';
-import { eventHasScore, extractSummary } from './contentStateTelemetryEvent';
+import { useRecordAssessmentScore } from './useAssessmentScores';
+import { eventHasScore, extractSummary, sumAssessEventTotals } from './contentStateTelemetryEvent';
 import type { TelemetryEvent } from './contentStateTelemetryEvent';
 
 const ContentStatus = {
@@ -66,13 +67,26 @@ export function useContentView({
   const userId = useUserId();
   const invalidateSummary = useInvalidateViewerSummary();
   const patchSummary = useOptimisticViewerSummaryPatch();
+  const recordAssessmentScore = useRecordAssessmentScore();
   const mergeSummaryRecord = useMergeViewerSummaryRecord();
   const startedRef = useRef(false);
   const assessEventsRef = useRef<unknown[]>([]);
+  /** Attempt start time (START's `ets`), sent as `assessmentTs`. */
+  const assessmentTsRef = useRef<number | null>(null);
+  /** One id per attempt; cleared on START so the next play gets a fresh one. */
+  const attemptIdRef = useRef<string | null>(null);
+  /** Guards against overlapping submits, which would double-count the attempt. */
+  const sendingAssessmentRef = useRef(false);
+  /** Attempt total from QUML_SUMMARY, which is more authoritative than summing ASSESS events. */
+  const summaryScoreRef = useRef<number | null>(null);
 
   useEffect(() => {
     startedRef.current = false;
     assessEventsRef.current = [];
+    assessmentTsRef.current = null;
+    attemptIdRef.current = null;
+    sendingAssessmentRef.current = false;
+    summaryScoreRef.current = null;
   }, [contentId]);
 
   /**
@@ -97,9 +111,38 @@ export function useContentView({
 
   const sendAssess = useCallback(async () => {
     if (!collectionId || !contentId || !contextId || !userId) return;
+    // A submit may already be in flight (e.g. QUML_SUMMARY and END both firing);
+    // letting a second one through would count as an extra attempt server-side.
+    if (sendingAssessmentRef.current) return;
+    sendingAssessmentRef.current = true;
+
+    const totals = sumAssessEventTotals(assessEventsRef.current);
+    // QUML_SUMMARY reports the attempt total directly; fall back to summing the
+    // per-question ASSESS events (the only source for SelfAssess content).
+    const score = summaryScoreRef.current ?? totals.score;
+    const maxScore = totals.maxScore;
+    // One id per attempt, generated lazily so a play that never submits doesn't burn one.
+    if (attemptIdRef.current == null) {
+      attemptIdRef.current =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `${collectionId}-${contextId}-${contentId}-${userId}-${Date.now()}`;
+    }
+    // START may have been missed (e.g. resumed player); the attempt still needs a timestamp.
+    const assessmentTs = assessmentTsRef.current ?? Date.now();
+
     // Optimistic: mark complete the instant the player signals a scored submission,
     // so level lock/unlock reacts immediately rather than waiting on any network call.
-    patchSummary(collectionId, contentId, ContentStatus.Completed);
+    // The score rides along so "Best Score" renders without waiting on the service,
+    // which does not return `assessmentStatus` yet.
+    patchSummary(collectionId, contentId, ContentStatus.Completed, {
+      score,
+      max_score: maxScore,
+    });
+    // Durable: survives the `invalidateSummary()` refetch below (which wipes the
+    // optimistic patch above, since the live service doesn't return
+    // `assessmentStatus`) and survives a full page reload, unlike the query cache.
+    recordAssessmentScore(userId, collectionId, contextId, contentId, { score, maxScore });
     try {
       await viewerService.viewAssess({
         userId,
@@ -107,13 +150,19 @@ export function useContentView({
         collectionId,
         contextId,
         assessments: assessEventsRef.current,
+        attemptId: attemptIdRef.current,
+        assessmentTs,
+        score,
+        maxScore,
       });
       await confirmEnrolment();
     } finally {
       assessEventsRef.current = [];
+      summaryScoreRef.current = null;
+      sendingAssessmentRef.current = false;
       await invalidateSummary();
     }
-  }, [collectionId, contentId, contextId, userId, patchSummary, confirmEnrolment, invalidateSummary]);
+  }, [collectionId, contentId, contextId, userId, patchSummary, recordAssessmentScore, confirmEnrolment, invalidateSummary]);
 
   return useCallback(
     (event: TelemetryEvent) => {
@@ -133,6 +182,13 @@ export function useContentView({
       const eidUpper = eid.toUpperCase();
 
       if (eidUpper === 'START') {
+        const ets = (rawEvent as { ets?: number } | undefined)?.ets ?? event?.ets;
+        if (ets != null) assessmentTsRef.current = ets;
+        // A replay within the same mount is a new attempt, so drop the previous
+        // attempt's id and accumulated events.
+        attemptIdRef.current = null;
+        assessEventsRef.current = [];
+        summaryScoreRef.current = null;
         if (!startedRef.current) {
           startedRef.current = true;
           void viewerService.viewStart({ userId, contentId, collectionId, contextId });
@@ -149,6 +205,7 @@ export function useContentView({
       if (eidUpper === 'QUML_SUMMARY' && isQuestionSet) {
         const edataQ = (rawEvent as { edata?: { score?: unknown; endpageseen?: unknown } })?.edata;
         if (typeof edataQ?.score === 'number' && Boolean(edataQ?.endpageseen)) {
+          summaryScoreRef.current = edataQ.score;
           void sendAssess();
         }
         return;

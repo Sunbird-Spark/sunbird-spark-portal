@@ -31,6 +31,11 @@ vi.mock('./useViewerSummary', () => ({
   useMergeViewerSummaryRecord: () => mockMergeRecord,
 }));
 
+const mockRecordAssessmentScore = vi.fn();
+vi.mock('./useAssessmentScores', () => ({
+  useRecordAssessmentScore: () => mockRecordAssessmentScore,
+}));
+
 describe('useContentView', () => {
   const defaultParams = {
     collectionId: 'course_1',
@@ -137,7 +142,13 @@ describe('useContentView', () => {
       result.current({ eid: 'QUML_SUMMARY', edata: { score: 8, endpageseen: true } });
     });
 
-    expect(mockPatchSummary).toHaveBeenCalledWith('course_1', 'content_1', 2);
+    // The score rides along on the same optimistic patch, so "Best Score" appears
+    // without waiting on a service that does not return assessmentStatus yet.
+    // max_score is 0 here because no per-question ASSESS events were accumulated.
+    expect(mockPatchSummary).toHaveBeenCalledWith('course_1', 'content_1', 2, {
+      score: 8,
+      max_score: 0,
+    });
   });
 
   it('confirms the enrolment via summary/read after a successful viewAssess, and merges the record into the cache', async () => {
@@ -235,5 +246,100 @@ describe('useContentView', () => {
       result.current({ eid: 'START' });
     });
     expect(mockViewStart).not.toHaveBeenCalled();
+  });
+
+  // Without an attemptId the service cannot tell one attempt from the next, so
+  // it can never report an attempt count - which is why the Learning Path UI
+  // had nothing to show. Mirrors the legacy content/state/update contract.
+  describe('attempt identity', () => {
+    const qsParams = { ...defaultParams, mimeType: 'application/vnd.sunbird.questionset' };
+
+    it('sends an attemptId and assessmentTs with the assessment', async () => {
+      const { result } = renderHook(() => useContentView(qsParams));
+      act(() => {
+        result.current({ eid: 'START', ets: 1700000000000 });
+      });
+      act(() => {
+        result.current({ eid: 'QUML_SUMMARY', edata: { score: 8, endpageseen: true } });
+      });
+
+      await waitFor(() => expect(mockViewAssess).toHaveBeenCalled());
+      expect(mockViewAssess).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attemptId: expect.any(String),
+          assessmentTs: 1700000000000,
+        })
+      );
+    });
+
+    it('falls back to a generated timestamp when START was missed', async () => {
+      const { result } = renderHook(() => useContentView(qsParams));
+      act(() => {
+        result.current({ eid: 'QUML_SUMMARY', edata: { score: 8, endpageseen: true } });
+      });
+
+      await waitFor(() => expect(mockViewAssess).toHaveBeenCalled());
+      expect(mockViewAssess.mock.calls[0]![0].assessmentTs).toBeTypeOf('number');
+    });
+
+    it('sends explicit score and maxScore totals summed from the ASSESS events', async () => {
+      const { result } = renderHook(() => useContentView(qsParams));
+      act(() => {
+        result.current({ eid: 'ASSESS', edata: { score: 3, item: { id: 'q1', maxscore: 5 } } });
+      });
+      act(() => {
+        result.current({ eid: 'ASSESS', edata: { score: 2, item: { id: 'q2', maxscore: 5 } } });
+      });
+      act(() => {
+        result.current({ eid: 'QUML_SUMMARY', edata: { score: 5, endpageseen: true } });
+      });
+
+      await waitFor(() => expect(mockViewAssess).toHaveBeenCalled());
+      expect(mockViewAssess).toHaveBeenCalledWith(
+        expect.objectContaining({ score: 5, maxScore: 10 })
+      );
+    });
+
+    // Two submits for one attempt would be counted as two attempts server-side.
+    it('ignores a second submit while the first is still in flight', async () => {
+      let release: (value: unknown) => void = () => {};
+      mockViewAssess.mockImplementationOnce(
+        () => new Promise((resolve) => { release = resolve; })
+      );
+      const { result } = renderHook(() => useContentView(qsParams));
+      act(() => {
+        result.current({ eid: 'QUML_SUMMARY', edata: { score: 8, endpageseen: true } });
+      });
+      act(() => {
+        result.current({ eid: 'QUML_SUMMARY', edata: { score: 8, endpageseen: true } });
+      });
+      expect(mockViewAssess).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        release({ data: {} });
+      });
+    });
+
+    it('starts a fresh attempt id on a replayed START', async () => {
+      const { result } = renderHook(() => useContentView(qsParams));
+      act(() => {
+        result.current({ eid: 'START', ets: 1 });
+      });
+      act(() => {
+        result.current({ eid: 'QUML_SUMMARY', edata: { score: 8, endpageseen: true } });
+      });
+      await waitFor(() => expect(mockViewAssess).toHaveBeenCalledTimes(1));
+
+      act(() => {
+        result.current({ eid: 'START', ets: 2 });
+      });
+      act(() => {
+        result.current({ eid: 'QUML_SUMMARY', edata: { score: 9, endpageseen: true } });
+      });
+      await waitFor(() => expect(mockViewAssess).toHaveBeenCalledTimes(2));
+
+      const first = mockViewAssess.mock.calls[0]![0].attemptId;
+      const second = mockViewAssess.mock.calls[1]![0].attemptId;
+      expect(second).not.toBe(first);
+    });
   });
 });

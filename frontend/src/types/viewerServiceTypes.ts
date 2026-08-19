@@ -14,8 +14,15 @@ import type { IssuedCertificate } from './TrackableCollections';
  */
 
 export interface AssessmentScoreEntry {
+  /** Best score across attempts, not the latest attempt's score. */
   score: number;
   max_score: number;
+  /**
+   * Number of attempts made. Optional because the live service does not return
+   * it yet - until it does, `useOptimisticViewerSummaryPatch` maintains a local
+   * count so the UI can still show "attempt N of M".
+   */
+  attempts?: number;
 }
 
 export interface ViewerSummaryRecord {
@@ -79,6 +86,19 @@ export interface ViewUpdateRequest extends ViewRequest {
 /** Body for POST /v1/assessment/submit. */
 export interface ViewAssessRequest extends ViewRequest {
   assessments: unknown[];
+  /**
+   * Identifies one attempt, so the service can count attempts instead of
+   * collapsing every submission for a content into a single record. Mirrors the
+   * legacy `content/state/update` `assessments[].attemptId`; regenerated on each
+   * player START.
+   */
+  attemptId: string;
+  /** Attempt start time (epoch ms), from the START telemetry event's `ets`. */
+  assessmentTs: number;
+  /** Attempt total, sent explicitly so the service need not re-derive it from raw events. */
+  score?: number;
+  /** Attempt maximum, sent explicitly alongside `score`. */
+  maxScore?: number;
 }
 
 /** Params for DELETE /v1/summary/delete/:userId. Omit collectionId/contextId + all=true to delete every enrolment. */
@@ -135,6 +155,7 @@ export interface ViewReadResponseContent {
   identifier?: string;
   score?: number;
   max_score?: number;
+  attempts?: number;
   [key: string]: unknown;
 }
 
@@ -148,12 +169,32 @@ export interface ViewReadResponse {
   contents?: ViewReadResponseContent[];
 }
 
+/**
+ * Response for POST /v1/assessment/read.
+ *
+ * The only Viewer Service endpoint that could return saved assessment scores:
+ * the verbatim live captures of `/v1/summary/list` (`summaryMapper.test.ts`) and
+ * `/v1/view/read` (`viewReadMapper.test.ts`) carry no score, max_score or
+ * attempts at all. Both shapes below are declared optional because the live
+ * wire shape is still unconfirmed - `services/viewer/assessmentReadMapper.ts`
+ * is the single place that normalises them.
+ */
 export interface AssessmentReadResponse {
   userId?: string;
   collectionId?: string;
   contextId?: string;
   /** Live field name (matches /v1/view/read's `response`, by analogy - unconfirmed). */
   response?: ViewReadResponseContent[];
-  /** Spec field name. */
-  contents?: Array<{ score?: number; max_score?: number }>;
+  /**
+   * Spec field name. `contentId`/`identifier` are declared here because entries
+   * are useless without one - there would be no way to key a score to a content.
+   */
+  contents?: Array<{
+    contentId?: string;
+    identifier?: string;
+    score?: number;
+    max_score?: number;
+    attempts?: number;
+    [key: string]: unknown;
+  }>;
 }

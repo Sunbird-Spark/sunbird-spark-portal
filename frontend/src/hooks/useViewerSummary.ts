@@ -56,7 +56,14 @@ export function useMergeViewerSummaryRecord(): (record: ViewerSummaryRecord) => 
         );
         if (idx === -1) return [...old, record];
         const next = [...old];
-        next[idx] = record;
+        // The live service does not return `assessmentStatus` yet, and this is a
+        // wholesale record replacement - so without this, every confirmation
+        // round-trip would erase the score the optimistic patch just recorded.
+        const previous = old[idx];
+        next[idx] =
+          record.assessmentStatus === undefined && previous?.assessmentStatus !== undefined
+            ? { ...record, assessmentStatus: previous.assessmentStatus }
+            : record;
         return next;
       });
     },
@@ -96,11 +103,32 @@ export function useOptimisticViewerSummaryPatch(): (
       queryClient.setQueryData<ViewerSummaryRecord[]>(['viewerSummary', userId], (old) => {
         if (!old) return old;
 
+        /**
+         * Keeps `assessmentStatus[contentId]` as the BEST score across attempts
+         * (matching the legacy course player, where `getContentAttemptInfoMap`
+         * picks the highest `totalScore` out of the score array) and counts the
+         * attempt locally. A weaker retry must never lower a learner's best score.
+         */
+        const mergeAssessment = (
+          previous: AssessmentScoreEntry | undefined,
+          next: AssessmentScoreEntry
+        ): AssessmentScoreEntry => ({
+          score: previous ? Math.max(previous.score, next.score) : next.score,
+          // A QUML_SUMMARY-only submission can report a 0 max; keep the known one.
+          max_score: next.max_score || previous?.max_score || 0,
+          attempts: (previous?.attempts ?? 0) + 1,
+        });
+
         const patchRecord = (record: ViewerSummaryRecord): ViewerSummaryRecord => ({
           ...record,
           contentStatus: { ...record.contentStatus, [contentId]: status },
           ...(assessmentScore
-            ? { assessmentStatus: { ...(record.assessmentStatus ?? {}), [contentId]: assessmentScore } }
+            ? {
+                assessmentStatus: {
+                  ...(record.assessmentStatus ?? {}),
+                  [contentId]: mergeAssessment(record.assessmentStatus?.[contentId], assessmentScore),
+                },
+              }
             : {}),
         });
 

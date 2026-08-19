@@ -48,14 +48,7 @@ export function LearningPathRailContainer({ courseContextId }: LearningPathRailC
       onBackToPath={() => navigate(basePath)}
       onOpenLevel={(levelId) => navigate(`${basePath}/level/${levelId}`)}
       onOpenPrior={() => navigate(`${basePath}/prior`)}
-      onOpenOutcome={
-        lp.model.outcomeAssessment
-          ? () =>
-              navigate(
-                `${basePath}/course/${lp.model.outcomeAssessment!.identifier}/content/${lp.model.outcomeAssessment!.leafIds[0] ?? ''}`
-              )
-          : undefined
-      }
+      onOpenOutcome={lp.model.outcomeAssessment ? () => navigate(`${basePath}/outcome`) : undefined}
       onOpenCourse={(courseId, contentId) => navigate(`${basePath}/course/${courseId}/content/${contentId}`)}
     />
   );

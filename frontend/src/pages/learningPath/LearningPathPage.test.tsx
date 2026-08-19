@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import LearningPathPage from './LearningPathPage';
 import type { LPCourseNode, LPLevelNode } from '@/types/learningPathTypes';
@@ -41,7 +41,14 @@ const level1: LPLevelNode = {
   index: 1,
   skills: ['Data literacy'],
   courses: [
-    { identifier: 'course_1', name: 'Course 1', leafNodesCount: 1, leafIds: ['res_1'], skills: [], isAssessmentCourse: false },
+    {
+      identifier: 'course_1',
+      name: 'Course 1',
+      leafNodesCount: 1,
+      leafIds: ['res_1'],
+      skills: [],
+      isAssessmentCourse: false,
+    },
   ],
 };
 
@@ -58,7 +65,13 @@ type LpTestData = {
     leafTotal: number;
   };
   policy: 'Fixed';
-  progress: { pct: number; completed: number; total: number; doneLevels: number; levelCount: number };
+  progress: {
+    pct: number;
+    completed: number;
+    total: number;
+    doneLevels: number;
+    levelCount: number;
+  };
   levelProgress: Array<{ pct: number; completed: number; total: number; doneCourses: number }>;
   levelStatuses: Array<'notStarted'>;
   priorState: { progress: null; done: boolean };
@@ -147,20 +160,40 @@ function renderAt(path: string, state?: unknown) {
         <Route path="/learning-path/:pathId" element={<LearningPathPage />} />
         <Route path="/learning-path/:pathId/level/:levelId" element={<LearningPathPage />} />
         <Route path="/learning-path/:pathId/prior" element={<LearningPathPage />} />
+        <Route path="/learning-path/:pathId/outcome" element={<LearningPathPage />} />
         <Route path="/learning-path/:pathId/complete" element={<LearningPathPage />} />
         <Route path="/learning-path/:pathId/status" element={<LearningPathPage />} />
-        <Route path="/learning-path/:pathId/course/:courseId/content/:contentId" element={<LearningPathPage />} />
+        <Route
+          path="/learning-path/:pathId/course/:courseId/content/:contentId"
+          element={<LearningPathPage />}
+        />
         <Route path="/learning-path/:pathId/batch/:contextId" element={<LearningPathPage />} />
-        <Route path="/learning-path/:pathId/batch/:contextId/level/:levelId" element={<LearningPathPage />} />
-        <Route path="/learning-path/:pathId/batch/:contextId/prior" element={<LearningPathPage />} />
-        <Route path="/learning-path/:pathId/batch/:contextId/complete" element={<LearningPathPage />} />
-        <Route path="/learning-path/:pathId/batch/:contextId/status" element={<LearningPathPage />} />
+        <Route
+          path="/learning-path/:pathId/batch/:contextId/level/:levelId"
+          element={<LearningPathPage />}
+        />
+        <Route
+          path="/learning-path/:pathId/batch/:contextId/prior"
+          element={<LearningPathPage />}
+        />
+        <Route
+          path="/learning-path/:pathId/batch/:contextId/outcome"
+          element={<LearningPathPage />}
+        />
+        <Route
+          path="/learning-path/:pathId/batch/:contextId/complete"
+          element={<LearningPathPage />}
+        />
+        <Route
+          path="/learning-path/:pathId/batch/:contextId/status"
+          element={<LearningPathPage />}
+        />
         <Route
           path="/learning-path/:pathId/batch/:contextId/course/:courseId/content/:contentId"
           element={<LearningPathPage />}
         />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 }
 
@@ -177,6 +210,63 @@ describe('LearningPathPage', () => {
     expect(screen.getByText('Prior check')).toBeInTheDocument();
   });
 
+  // Regression: the prior/outcome gate screens had no way back to the path overview.
+  it('has a back-to-path link on the prior gate that returns to the overview', () => {
+    mockLpData = buildLp();
+    renderAt('/learning-path/lp_1/batch/batch_1/prior');
+    fireEvent.click(screen.getByText(/learningPath\.backToPath/));
+    expect(screen.getByText('Data Foundations')).toBeInTheDocument();
+    // The overview's ledger row legitimately shows the assessment's own name too,
+    // so assert on gate-specific copy instead.
+    expect(screen.queryByText('learningPath.beforeThePathOpens')).not.toBeInTheDocument();
+  });
+
+  it('has a back-to-path link on the outcome gate that returns to the overview', () => {
+    mockLpData = buildLp({ outcomeState: { progress: null, unlocked: true } });
+    renderAt('/learning-path/lp_1/batch/batch_1/outcome');
+    fireEvent.click(screen.getByText(/learningPath\.backToPath/));
+    expect(screen.getByText('Data Foundations')).toBeInTheDocument();
+    expect(screen.queryByText('learningPath.beforeTheFinalAssessment')).not.toBeInTheDocument();
+  });
+
+  it('renders the outcome assessment gate at /outcome when unlocked', () => {
+    mockLpData = buildLp({ outcomeState: { progress: null, unlocked: true } });
+    renderAt('/learning-path/lp_1/batch/batch_1/outcome');
+    expect(screen.getByText('Outcome check')).toBeInTheDocument();
+    expect(screen.queryByText('learningPath.skipAndStartLevel1')).not.toBeInTheDocument();
+  });
+
+  // A hand-typed /outcome URL must not show a gate the learner cannot use yet -
+  // the rail/ledger rows only ever navigate here once unlocked.
+  it('redirects away from /outcome when the outcome assessment is still locked', () => {
+    mockLpData = buildLp({ outcomeState: { progress: null, unlocked: false } });
+    renderAt('/learning-path/lp_1/batch/batch_1/outcome');
+    // The overview's own ledger row legitimately shows the outcome course's name
+    // even while locked, so assert on gate-specific copy instead.
+    expect(screen.queryByText('learningPath.beforeTheFinalAssessment')).not.toBeInTheDocument();
+    expect(screen.getByText('Data Foundations')).toBeInTheDocument();
+  });
+
+  it('redirects away from /outcome when the path has no outcome assessment', () => {
+    mockLpData = buildLp({
+      model: {
+        identifier: 'lp_1',
+        name: 'Data Foundations',
+        policy: 'Fixed' as const,
+        levels: [level1],
+        priorAssessment: priorCourse,
+        outcomeAssessment: undefined as unknown as LPCourseNode,
+        allSkills: ['Data literacy'],
+        courseTotal: 2,
+        leafTotal: 2,
+      },
+      outcomeState: { progress: null, unlocked: true },
+    });
+    renderAt('/learning-path/lp_1/batch/batch_1/outcome');
+    expect(screen.queryByText('learningPath.beforeTheFinalAssessment')).not.toBeInTheDocument();
+    expect(screen.getByText('Data Foundations')).toBeInTheDocument();
+  });
+
   it('renders the level detail view at /level/:levelId', () => {
     mockLpData = buildLp();
     renderAt('/learning-path/lp_1/batch/batch_1/level/level_1');
@@ -184,7 +274,9 @@ describe('LearningPathPage', () => {
   });
 
   it('renders the completion view at /complete', () => {
-    mockLpData = buildLp({ progress: { pct: 100, completed: 3, total: 3, doneLevels: 1, levelCount: 1 } });
+    mockLpData = buildLp({
+      progress: { pct: 100, completed: 3, total: 3, doneLevels: 1, levelCount: 1 },
+    });
     renderAt('/learning-path/lp_1/batch/batch_1/complete');
     expect(screen.getByText('learningPath.pathComplete')).toBeInTheDocument();
   });
@@ -206,7 +298,9 @@ describe('LearningPathPage', () => {
   });
 
   it('renders the completion view at /complete with no contextId in the URL', () => {
-    mockLpData = buildLp({ progress: { pct: 100, completed: 3, total: 3, doneLevels: 1, levelCount: 1 } });
+    mockLpData = buildLp({
+      progress: { pct: 100, completed: 3, total: 3, doneLevels: 1, levelCount: 1 },
+    });
     renderAt('/learning-path/lp_1/complete');
     expect(screen.getByText('learningPath.pathComplete')).toBeInTheDocument();
   });

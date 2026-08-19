@@ -12,6 +12,7 @@ import type {
   WaiverInfo,
 } from '../../types/learningPathTypes';
 import { getCourseContextId } from '../viewer/summaryMapper';
+import { getAssessmentInfo } from './learningPathAssessment';
 
 const COMPLETE_STATUS = 2;
 
@@ -189,15 +190,18 @@ export function isCertificateUnlocked(
   return (outcomeProgress?.pct ?? 0) >= 100;
 }
 
-/** Best score for an assessment course/content id, from the path record's `assessmentStatus`. */
+/**
+ * Best score for an assessment course/content id, from the path record's
+ * `assessmentStatus`. Kept as a thin wrapper over `getAssessmentInfo` so
+ * existing callers that only need the score are unaffected by the id-convention
+ * resolution and attempt count that helper adds.
+ */
 export function getAssessmentScore(
   identifier: string | undefined,
-  pathSummary: ViewerSummaryRecord | undefined
+  pathSummary: ViewerSummaryRecord | undefined,
+  leafIds?: string[]
 ): AssessmentScore | null {
-  if (!identifier) return null;
-  const entry = pathSummary?.assessmentStatus?.[identifier];
-  if (!entry) return null;
-  return { score: entry.score, maxScore: entry.max_score };
+  return getAssessmentInfo(identifier, leafIds, pathSummary);
 }
 
 function findOwningCourse(model: LearningPathModel, contentId: string): LPCourseNode | undefined {

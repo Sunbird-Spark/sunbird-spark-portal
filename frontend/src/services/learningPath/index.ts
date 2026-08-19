@@ -8,6 +8,8 @@ export {
   getAssessmentScore,
   getResumeTarget,
 } from './learningPathProgress';
+export { getAssessmentInfo, buildAssessmentInfoMap } from './learningPathAssessment';
+export type { LPAssessmentInfo } from './learningPathAssessment';
 export { getAttainedLevels, getGainedSkills, SKILL_GAINING_STATUSES } from './skillAttainment';
 export { buildPathSkillSummary, aggregateSkills, filterPathSummaries } from './skillAggregation';
 export type { PathSkillSummary, PathSkillStatus, SkillAggregate, PathSkillFilters, SkillSourceRef } from './skillAggregation';

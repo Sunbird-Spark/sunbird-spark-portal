@@ -1553,6 +1553,8 @@
     "start": "Commencer",
     "startAssessment": "Commencer l'évaluation",
     "skipAndStartLevel1": "Passer et commencer le niveau 1",
+    "beforeTheFinalAssessment": "Avant l'évaluation finale",
+    "outcomeAssessmentNote": "Il s'agit de l'évaluation finale du parcours. Complétez-la pour débloquer votre certificat.",
     "beforeThePathOpens": "Avant l'ouverture du parcours",
     "questions": "Questions",
     "time": "Durée",

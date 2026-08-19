@@ -59,7 +59,7 @@ describe('LearningPathOverview', () => {
   it('shows the EnrolCard prompt for a learner who has not enrolled', () => {
     render(
       <MemoryRouter>
-        <LearningPathOverview lp={buildLp()} isAuthenticated onOpenLevel={noop} onOpenPrior={noop} onOpenCourse={noop} />
+        <LearningPathOverview lp={buildLp()} isAuthenticated onOpenLevel={noop} onOpenPrior={noop} onOpenOutcome={noop} onOpenCourse={noop} />
       </MemoryRouter>
     );
 
@@ -74,6 +74,7 @@ describe('LearningPathOverview', () => {
           isAuthenticated
           onOpenLevel={noop}
           onOpenPrior={noop}
+          onOpenOutcome={noop}
           onOpenCourse={noop}
         />
       </MemoryRouter>
@@ -90,6 +91,7 @@ describe('LearningPathOverview', () => {
           isAuthenticated
           onOpenLevel={noop}
           onOpenPrior={noop}
+          onOpenOutcome={noop}
           onOpenCourse={noop}
         />
       </MemoryRouter>
@@ -106,6 +108,7 @@ describe('LearningPathOverview', () => {
           isAuthenticated
           onOpenLevel={noop}
           onOpenPrior={noop}
+          onOpenOutcome={noop}
           onOpenCourse={noop}
         />
       </MemoryRouter>
@@ -117,7 +120,7 @@ describe('LearningPathOverview', () => {
   it('renders Path Progress as a full-width banner above the ledger/side-panel row', () => {
     render(
       <MemoryRouter>
-        <LearningPathOverview lp={buildLp()} isAuthenticated onOpenLevel={noop} onOpenPrior={noop} onOpenCourse={noop} />
+        <LearningPathOverview lp={buildLp()} isAuthenticated onOpenLevel={noop} onOpenPrior={noop} onOpenOutcome={noop} onOpenCourse={noop} />
       </MemoryRouter>
     );
 

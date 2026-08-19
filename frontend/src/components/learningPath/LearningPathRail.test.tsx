@@ -173,4 +173,86 @@ describe('LearningPathRail', () => {
       expect(screen.queryByTestId('ledger-course-row-toggle')).not.toBeInTheDocument();
     });
   });
+
+  // Mirrors the course player's ContentRow, which shows the attempt count next to
+  // the title and "Best Score: x/y" once an assessment is complete.
+  describe('assessment score and attempts', () => {
+    /** Turns leaf_2 into a self-assess questionset with an attempt limit. */
+    function assessmentModel() {
+      const model = buildModel();
+      const leaf = model.levels[0]!.courses[0]!.units![1]!.children[0]!;
+      leaf.mimeType = 'application/vnd.sunbird.questionset';
+      leaf.maxAttempts = 3;
+      return model;
+    }
+
+    function summaryWith(
+      assessmentStatus?: ViewerSummaryRecord['assessmentStatus'],
+      contentStatus: Record<string, number> = { leaf_2: 2 }
+    ): ViewerSummaryRecord {
+      return {
+        userId: 'u1',
+        collectionId: 'lp_1',
+        active: true,
+        status: 1,
+        progress: 0,
+        contentStatus,
+        ...(assessmentStatus ? { assessmentStatus } : {}),
+      };
+    }
+
+    it('shows the best score on a completed assessment leaf', () => {
+      renderRail({
+        model: assessmentModel(),
+        pathSummary: summaryWith({ leaf_2: { score: 8, max_score: 10, attempts: 1 } }),
+      });
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+      expect(screen.getByTestId('course-unit-leaf-score')).toHaveTextContent(
+        'courseDetails.scoreLabel:{"score":8,"max":10}'
+      );
+    });
+
+    it('shows the attempt count against the attempt limit', () => {
+      renderRail({
+        model: assessmentModel(),
+        pathSummary: summaryWith({ leaf_2: { score: 8, max_score: 10, attempts: 2 } }),
+      });
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+      expect(screen.getByTestId('course-unit-leaf-attempts')).toHaveTextContent('2/3');
+    });
+
+    it('omits attempts when the entry carries no attempt count', () => {
+      renderRail({
+        model: assessmentModel(),
+        pathSummary: summaryWith({ leaf_2: { score: 8, max_score: 10 } }),
+      });
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+      expect(screen.queryByTestId('course-unit-leaf-attempts')).not.toBeInTheDocument();
+    });
+
+    it('shows no score when the assessment has no entry yet', () => {
+      renderRail({ model: assessmentModel(), pathSummary: summaryWith() });
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+      expect(screen.queryByTestId('course-unit-leaf-score')).not.toBeInTheDocument();
+    });
+
+    // A score before completion would contradict the tick, so it is gated on status 2.
+    it('shows no score while the assessment is incomplete', () => {
+      renderRail({
+        model: assessmentModel(),
+        pathSummary: summaryWith({ leaf_2: { score: 8, max_score: 10 } }, { leaf_2: 1 }),
+      });
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+      expect(screen.queryByTestId('course-unit-leaf-score')).not.toBeInTheDocument();
+    });
+
+    it('shows no score for a non-assessment leaf even if an entry exists', () => {
+      renderRail({
+        model: buildModel(),
+        pathSummary: summaryWith({ leaf_2: { score: 8, max_score: 10, attempts: 1 } }),
+      });
+      fireEvent.click(screen.getByTestId('ledger-course-row-toggle'));
+      expect(screen.queryByTestId('course-unit-leaf-score')).not.toBeInTheDocument();
+    });
+  });
 });

@@ -1554,6 +1554,8 @@
     "start": "Start",
     "startAssessment": "Start assessment",
     "skipAndStartLevel1": "Skip and start Level 1",
+    "beforeTheFinalAssessment": "Before the final assessment",
+    "outcomeAssessmentNote": "This is the path's final assessment. Complete it to unlock your certificate.",
     "beforeThePathOpens": "Before the path opens",
     "questions": "Questions",
     "time": "Time",

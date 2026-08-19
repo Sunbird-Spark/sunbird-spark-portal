@@ -31,6 +31,12 @@ export interface LPUnitNode {
   /** Leaf ids under this node (the node's own id when it is a leaf). */
   leafIds: string[];
   children: LPUnitNode[];
+  /**
+   * Attempt limit for self-assess leaves, carried through from the course
+   * hierarchy so the rail can render "attempt N of M" the way the course
+   * player's `ContentRow` does.
+   */
+  maxAttempts?: number;
 }
 
 export interface LPCourseNode {

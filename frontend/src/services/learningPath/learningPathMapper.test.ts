@@ -126,6 +126,25 @@ describe('parseLearningPath', () => {
     expect(course.leafIds).toEqual(course.units!.flatMap((u) => u.leafIds));
   });
 
+  // The rail renders "attempt N of M" for self-assess leaves, so the limit has to
+  // survive the hierarchy -> LPUnitNode mapping instead of being dropped.
+  it('carries a leaf\'s maxAttempts through into the unit tree', () => {
+    const hierarchy = JSON.parse(JSON.stringify(LP_HIERARCHY_NO_ASSESSMENTS));
+    const leaf = hierarchy.children[0].children[0].children[0].children[0];
+    leaf.mimeType = 'application/vnd.sunbird.questionset';
+    leaf.maxAttempts = 3;
+
+    const model = parseLearningPath(hierarchy);
+    const mappedLeaf = model.levels[0]!.courses[0]!.units![0]!.children[0]!;
+    expect(mappedLeaf.maxAttempts).toBe(3);
+  });
+
+  it('omits maxAttempts for leaves that declare none', () => {
+    const model = parseLearningPath(LP_HIERARCHY_NO_ASSESSMENTS);
+    const mappedLeaf = model.levels[0]!.courses[0]!.units![0]!.children[0]!;
+    expect(mappedLeaf.maxAttempts).toBeUndefined();
+  });
+
   it('returns an empty model for a null/undefined root', () => {
     expect(parseLearningPath(null)).toMatchObject({ identifier: '', levels: [], policy: 'Fixed' });
     expect(parseLearningPath(undefined)).toMatchObject({ identifier: '', levels: [], policy: 'Fixed' });

@@ -108,6 +108,7 @@ describe('LearningPathPlayerView', () => {
         onBackToPath={vi.fn()}
         onOpenLevel={vi.fn()}
         onOpenPrior={vi.fn()}
+        onOpenOutcome={vi.fn()}
         onNavigateContent={vi.fn()}
       />
     );
@@ -128,6 +129,7 @@ describe('LearningPathPlayerView', () => {
         onBackToPath={vi.fn()}
         onOpenLevel={vi.fn()}
         onOpenPrior={vi.fn()}
+        onOpenOutcome={vi.fn()}
         onNavigateContent={vi.fn()}
       />
     );
@@ -149,6 +151,7 @@ describe('LearningPathPlayerView', () => {
         onBackToPath={vi.fn()}
         onOpenLevel={vi.fn()}
         onOpenPrior={vi.fn()}
+        onOpenOutcome={vi.fn()}
         onNavigateContent={onNavigateContent}
       />
     );
@@ -175,6 +178,7 @@ describe('LearningPathPlayerView', () => {
         onBackToPath={vi.fn()}
         onOpenLevel={vi.fn()}
         onOpenPrior={vi.fn()}
+        onOpenOutcome={vi.fn()}
         onNavigateContent={vi.fn()}
       />
     );
@@ -218,6 +222,7 @@ describe('LearningPathPlayerView', () => {
         onBackToPath={vi.fn()}
         onOpenLevel={vi.fn()}
         onOpenPrior={vi.fn()}
+        onOpenOutcome={vi.fn()}
         onNavigateContent={vi.fn()}
       />
     );
@@ -230,11 +235,13 @@ describe('LearningPathPlayerView', () => {
   // Regression: this screen renders LearningPathRail directly (the rail container
   // is only used inside CollectionSidePanel), so it must wire the outcome
   // assessment up itself - otherwise the rail's outcome row is inert here even
-  // though it works on the path overview screen.
-  it('starts the outcome assessment from the rail once every Level is complete', () => {
+  // though it works on the path overview screen. It now opens the outcome GATE
+  // (not the player directly) - LearningPathPage's `/outcome` branch does the
+  // navigateContent jump once the learner clicks Start there.
+  it('opens the outcome gate from the rail once every Level is complete', () => {
     mockCollectionData = { hierarchyRoot: { identifier: 'course_1', mimeType: 'application/vnd.ekstep.content-collection', children: [] } };
     mockContentData = { data: { content: { mimeType: 'video/mp4', identifier: 'res_1' } } };
-    const onNavigateContent = vi.fn();
+    const onOpenOutcome = vi.fn();
 
     render(
       <LearningPathPlayerView
@@ -265,11 +272,12 @@ describe('LearningPathPlayerView', () => {
         onBackToPath={vi.fn()}
         onOpenLevel={vi.fn()}
         onOpenPrior={vi.fn()}
-        onNavigateContent={onNavigateContent}
+        onOpenOutcome={onOpenOutcome}
+        onNavigateContent={vi.fn()}
       />
     );
 
     fireEvent.click(screen.getByTestId('rail-outcome-row'));
-    expect(onNavigateContent).toHaveBeenCalledWith('course_outcome', 'leaf_outcome');
+    expect(onOpenOutcome).toHaveBeenCalled();
   });
 });

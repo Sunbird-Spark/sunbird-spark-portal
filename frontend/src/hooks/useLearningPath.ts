@@ -79,7 +79,13 @@ export function useLearningPath(pathId: string | undefined, contextIdParam: stri
   );
   const outcomeState = {
     progress: outcomeProgress,
-    unlocked: isOutcomeUnlocked(levelProgress),
+    // A path made entirely of a prior + outcome assessment has zero content
+    // Levels left once `parseLearningPath` unwraps both out of `model.levels` -
+    // `isOutcomeUnlocked([])` is `false` (correctly locked for a path with no
+    // outcome assessment and nothing else), so that case is special-cased here,
+    // where `model.outcomeAssessment`'s presence is known, rather than in
+    // `isOutcomeUnlocked` itself.
+    unlocked: model.levels.length === 0 ? Boolean(model.outcomeAssessment) : isOutcomeUnlocked(levelProgress),
     done: (outcomeProgress?.pct ?? 0) >= 100,
   };
 

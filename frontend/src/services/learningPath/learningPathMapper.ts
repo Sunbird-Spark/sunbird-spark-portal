@@ -74,6 +74,7 @@ function mapUnitNode(node: HierarchyContentNode): LPUnitNode {
     isUnit,
     leafIds: isUnit ? children.flatMap((c) => c.leafIds) : [node.identifier],
     children,
+    ...(typeof node.maxAttempts === 'number' ? { maxAttempts: node.maxAttempts } : {}),
   };
 }
 

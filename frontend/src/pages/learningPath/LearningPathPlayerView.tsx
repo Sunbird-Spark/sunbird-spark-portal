@@ -20,6 +20,7 @@ interface LearningPathPlayerViewProps {
   onBackToPath: () => void;
   onOpenLevel: (levelId: string) => void;
   onOpenPrior: () => void;
+  onOpenOutcome: () => void;
   onNavigateContent: (courseId: string, contentId: string) => void;
 }
 
@@ -37,6 +38,7 @@ export function LearningPathPlayerView({
   onBackToPath,
   onOpenLevel,
   onOpenPrior,
+  onOpenOutcome,
   onNavigateContent,
 }: LearningPathPlayerViewProps) {
   const { t } = useAppI18n();
@@ -159,15 +161,7 @@ export function LearningPathPlayerView({
         onBackToPath={onBackToPath}
         onOpenLevel={onOpenLevel}
         onOpenPrior={onOpenPrior}
-        onOpenOutcome={
-          model.outcomeAssessment
-            ? () =>
-                onNavigateContent(
-                  model.outcomeAssessment!.identifier,
-                  model.outcomeAssessment!.leafIds[0] ?? ''
-                )
-            : undefined
-        }
+        onOpenOutcome={model.outcomeAssessment ? onOpenOutcome : undefined}
         onOpenCourse={onNavigateContent}
       />
     </div>

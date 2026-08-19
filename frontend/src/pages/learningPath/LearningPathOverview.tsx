@@ -15,11 +15,19 @@ interface LearningPathOverviewProps {
   isAuthenticated: boolean;
   onOpenLevel: (levelId: string) => void;
   onOpenPrior: () => void;
+  onOpenOutcome: () => void;
   onOpenCourse: (courseId: string, contentId: string) => void;
 }
 
 /** Overview screen (Style B · Ledger): sticky progress rail + ledger table, or an enrol prompt when not yet enrolled. */
-export function LearningPathOverview({ lp, isAuthenticated, onOpenLevel, onOpenPrior, onOpenCourse }: LearningPathOverviewProps) {
+export function LearningPathOverview({
+  lp,
+  isAuthenticated,
+  onOpenLevel,
+  onOpenPrior,
+  onOpenOutcome,
+  onOpenCourse,
+}: LearningPathOverviewProps) {
   const { t } = useAppI18n();
   const {
     model,
@@ -79,15 +87,7 @@ export function LearningPathOverview({ lp, isAuthenticated, onOpenLevel, onOpenP
               pathSummary={pathSummary}
               onOpenLevel={onOpenLevel}
               onOpenPrior={onOpenPrior}
-              onOpenOutcome={
-                model.outcomeAssessment
-                  ? () =>
-                      onOpenCourse(
-                        model.outcomeAssessment!.identifier,
-                        model.outcomeAssessment!.leafIds[0] ?? ''
-                      )
-                  : undefined
-              }
+              onOpenOutcome={model.outcomeAssessment ? onOpenOutcome : undefined}
               onOpenCourse={onOpenCourse}
             />
           )}

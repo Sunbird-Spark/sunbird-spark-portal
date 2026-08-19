@@ -65,6 +65,10 @@ describe('ViewerService', () => {
       collectionId: 'do_c',
       contextId: 'batch_1',
       assessments: [{ eid: 'ASSESS' }],
+      attemptId: 'attempt-1',
+      assessmentTs: 1700000000000,
+      score: 3,
+      maxScore: 5,
     };
     await service.viewAssess(request);
     expect(mockPost).toHaveBeenCalledWith('/v1/assessment/submit', {
@@ -74,6 +78,10 @@ describe('ViewerService', () => {
         courseId: 'do_c',
         batchId: 'batch_1',
         assessments: [{ eid: 'ASSESS' }],
+        attemptId: 'attempt-1',
+        assessmentTs: 1700000000000,
+        score: 3,
+        maxScore: 5,
       },
     });
   });

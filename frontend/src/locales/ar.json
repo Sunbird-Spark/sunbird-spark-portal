@@ -1554,6 +1554,8 @@
     "start": "بدء",
     "startAssessment": "بدء التقييم",
     "skipAndStartLevel1": "تخطي وبدء المستوى 1",
+    "beforeTheFinalAssessment": "قبل التقييم النهائي",
+    "outcomeAssessmentNote": "هذا هو التقييم النهائي للمسار. أكمله لفتح شهادتك.",
     "beforeThePathOpens": "قبل فتح المسار",
     "questions": "الأسئلة",
     "time": "الوقت",

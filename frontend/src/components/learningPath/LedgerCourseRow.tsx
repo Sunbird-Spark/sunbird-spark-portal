@@ -3,6 +3,7 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 import { Badge } from '@/components/ui/badge';
 import { CourseUnitTree } from './CourseUnitTree';
 import type { LPCourseNode } from '@/types/learningPathTypes';
+import type { LPAssessmentInfo } from '@/services/learningPath';
 import type { ProgressInfo } from '@/types/learningPathTypes';
 
 interface LedgerCourseRowProps {
@@ -19,6 +20,8 @@ interface LedgerCourseRowProps {
   /** Opens one leaf inside this course. Required for the unit tree to be interactive. */
   onOpenContent?: (contentId: string) => void;
   contentStatus?: Record<string, number>;
+  /** Best score / attempts per leaf, forwarded to the unit tree. */
+  assessmentInfo?: Record<string, LPAssessmentInfo>;
   activeContentId?: string | null;
 }
 
@@ -39,6 +42,7 @@ export function LedgerCourseRow({
   onToggle,
   onOpenContent,
   contentStatus,
+  assessmentInfo,
   activeContentId = null,
 }: LedgerCourseRowProps) {
   const { t } = useAppI18n();
@@ -95,6 +99,7 @@ export function LedgerCourseRow({
           <CourseUnitTree
             nodes={units}
             contentStatus={contentStatus}
+            assessmentInfo={assessmentInfo}
             activeContentId={activeContentId}
             onOpenContent={(contentId) => onOpenContent?.(contentId)}
             untitledLabel={t('collectionSidebar.untitled')}

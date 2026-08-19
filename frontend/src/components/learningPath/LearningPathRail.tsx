@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FiHelpCircle, FiAward } from 'react-icons/fi';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { CertificateLockCard } from './CertificateLockCard';
 import { LedgerCourseRow } from './LedgerCourseRow';
 import { computeCourseProgress, getCourseContentStatus } from '@/services/learningPath/learningPathProgress';
+import { buildAssessmentInfoMap } from '@/services/learningPath/learningPathAssessment';
 import type { LearningPathModel, LevelProgressInfo, LevelStatusKey, PathProgressInfo } from '@/types/learningPathTypes';
 import type { ViewerSummaryRecord } from '@/types/viewerServiceTypes';
 
@@ -62,6 +63,9 @@ export function LearningPathRail({
   // `null` = untouched, so the active course stays open until the learner
   // explicitly collapses it; after that their choice wins.
   const [expandedCourseIds, setExpandedCourseIds] = useState<string[] | null>(null);
+  // Best score / attempts per leaf. Derived from the path record, which is where
+  // both the server's and the optimistic patch's assessment entries land.
+  const assessmentInfo = useMemo(() => buildAssessmentInfoMap(pathSummary), [pathSummary]);
   const expanded = expandedCourseIds ?? (activeCourseId ? [activeCourseId] : []);
 
   const toggleCourse = (courseId: string) =>
@@ -141,6 +145,7 @@ export function LearningPathRail({
                         onToggle={() => toggleCourse(course.identifier)}
                         onOpenContent={(contentId) => onOpenCourse(course.identifier, contentId)}
                         contentStatus={getCourseContentStatus(course, summaryByCollectionId, pathSummary)}
+                        assessmentInfo={assessmentInfo}
                         activeContentId={activeContentId ?? null}
                       />
                     ))}
@@ -153,6 +158,9 @@ export function LearningPathRail({
         {model.outcomeAssessment && (
           <div
             onClick={outcomeUnlocked ? onOpenOutcome : undefined}
+            role={outcomeUnlocked && onOpenOutcome ? 'button' : undefined}
+            tabIndex={outcomeUnlocked && onOpenOutcome ? 0 : undefined}
+            onKeyDown={(e) => outcomeUnlocked && e.key === 'Enter' && onOpenOutcome?.()}
             className={`mt-2 flex items-center gap-2.5 rounded-xl border border-dashed border-sunbird-gray-b2 px-3 py-2.5 ${
               outcomeUnlocked && onOpenOutcome ? 'cursor-pointer' : 'opacity-75'
             }`}
