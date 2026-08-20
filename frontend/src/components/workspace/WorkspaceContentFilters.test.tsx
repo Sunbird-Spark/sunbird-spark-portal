@@ -13,7 +13,6 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'workspace.typeFilters.content': 'Content',
         'workspace.typeFilters.quiz': 'Quiz',
         'workspace.typeFilters.collection': 'Collection',
-        'workspace.typeFilters.learningPath': 'Learning Path',
         'workspace.hasTranscripts': 'Transcripts',
         'workspace.gridView': 'Grid view',
         'workspace.listView': 'List view',
@@ -66,12 +65,6 @@ describe('WorkspaceContentFilters', () => {
     const { onTypeFilterChange } = renderFilters();
     fireEvent.click(screen.getByRole('button', { name: 'Quiz' }));
     expect(onTypeFilterChange).toHaveBeenCalledWith('quiz');
-  });
-
-  it('includes Learning Path as a selectable type', () => {
-    const { onTypeFilterChange } = renderFilters();
-    fireEvent.click(screen.getByRole('button', { name: 'Learning Path' }));
-    expect(onTypeFilterChange).toHaveBeenCalledWith('learningPath');
   });
 
   it('toggles the transcript filter on click', () => {

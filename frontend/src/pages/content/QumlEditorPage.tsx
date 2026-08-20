@@ -10,6 +10,7 @@ import { useEditorLock } from '@/hooks/useEditorLock';
 import useImpression from '@/hooks/useImpression';
 import useInteract from '@/hooks/useInteract';
 import { useEditorBackNavigation } from '@/pages/workspace/editors/useEditorBackNavigation';
+import { useEditorViewIntent } from '@/pages/workspace/editors/useEditorViewIntent';
 
 import { useAppI18n } from '@/hooks/useAppI18n';
 
@@ -42,9 +43,12 @@ const QumlEditorPage = () => {
       .finally(() => setLoading(false));
   }, [contentId]);
 
+  const viewIntent = useEditorViewIntent();
+
   const { editorMode, lockError, isLocking, retireLock } = useEditorLock({
     contentId,
     metadata,
+    viewIntent,
   });
 
   const backTo = useEditorBackNavigation();

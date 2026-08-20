@@ -18,7 +18,7 @@ export type ViewMode = 'grid' | 'list';
 
 export type SortOption = 'updated' | 'created' | 'title';
 
-export type ContentTypeFilter = 'all' | 'course' | 'content' | 'quiz' | 'collection' | 'learningPath';
+export type ContentTypeFilter = 'all' | 'course' | 'content' | 'quiz' | 'collection';
 
 export interface EditorOption {
   id: string;
