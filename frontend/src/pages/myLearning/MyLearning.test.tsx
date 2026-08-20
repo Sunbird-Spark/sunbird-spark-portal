@@ -10,6 +10,12 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 vi.mock('@/hooks/useUserEnrolledCollections', () => ({
   useUserEnrolledCollections: vi.fn(),
 }));
+vi.mock('@/hooks/useMySkills', () => ({
+  useMySkills: vi.fn(() => ({
+    aggregate: { totalSkills: 0, gainedSkills: 0, pendingSkills: 0, pathsCompleted: 0, pathsOngoing: 0 },
+    totalCount: 0,
+  })),
+}));
 vi.mock('@/hooks/useAppI18n');
 
 vi.mock('@/components/common/PageLoader', () => ({

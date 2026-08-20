@@ -58,10 +58,10 @@ export function LedgerTable({
       {model.priorAssessment && (
         <div
           onClick={onOpenPrior}
-          className="grid cursor-pointer grid-cols-[2.375rem_1fr_10rem_8.25rem_6.75rem] items-center gap-3.5 border-t border-sunbird-gray-e5 bg-sunbird-lavender/5 px-[1.125rem] py-3.5"
+          className="grid cursor-pointer grid-cols-[2.375rem_1fr_10rem_8.25rem_6.75rem] items-center gap-3.5 border-t border-sunbird-gray-e5 bg-sunbird-brick/5 px-[1.125rem] py-3.5"
           data-testid="ledger-prior-row"
         >
-          <div className="flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-lg bg-sunbird-lavender/15 text-sunbird-lavender">
+          <div className="flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-lg bg-sunbird-brick/15 text-sunbird-brick">
             <FiHelpCircle className="h-4 w-4" />
           </div>
           <div>
@@ -105,12 +105,12 @@ export function LedgerTable({
           role={outcomeUnlocked && onOpenOutcome ? 'button' : undefined}
           tabIndex={outcomeUnlocked && onOpenOutcome ? 0 : undefined}
           onKeyDown={(e) => outcomeUnlocked && e.key === 'Enter' && onOpenOutcome?.()}
-          className={`grid grid-cols-[2.375rem_1fr_10rem_8.25rem_6.75rem] items-center gap-3.5 border-t border-sunbird-gray-e5 bg-sunbird-jamun/5 px-[1.125rem] py-3.5 ${
+          className={`grid grid-cols-[2.375rem_1fr_10rem_8.25rem_6.75rem] items-center gap-3.5 border-t border-sunbird-gray-e5 bg-sunbird-brick/5 px-[1.125rem] py-3.5 ${
             outcomeUnlocked && onOpenOutcome ? 'cursor-pointer' : 'opacity-90'
           }`}
           data-testid="ledger-outcome-row"
         >
-          <div className="flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-lg bg-sunbird-jamun/10 text-sunbird-jamun">
+          <div className="flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-lg bg-sunbird-brick/10 text-sunbird-brick">
             <FiAward className="h-[0.9375rem] w-[0.9375rem]" />
           </div>
           <div>

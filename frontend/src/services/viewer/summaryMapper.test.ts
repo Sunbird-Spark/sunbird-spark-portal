@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   normaliseSummaryRecords,
   indexSummaryByCollectionId,
+  buildCourseSummaryMapForContext,
   getPathSummary,
   buildCourseContextId,
   getCourseContextId,
@@ -207,6 +208,42 @@ describe('getPathSummary — duplicate Learning Path enrolments (regression)', (
   it('returns the single match unchanged when there is no duplicate enrolment', () => {
     const records = normaliseSummaryRecords(LIVE_RESPONSE);
     expect(getPathSummary(records, 'do_2146317230884208641312')?.contextId).toBe('0146338062206566400');
+  });
+});
+
+describe('buildCourseSummaryMapForContext', () => {
+  // A course id that has a completed record from an UNRELATED context (a
+  // different Learning Path/standalone enrolment), plus its real fan-out
+  // record under `lpContextId`.
+  const records: ViewerSummaryRecord[] = [
+    {
+      collectionId: 'do_course_shared',
+      contextId: 'other-lp-batch:do_course_shared',
+      completionPercentage: 100,
+      contentStatus: { do_leaf1: 2 },
+    } as unknown as ViewerSummaryRecord,
+    {
+      collectionId: 'do_course_shared',
+      contextId: 'this-lp-batch:do_course_shared',
+      completionPercentage: 40,
+      contentStatus: { do_leaf1: 1 },
+    } as unknown as ViewerSummaryRecord,
+  ];
+
+  it('returns an empty map when lpContextId is undefined (not enrolled in this path)', () => {
+    const map = buildCourseSummaryMapForContext(records, undefined);
+    expect(map.size).toBe(0);
+  });
+
+  it('excludes a same-collectionId record from a foreign context (the leak this fixes)', () => {
+    const map = buildCourseSummaryMapForContext(records, 'this-lp-batch');
+    expect(map.get('do_course_shared')?.completionPercentage).toBe(40);
+    expect(map.size).toBe(1);
+  });
+
+  it('only includes records whose contextId is a fan-out of the given lpContextId', () => {
+    const map = buildCourseSummaryMapForContext(records, 'unrelated-batch');
+    expect(map.size).toBe(0);
   });
 });
 

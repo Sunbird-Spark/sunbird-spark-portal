@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FiArrowRight, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { SkillTag } from '@/components/learningPath/status/SkillTag';
@@ -22,6 +22,7 @@ const STATUS_TONE: Record<PathSkillStatus, string> = {
 /** One enrolled Learning Path: a collapsed summary row that expands into its gained/pending skills. */
 export function SkillPathAccordion({ pathName, summary, isLoading, isExpanded, onToggle }: SkillPathAccordionProps) {
   const { t } = useAppI18n();
+  const location = useLocation();
 
   if (isLoading || !summary) {
     return (
@@ -113,6 +114,7 @@ export function SkillPathAccordion({ pathName, summary, isLoading, isExpanded, o
 
           <Link
             to={getLearningPathStatusPath(summary.pathId, summary.contextId)}
+            state={{ from: location.pathname + location.search }}
             className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-sunbird-brick hover:underline"
           >
             {t('mySkills.viewPathStatus')}

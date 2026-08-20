@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FiCheck, FiChevronDown, FiChevronUp, FiLock } from 'react-icons/fi';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { getLearningPathStatusPath } from '@/utils/getContentDetailPath';
@@ -16,6 +16,7 @@ interface SkillCardProps {
  */
 export function SkillCard({ entry, isExpanded, onToggle }: SkillCardProps) {
   const { t } = useAppI18n();
+  const location = useLocation();
   const { skill, gained, pathCount, origins } = entry;
 
   return (
@@ -72,6 +73,7 @@ export function SkillCard({ entry, isExpanded, onToggle }: SkillCardProps) {
               <div className="min-w-0">
                 <Link
                   to={getLearningPathStatusPath(origin.pathId, origin.contextId)}
+                  state={{ from: location.pathname + location.search }}
                   className="block truncate text-sm font-medium text-sunbird-brick hover:underline"
                 >
                   {origin.pathName}

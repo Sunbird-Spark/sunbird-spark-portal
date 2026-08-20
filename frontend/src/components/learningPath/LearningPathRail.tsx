@@ -95,7 +95,7 @@ export function LearningPathRail({
             onClick={onOpenPrior}
             className="mt-3 flex cursor-pointer items-center gap-2.5 rounded-xl border border-sunbird-gray-e5 px-3 py-2.5"
           >
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sunbird-lavender text-white">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sunbird-brick text-white">
               <FiHelpCircle className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -166,7 +166,7 @@ export function LearningPathRail({
             }`}
             data-testid="rail-outcome-row"
           >
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sunbird-jamun/10 text-sunbird-jamun">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sunbird-brick/10 text-sunbird-brick">
               <FiAward className="h-3.5 w-3.5" />
             </div>
             <div className="min-w-0 flex-1">

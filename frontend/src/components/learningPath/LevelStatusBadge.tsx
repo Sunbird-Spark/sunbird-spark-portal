@@ -6,7 +6,7 @@ import type { LevelStatusKey } from '@/types/learningPathTypes';
 const LABEL_KEY: Record<LevelStatusKey, string> = {
   completed: 'learningPath.statusCompleted',
   active: 'learningPath.statusInProgress',
-  notStarted: 'learningPath.statusInProgress',
+  notStarted: 'status.notStarted',
   locked: 'learningPath.statusLocked',
   waived: 'learningPath.statusWaived',
   credited: 'learningPath.statusCredited',

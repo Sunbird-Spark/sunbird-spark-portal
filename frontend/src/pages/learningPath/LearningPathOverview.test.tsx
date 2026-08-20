@@ -124,11 +124,21 @@ describe('LearningPathOverview', () => {
       </MemoryRouter>
     );
 
-    const progressCard = screen.getByTestId('path-progress-card');
-    const policyBanner = screen.getByTestId('policy-note-banner');
+    expect(screen.getByTestId('path-progress-card')).toBeInTheDocument();
+  });
 
-    // DOCUMENT_POSITION_FOLLOWING (4) — progressCard must precede policyBanner in the DOM,
-    // which in turn precedes the ledger/side-panel row, so it never slides back into a sidebar.
-    expect(progressCard.compareDocumentPosition(policyBanner) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  // Regression: the policy explainer used to render as an always-visible,
+  // full-width banner below the path progress card - it's now a
+  // click-to-reveal info popover inside PathProgressCard itself (see: policy
+  // note as click-to-reveal info).
+  it('no longer renders the old always-visible policy note banner', () => {
+    render(
+      <MemoryRouter>
+        <LearningPathOverview lp={buildLp()} isAuthenticated onOpenLevel={noop} onOpenPrior={noop} onOpenOutcome={noop} onOpenCourse={noop} />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByTestId('policy-note-banner')).not.toBeInTheDocument();
+    expect(screen.getByTestId('policy-info-trigger')).toBeInTheDocument();
   });
 });

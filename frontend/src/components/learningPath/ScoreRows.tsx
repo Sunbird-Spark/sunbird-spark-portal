@@ -20,7 +20,7 @@ export function ScoreRows({ rows }: ScoreRowsProps) {
             <span className="text-xs text-sunbird-gray-75">{row.sub}</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-pill bg-sunbird-gray-e5">
-            <div className="h-full rounded-pill bg-sunbird-lavender" style={{ width: `${row.pct}%` }} />
+            <div className="h-full rounded-pill bg-sunbird-brick" style={{ width: `${row.pct}%` }} />
           </div>
           <span className="text-right text-sm font-medium text-sunbird-ink">{row.score}</span>
         </div>

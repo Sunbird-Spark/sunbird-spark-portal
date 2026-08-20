@@ -142,6 +142,33 @@ describe('useLearningPath', () => {
     });
   });
 
+  // Regression: a Level's own Course shares an identifier with a course
+  // completed under a totally unrelated context (a different Learning Path,
+  // or a leftover standalone enrolment) — its summary record must not leak
+  // into THIS path's progress while the learner has never enrolled here
+  // (see bug: unenrolled Learning Path showing "Completed").
+  it('ignores a foreign-context summary record for the same course id when not enrolled in this path', () => {
+    mockUseCollectionData = mockCollectionData;
+    mockSummaryRecords = [
+      {
+        userId: 'u1',
+        collectionId: 'do_2146316303263006721126',
+        contextId: 'some-other-lp-batch:do_2146316303263006721126',
+        active: true,
+        status: 2,
+        progress: 2,
+        completionPercentage: 100,
+        contentStatus: { do_21463158442296934411: 2, do_214631592231313408130: 2 },
+      },
+    ];
+
+    const { result } = renderHook(() => useLearningPath(LP_HIERARCHY_NO_ASSESSMENTS.identifier, undefined));
+
+    expect(result.current.progress.pct).toBe(0);
+    expect(result.current.levelProgress[0]?.pct).toBe(0);
+    expect(result.current.levelStatuses).toEqual(['notStarted', 'locked']);
+  });
+
   it('reports isLoading while the hierarchy is missing', () => {
     mockUseCollectionData = undefined;
     mockSummaryRecords = [];

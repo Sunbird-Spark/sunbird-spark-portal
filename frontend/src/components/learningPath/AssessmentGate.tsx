@@ -52,7 +52,7 @@ export function AssessmentGate({
           <button type="button" onClick={onBack} className="mb-3 block bg-transparent p-0 text-sm font-medium text-sunbird-brick">
             ← {t('learningPath.backToPath')}
           </button>
-          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-sunbird-lavender">
+          <span className="text-[0.6875rem] font-medium uppercase tracking-wider text-sunbird-brick">
             {t(isPrior ? 'learningPath.priorAssessmentSub' : 'learningPath.outcomeAssessmentSub')}
           </span>
           <h2 className="mt-1.5 text-2xl font-bold text-foreground">{assessment.name}</h2>

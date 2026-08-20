@@ -17,7 +17,7 @@ import {
   isOutcomeUnlocked,
   getResumeTarget,
 } from '../services/learningPath/learningPathProgress';
-import { getPathSummary, indexSummaryByCollectionId } from '../services/viewer/summaryMapper';
+import { getPathSummary, buildCourseSummaryMapForContext } from '../services/viewer/summaryMapper';
 
 /**
  * Composes the Learning Path hierarchy, Viewer Service progress, and
@@ -49,7 +49,10 @@ export function useLearningPath(pathId: string | undefined, contextIdParam: stri
     () => getPathSummary(summaryRecords, pathId, contextIdParam),
     [summaryRecords, pathId, contextIdParam]
   );
-  const summaryByCollectionId = useMemo(() => indexSummaryByCollectionId(summaryRecords), [summaryRecords]);
+  const summaryByCollectionId = useMemo(
+    () => buildCourseSummaryMapForContext(summaryRecords, enrollment.effectiveContextId),
+    [summaryRecords, enrollment.effectiveContextId]
+  );
 
   const progress = useMemo(
     () => computePathProgress(model, pathSummary, summaryByCollectionId),

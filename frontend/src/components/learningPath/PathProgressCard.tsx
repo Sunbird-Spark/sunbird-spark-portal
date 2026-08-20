@@ -1,10 +1,20 @@
+import { FiInfo } from 'react-icons/fi';
 import { useAppI18n } from '@/hooks/useAppI18n';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/common/Popover';
 import type { LearningPathPolicy, PathProgressInfo } from '@/types/learningPathTypes';
 
 const POLICY_LABEL_KEY: Record<LearningPathPolicy, string> = {
   Fixed: 'learningPath.policyStrict',
   Diagnostic: 'learningPath.policyAdaptive',
   PriorLearning: 'learningPath.policyPriorLearning',
+};
+
+// Moved from the old, always-visible `PolicyNoteBanner` (now deleted) - the
+// explainer is now a click-to-reveal popover next to the Policy stat instead.
+const POLICY_NOTE_KEY: Record<LearningPathPolicy, string> = {
+  Fixed: 'learningPath.policyNoteStrict',
+  Diagnostic: 'learningPath.policyNoteAdaptive',
+  PriorLearning: 'learningPath.policyNotePriorLearning',
 };
 
 interface PathProgressCardProps {
@@ -15,10 +25,40 @@ interface PathProgressCardProps {
   batchEndDate?: string;
 }
 
-function StatColumn({ label, value }: { label: string; value: string | number }) {
+interface StatColumnProps {
+  label: string;
+  value: string | number;
+  /** When provided (with `infoContent`), shows a click-to-reveal info icon next to the label. */
+  infoLabel?: string;
+  infoContent?: string;
+  testId?: string;
+}
+
+/** A single stat, optionally with a click-to-reveal info popover explaining what it means. */
+function StatColumn({ label, value, infoLabel, infoContent, testId }: StatColumnProps) {
+  const hasInfo = !!infoLabel && !!infoContent;
   return (
     <div className="flex flex-col gap-1 text-sm" data-testid="path-progress-stat">
-      <span className="text-sunbird-gray-75">{label}</span>
+      <span className="flex items-center gap-1 text-sunbird-gray-75">
+        {label}
+        {hasInfo && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                aria-label={infoLabel}
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full text-sunbird-gray-75 hover:text-sunbird-brick"
+                data-testid={`${testId}-info-trigger`}
+              >
+                <FiInfo className="h-3.5 w-3.5" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 text-sm leading-relaxed" data-testid={`${testId}-info-popover`}>
+              {infoContent}
+            </PopoverContent>
+          </Popover>
+        )}
+      </span>
       <span className="font-medium text-foreground">{value}</span>
     </div>
   );
@@ -63,10 +103,34 @@ export function PathProgressCard({ progress, policy, courseTotal, scopeCount, ba
       <div className="hidden w-px self-stretch bg-sunbird-gray-e5 lg:block" aria-hidden="true" />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:flex lg:flex-1 lg:flex-wrap lg:gap-8">
-        <StatColumn label={t('learningPath.policy')} value={t(POLICY_LABEL_KEY[policy])} />
-        <StatColumn label={t('learningPath.levels')} value={progress.levelCount} />
-        <StatColumn label={t('learningPath.coursesLinked')} value={courseTotal} />
-        <StatColumn label={t('learningPath.skillsScoped')} value={scopeCount} />
+        <StatColumn
+          label={t('learningPath.policy')}
+          value={t(POLICY_LABEL_KEY[policy])}
+          infoLabel={t('learningPath.policyInfoLabel')}
+          infoContent={t(POLICY_NOTE_KEY[policy])}
+          testId="policy"
+        />
+        <StatColumn
+          label={t('learningPath.levels')}
+          value={progress.levelCount}
+          infoLabel={t('learningPath.levelsInfoLabel')}
+          infoContent={t('learningPath.levelsNote')}
+          testId="levels"
+        />
+        <StatColumn
+          label={t('learningPath.coursesLinked')}
+          value={courseTotal}
+          infoLabel={t('learningPath.coursesLinkedInfoLabel')}
+          infoContent={t('learningPath.coursesLinkedNote')}
+          testId="courses-linked"
+        />
+        <StatColumn
+          label={t('learningPath.skillsScoped')}
+          value={scopeCount}
+          infoLabel={t('learningPath.skillsScopedInfoLabel')}
+          infoContent={t('learningPath.skillsScopedNote')}
+          testId="skills-scoped"
+        />
         {batchEndDate && <StatColumn label={t('learningPath.batchEnds')} value={batchEndDate} />}
       </div>
     </div>

@@ -6,6 +6,7 @@ import MyLearningCourses, { LearningTypeFilter } from "@/components/myLearning/M
 import MyLearningProgress from "@/components/myLearning/MyLearningProgress";
 import MyLearningUpcomingBatches from "@/components/myLearning/MyLearningUpcomingBatches";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
+import { useMySkills } from "@/hooks/useMySkills";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import useImpression from "@/hooks/useImpression";
 import { parseCourseContextId } from "@/services/viewer/summaryMapper";
@@ -19,6 +20,7 @@ const MyLearning = () => {
   useImpression({ type: 'view', pageid: 'my-learning', env: 'learn' });
 
   const { data, isLoading, error } = useUserEnrolledCollections();
+  const { aggregate, totalCount: pathsTotal } = useMySkills();
   const [typeFilter, setTypeFilter] = useState<LearningTypeFilter>('course');
 
   const courses = useMemo(() => {
@@ -86,10 +88,15 @@ const MyLearning = () => {
           {/* Right Column - Hours Spent + Upcoming Batches */}
           <div className="space-y-6 h-full min-h-0 overflow-y-auto">
             <MyLearningProgress
+              typeFilter={typeFilter}
               lessonsVisited={lessonsVisited}
               totalLessons={totalLessons}
               contentsCompleted={contentsCompleted}
               totalContents={totalCourses}
+              skillsGained={aggregate.gainedSkills}
+              skillsTotal={aggregate.totalSkills}
+              pathsCompleted={aggregate.pathsCompleted}
+              pathsTotal={pathsTotal}
             />
             {/* Upcoming Batches - New Design */}
             <MyLearningUpcomingBatches upcomingBatches={upcomingBatches} />

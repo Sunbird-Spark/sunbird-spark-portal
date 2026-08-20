@@ -60,7 +60,7 @@ export function LedgerCourseRow({
         tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       >
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sunbird-lavender/15 text-sunbird-lavender">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sunbird-brick/15 text-sunbird-brick">
           <Icon className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">

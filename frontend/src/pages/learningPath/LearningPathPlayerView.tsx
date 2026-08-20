@@ -9,6 +9,8 @@ import { normalizeQumlPlayerEvent } from '@/services/players/playerEventNormaliz
 import { LearningPathPlayerCard } from '@/components/learningPath/LearningPathPlayerCard';
 import { LearningPathRail } from '@/components/learningPath/LearningPathRail';
 import PageLoader from '@/components/common/PageLoader';
+import { Button } from '@/components/common/Button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/common/Dialog';
 import type { useLearningPath } from '@/hooks/useLearningPath';
 
 type LearningPathData = ReturnType<typeof useLearningPath>;
@@ -117,7 +119,24 @@ export function LearningPathPlayerView({
     : (course?.name ?? '');
 
   if (!enrollment.isEnrolled) {
-    return <PageLoader error={t('learningPath.mustJoinPath')} onRetry={onBackToPath} />;
+    // Rendered as a popup (not `PageLoader`'s full-screen overlay) so the
+    // surrounding page chrome (Header/Sidebar) stays visible behind it - see
+    // bug: "must join" error replacing the entire screen.
+    return (
+      <Dialog open onOpenChange={() => {}}>
+        <DialogContent hideCloseButton className="text-center">
+          <DialogHeader className="items-center text-center">
+            <DialogTitle>{t('learningPath.joinRequiredTitle')}</DialogTitle>
+            <DialogDescription>{t('learningPath.mustJoinPath')}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center">
+            <Button type="button" onClick={onBackToPath}>
+              {t('learningPath.backToPath')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
   }
 
   if (courseLoading) return <PageLoader />;

@@ -113,8 +113,36 @@ describe('LearningPathPlayerView', () => {
       />
     );
 
-    expect(screen.getByTestId('page-loader')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('learningPath.mustJoinPath')).toBeInTheDocument();
     expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+  });
+
+  // Regression: this used to render `PageLoader`'s full-screen overlay
+  // (`fixed inset-0 z-50`), replacing the entire page including the
+  // Header/Sidebar - see bug: "must join" error must show as a popup only.
+  it('shows the "must join" message as a dialog, not a full-page replacement', () => {
+    mockCollectionData = { hierarchyRoot: level1.courses[0] };
+    mockContentData = { data: { content: { mimeType: 'video/mp4', identifier: 'res_1' } } };
+    const onBackToPath = vi.fn();
+
+    render(
+      <LearningPathPlayerView
+        lp={buildLp({ enrollment: { isEnrolled: false, effectiveContextId: undefined } })}
+        courseId="course_1"
+        contentId="res_1"
+        onBackToPath={onBackToPath}
+        onOpenLevel={vi.fn()}
+        onOpenPrior={vi.fn()}
+        onOpenOutcome={vi.fn()}
+        onNavigateContent={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId('page-loader')).not.toBeInTheDocument();
+    expect(screen.getByText('learningPath.joinRequiredTitle')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('learningPath.backToPath'));
+    expect(onBackToPath).toHaveBeenCalledTimes(1);
   });
 
   it('renders the ContentPlayer and the Learning Path rail when enrolled', () => {

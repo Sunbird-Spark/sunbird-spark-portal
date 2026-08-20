@@ -3,7 +3,6 @@ import { PathProgressCard } from '@/components/learningPath/PathProgressCard';
 import { CertificateLockCard } from '@/components/learningPath/CertificateLockCard';
 import { EnrolCard } from '@/components/learningPath/EnrolCard';
 import { LearningPathCreatorPanel } from '@/components/learningPath/LearningPathCreatorPanel';
-import { PolicyNoteBanner } from '@/components/learningPath/PolicyNoteBanner';
 import { LedgerTable } from '@/components/learningPath/LedgerTable';
 import { LearningPathGoBackButton } from '@/components/learningPath/LearningPathGoBackButton';
 import type { useLearningPath } from '@/hooks/useLearningPath';
@@ -62,10 +61,6 @@ export function LearningPathOverview({
           scopeCount={model.allSkills.length}
           batchEndDate={enrollment.batchEndDate}
         />
-      </div>
-
-      <div className="mb-4">
-        <PolicyNoteBanner policy={policy} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_18.75rem] lg:items-start">

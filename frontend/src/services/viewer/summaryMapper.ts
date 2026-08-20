@@ -54,6 +54,30 @@ export function indexSummaryByCollectionId(
 }
 
 /**
+ * Same shape as `indexSummaryByCollectionId`, but only includes a course's
+ * record when it's a fan-out of THIS Learning Path's own context
+ * (`<lpContextId>:<courseId>`) — see `buildCourseContextId`. Without this
+ * scoping, a course id that also has a summary record from an unrelated
+ * context (a different LP reusing the same course, a standalone enrolment)
+ * leaks into this path's progress, showing a Level "Completed" before the
+ * learner has ever enrolled in THIS path (`lpContextId` undefined —
+ * see bug: unenrolled Learning Path showing Completed).
+ */
+export function buildCourseSummaryMapForContext(
+  records: ViewerSummaryRecord[],
+  lpContextId: string | undefined
+): Map<string, ViewerSummaryRecord> {
+  const map = new Map<string, ViewerSummaryRecord>();
+  if (!lpContextId) return map;
+  records.forEach((record) => {
+    if (record.collectionId && record.contextId?.startsWith(`${lpContextId}:`)) {
+      map.set(record.collectionId, record);
+    }
+  });
+  return map;
+}
+
+/**
  * The path-root summary record — the one whose collectionId equals the
  * Learning Path's identifier. A user can end up enrolled in the same
  * Learning Path under more than one batch (observed live); picking the
