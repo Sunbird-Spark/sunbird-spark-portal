@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import LearningPathPage from './LearningPathPage';
@@ -14,6 +14,11 @@ vi.mock('@/hooks/usePermission', () => ({
 
 vi.mock('@/hooks/useImpression', () => ({
   default: () => undefined,
+}));
+
+const mockUseStoredAssessmentScores = vi.fn(() => ({}) as Record<string, { score: number; maxScore: number; attempts: number }>);
+vi.mock('@/hooks/useAssessmentScores', () => ({
+  useStoredAssessmentScores: (collectionId: string | undefined) => mockUseStoredAssessmentScores(collectionId),
 }));
 
 const priorCourse: LPCourseNode = {
@@ -198,6 +203,22 @@ function renderAt(path: string, state?: unknown) {
 }
 
 describe('LearningPathPage', () => {
+  beforeEach(() => {
+    mockUseStoredAssessmentScores.mockReset().mockReturnValue({});
+  });
+
+  // Regression: the gate/complete screens used to read the score only from
+  // `pathSummary.assessmentStatus`, which is wiped by the next `['viewerSummary']`
+  // refetch - the durable local store must fill in when that happens.
+  it('shows the prior assessment score from the local store even when pathSummary has no assessmentStatus', () => {
+    mockUseStoredAssessmentScores.mockImplementation((collectionId) =>
+      collectionId === 'course_prior' ? { qs_prior: { score: 8, maxScore: 10, attempts: 1 } } : {}
+    );
+    mockLpData = buildLp({ pathSummary: undefined });
+    renderAt('/learning-path/lp_1/batch/batch_1/prior');
+    expect(screen.getByText('8/10')).toBeInTheDocument();
+  });
+
   it('renders the overview screen (Ledger table) by default', () => {
     mockLpData = buildLp();
     renderAt('/learning-path/lp_1');

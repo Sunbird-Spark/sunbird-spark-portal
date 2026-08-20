@@ -342,4 +342,27 @@ describe('useContentView', () => {
       expect(second).not.toBe(first);
     });
   });
+
+  // Regression: the END branch used to unconditionally re-patch this leaf's
+  // status from `progressToStatus(effectiveProgress)` right after `sendAssess()`
+  // had already optimistically patched it to Completed - since a SelfAssess
+  // submission's END summary rarely carries a standard progress/endpageseen
+  // signal, that second patch downgraded the leaf right back to NotStarted in
+  // the same tick (see bug: level appears locked right after passing a
+  // self-assessment).
+  describe('SelfAssess END status', () => {
+    const selfAssessParams = { ...defaultParams, contentType: 'SelfAssess' };
+
+    it('does not downgrade the Completed status set by sendAssess when the END event carries no progress signal', () => {
+      const { result } = renderHook(() => useContentView(selfAssessParams));
+      act(() => {
+        result.current({ eid: 'START' });
+        result.current({ eid: 'ASSESS', edata: { score: 8, item: { maxscore: 10 } } });
+        result.current({ eid: 'END', edata: {} });
+      });
+
+      expect(mockPatchSummary).toHaveBeenCalledTimes(1);
+      expect(mockPatchSummary).toHaveBeenCalledWith('course_1', 'content_1', 2, { score: 8, max_score: 10 });
+    });
+  });
 });

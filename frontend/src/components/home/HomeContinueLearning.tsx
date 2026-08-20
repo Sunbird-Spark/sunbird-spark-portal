@@ -8,6 +8,7 @@ import type { TrackableCollection } from "@/types/TrackableCollections";
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { getPlaceholderImage } from '@/utils/getPlaceholderImage';
 import { getContentDetailPath } from '@/utils/getContentDetailPath';
+import { parseCourseContextId } from '@/services/viewer/summaryMapper';
 
 // Circular progress component
 const CircularProgress = ({ progress }: { progress: number }) => {
@@ -50,6 +51,12 @@ const HomeContinueLearning = () => {
     const { data, isLoading } = useUserEnrolledCollections();
 
     const lastAccessedCourse: TrackableCollection | undefined = (data?.data?.courses ?? [])
+        // Enrolling in a Learning Path fans out per-course records with a composite
+        // "<lpBatchId>:<courseId>" batchId - strip those, or a course inside an
+        // enrolled Learning Path can outrank the path's own record here and get
+        // treated as a plain Course (isLearningPath below reads its primaryCategory,
+        // which is "Course"), building a broken /collection/.../batch/<composite> URL.
+        .filter((c: TrackableCollection) => !parseCourseContextId(c.batchId))
         .filter((c: TrackableCollection) => c.completionPercentage < 100)
         .sort((a: TrackableCollection, b: TrackableCollection) =>
             (b.lastContentAccessTime ?? 0) - (a.lastContentAccessTime ?? 0)

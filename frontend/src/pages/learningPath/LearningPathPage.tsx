@@ -10,7 +10,8 @@ import { PathCompletionView } from '@/components/learningPath/PathCompletionView
 import { LearningPathOverview } from './LearningPathOverview';
 import { LearningPathPlayerView } from './LearningPathPlayerView';
 import { LearningPathStatusView } from './LearningPathStatusView';
-import { getAssessmentScore } from '@/services/learningPath/learningPathProgress';
+import { useStoredAssessmentScores } from '@/hooks/useAssessmentScores';
+import { mergeAssessmentSources, resolveAssessmentInfo } from '@/services/learningPath/learningPathAssessment';
 import type { ScoreRow } from '@/components/learningPath/ScoreRows';
 
 const LearningPathPage = () => {
@@ -35,6 +36,25 @@ const LearningPathPage = () => {
 
   const lp = useLearningPath(pathId, contextId);
   const { model, policy, levelStatuses, pathSummary, outcomeState } = lp;
+
+  // Durable local scores (survive the `['viewerSummary']` refetch that wipes
+  // `pathSummary.assessmentStatus`) - merged with the path record below via
+  // `mergeAssessmentSources` so a submitted score never disappears after a
+  // cache invalidation/reload (see bug: prior/outcome score reverts to "—").
+  const priorLocalScores = useStoredAssessmentScores(model.priorAssessment?.identifier);
+  const outcomeLocalScores = useStoredAssessmentScores(model.outcomeAssessment?.identifier);
+  const getPriorScore = () =>
+    resolveAssessmentInfo(
+      model.priorAssessment?.identifier,
+      model.priorAssessment?.leafIds,
+      mergeAssessmentSources(pathSummary, priorLocalScores)
+    );
+  const getOutcomeScore = () =>
+    resolveAssessmentInfo(
+      model.outcomeAssessment?.identifier,
+      model.outcomeAssessment?.leafIds,
+      mergeAssessmentSources(pathSummary, outcomeLocalScores)
+    );
 
   const basePath = contextId ? `/learning-path/${pathId}/batch/${contextId}` : `/learning-path/${pathId}`;
   const goOverview = () => navigate(basePath);
@@ -77,7 +97,7 @@ const LearningPathPage = () => {
           assessment={model.priorAssessment}
           policy={policy}
           allSkills={model.allSkills}
-          bestScore={getAssessmentScore(model.priorAssessment.identifier, pathSummary, model.priorAssessment.leafIds)}
+          bestScore={getPriorScore()}
           onStart={() => openCourse(model.priorAssessment!.identifier, model.priorAssessment!.leafIds[0] ?? '')}
           onSkip={goOverview}
           onBack={goOverview}
@@ -99,7 +119,7 @@ const LearningPathPage = () => {
           variant="outcome"
           assessment={model.outcomeAssessment}
           allSkills={model.allSkills}
-          bestScore={getAssessmentScore(model.outcomeAssessment.identifier, pathSummary, model.outcomeAssessment.leafIds)}
+          bestScore={getOutcomeScore()}
           onStart={() => openCourse(model.outcomeAssessment!.identifier, model.outcomeAssessment!.leafIds[0] ?? '')}
           onBack={goOverview}
         />
@@ -110,7 +130,7 @@ const LearningPathPage = () => {
   if (location.pathname.endsWith('/complete')) {
     const scores: ScoreRow[] = [];
     if (model.priorAssessment) {
-      const s = getAssessmentScore(model.priorAssessment.identifier, pathSummary, model.priorAssessment.leafIds);
+      const s = getPriorScore();
       scores.push({
         name: model.priorAssessment.name,
         sub: t('learningPath.priorAssessmentSub'),
@@ -119,7 +139,7 @@ const LearningPathPage = () => {
       });
     }
     if (model.outcomeAssessment) {
-      const s = getAssessmentScore(model.outcomeAssessment.identifier, pathSummary, model.outcomeAssessment.leafIds);
+      const s = getOutcomeScore();
       scores.push({
         name: model.outcomeAssessment.name,
         sub: t('learningPath.outcomeAssessmentSub'),

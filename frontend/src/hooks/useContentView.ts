@@ -213,11 +213,20 @@ export function useContentView({
 
       if (eidUpper === 'END') {
         const summary = extractSummary(event);
+        // Set when `sendAssess()` below already optimistically patched this
+        // leaf to Completed - a SelfAssess submission's END summary rarely
+        // carries a standard progress/endpageseen signal, so the unconditional
+        // progress-status patch further down would otherwise immediately
+        // downgrade that just-set Completed status back to NotStarted/InProgress
+        // in the same tick (see bug: level appears locked right after passing
+        // a self-assessment).
+        let selfAssessCompletedViaScore = false;
         if (isSelfAssess) {
           const hasScore =
             eventHasScore(event, false) ||
             assessEventsRef.current.some((e) => eventHasScore(e as TelemetryEvent, false));
           if (hasScore) {
+            selfAssessCompletedViaScore = true;
             void sendAssess();
           }
         }
@@ -225,7 +234,9 @@ export function useContentView({
         // Optimistic: reflect this content's new status immediately (drives
         // level lock/unlock via useLearningPath) rather than waiting on the
         // server round-trip below.
-        patchSummary(collectionId, contentId, progressToStatus(effectiveProgress));
+        if (!selfAssessCompletedViaScore) {
+          patchSummary(collectionId, contentId, progressToStatus(effectiveProgress));
+        }
         // Per the Viewer Service spec, view/update's "timespent" (seconds) comes
         // from the END telemetry event's edata.duration.
         const rawDuration = (rawEvent as { edata?: { duration?: unknown } } | undefined)?.edata?.duration;
