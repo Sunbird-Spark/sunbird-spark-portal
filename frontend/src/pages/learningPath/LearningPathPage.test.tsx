@@ -16,7 +16,10 @@ vi.mock('@/hooks/useImpression', () => ({
   default: () => undefined,
 }));
 
-const mockUseStoredAssessmentScores = vi.fn(() => ({}) as Record<string, { score: number; maxScore: number; attempts: number }>);
+type StoredScoreMap = Record<string, { score: number; maxScore: number; attempts: number }>;
+const mockUseStoredAssessmentScores = vi.fn(
+  (_collectionId: string | undefined): StoredScoreMap => ({})
+);
 vi.mock('@/hooks/useAssessmentScores', () => ({
   useStoredAssessmentScores: (collectionId: string | undefined) => mockUseStoredAssessmentScores(collectionId),
 }));
@@ -211,7 +214,7 @@ describe('LearningPathPage', () => {
   // `pathSummary.assessmentStatus`, which is wiped by the next `['viewerSummary']`
   // refetch - the durable local store must fill in when that happens.
   it('shows the prior assessment score from the local store even when pathSummary has no assessmentStatus', () => {
-    mockUseStoredAssessmentScores.mockImplementation((collectionId) =>
+    mockUseStoredAssessmentScores.mockImplementation((collectionId): StoredScoreMap =>
       collectionId === 'course_prior' ? { qs_prior: { score: 8, maxScore: 10, attempts: 1 } } : {}
     );
     mockLpData = buildLp({ pathSummary: undefined });
