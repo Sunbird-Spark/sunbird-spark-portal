@@ -210,6 +210,7 @@ const PRIMARY_CATEGORY_THEMES: Record<string, CardTheme> = {
   course: withId('crs', THEME_WAVE),
   'digital textbook': withId('dtb', THEME_WAVE),
   'learning path': withId('lnp', THEME_WAVE),
+  level: withId('lvl', THEME_WAVE),
 
   // Textbook family
   etextbook: withId('etb', THEME_SUNFLOWER),
@@ -276,6 +277,7 @@ const PRIMARY_CATEGORY_ICONS: Record<string, IconType> = {
   course: FiBookOpen,
   'digital textbook': FiBook,
   'learning path': FiMap,
+  level: FiLayers,
   etextbook: FiBook,
   textbook: FiBook,
   'learning resource': FiVideo,

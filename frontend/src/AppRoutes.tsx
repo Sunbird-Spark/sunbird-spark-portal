@@ -23,11 +23,13 @@ import PageLayout from './components/layout/PageLayout';
 
 import Home from './pages/home/Home';
 import Profile from './pages/profile/Profile';
+import MySkills from './pages/mySkills/MySkills';
 import DeleteAccountGate from './pages/profile/DeleteAccountGate';
 import WorkspacePage from './pages/workspace/WorkspacePage';
 import ReportsPage from './pages/reports/ReportsPage';
 import CreateContentPage from './pages/content/CreateContentPage';
 import CollectionDetailPage from './pages/collection/CollectionDetailPage';
+import LearningPathPage from './pages/learningPath/LearningPathPage';
 import Index from './pages/Index';
 import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import PasswordResetSuccess from './pages/forgotPassword/PasswordResetSuccess';
@@ -76,6 +78,10 @@ const AppRoutes: React.FC = () => {
           </Route>
           <Route path=":collectionId/dashboard/:tab" element={<CourseDashboardPage />} />
         </Route>
+        {/* Learning Path creator dashboard - same page as the Course dashboard above (see
+            CourseDashboardPage's isLearningPath branch); kept outside the shared-sidebar
+            `learning-path` block below since this page renders its own Header/Footer. */}
+        <Route path="learning-path/:pathId/dashboard/:tab" element={<CourseDashboardPage />} />
 
         {/* Full-screen routes (own layout, no shared sidebar) */}
         <Route path="/workspace/review/:contentId" element={
@@ -137,6 +143,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/explore" element={<Explore />} />
           <Route path="/my-learning" element={<MyLearning />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/skills" element={<MySkills />} />
           <Route path="/help-support" element={<HelpSupport />} />
           <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
           <Route path="/reports" element={<ReportsPage />} />
@@ -161,6 +168,23 @@ const AppRoutes: React.FC = () => {
               <WorkspacePage />
             </ProtectedRoute>
           } />
+          <Route path="learning-path">
+            <Route path=":pathId" element={<LearningPathPage />} />
+            {/* Not-yet-enrolled variants (no contextId in the URL) - mirrors CollectionDetailPage's :collectionId vs :collectionId/batch/:batchId split. */}
+            <Route path=":pathId/level/:levelId" element={<LearningPathPage />} />
+            <Route path=":pathId/prior" element={<LearningPathPage />} />
+            <Route path=":pathId/outcome" element={<LearningPathPage />} />
+            <Route path=":pathId/complete" element={<LearningPathPage />} />
+            <Route path=":pathId/status" element={<LearningPathPage />} />
+            <Route path=":pathId/course/:courseId/content/:contentId" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId/level/:levelId" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId/prior" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId/outcome" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId/complete" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId/status" element={<LearningPathPage />} />
+            <Route path=":pathId/batch/:contextId/course/:courseId/content/:contentId" element={<LearningPathPage />} />
+          </Route>
         </Route>
 
         {/* Catch-all redirect */}
