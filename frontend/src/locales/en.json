@@ -605,6 +605,7 @@
     "startingEditor": "Starting Editor",
     "launchingEditor": "Launching {{name}} editor...",
     "enterContentName": "Enter content name",
+    "evaluationCourse": "Evaluation Course",
     "typeFilters": {
       "all": "All Types",
       "course": "Course",
