@@ -16,6 +16,8 @@ interface LedgerTableProps {
   outcomeProgress?: (ProgressInfo & { status: 'completed' | 'active' | 'notStarted' }) | null;
   summaryByCollectionId: Map<string, ViewerSummaryRecord>;
   pathSummary?: ViewerSummaryRecord;
+  /** Locks the prior row and every course row's CTA when the learner has not joined this path yet. */
+  isEnrolled: boolean;
   onOpenLevel: (levelId: string) => void;
   onOpenPrior: () => void;
   /** Opens the outcome assessment. Only reachable once `outcomeUnlocked` is true. */
@@ -37,6 +39,7 @@ export function LedgerTable({
   outcomeProgress,
   summaryByCollectionId,
   pathSummary,
+  isEnrolled,
   onOpenLevel,
   onOpenPrior,
   onOpenOutcome,
@@ -55,30 +58,47 @@ export function LedgerTable({
         <span className="text-right">{t('learningPath.status')}</span>
       </div>
 
-      {model.priorAssessment && (
-        <div
-          onClick={onOpenPrior}
-          className="grid cursor-pointer grid-cols-[2.375rem_1fr_10rem_8.25rem_6.75rem] items-center gap-3.5 border-t border-sunbird-gray-e5 bg-sunbird-brick/5 px-[1.125rem] py-3.5"
-          data-testid="ledger-prior-row"
-        >
-          <div className="flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-lg bg-sunbird-brick/15 text-sunbird-brick">
-            <FiHelpCircle className="h-4 w-4" />
+      {model.priorAssessment && (() => {
+        // Three states, matching the outcome row below: an unenrolled visitor
+        // must never see "In progress" for content they haven't joined yet -
+        // see bug: unenrolled learner shown "In progress" on the prior
+        // assessment. Precedence: not enrolled > done > not started > in progress.
+        const priorLabel = !isEnrolled
+          ? 'learningPath.statusLocked'
+          : priorDone
+            ? 'learningPath.statusCompleted'
+            : priorProgress?.status === 'notStarted'
+              ? 'learningPath.start'
+              : 'learningPath.statusInProgress';
+        const isOpenable = isEnrolled && Boolean(onOpenPrior);
+        return (
+          <div
+            onClick={isOpenable ? onOpenPrior : undefined}
+            role={isOpenable ? 'button' : undefined}
+            tabIndex={isOpenable ? 0 : undefined}
+            onKeyDown={(e) => isOpenable && e.key === 'Enter' && onOpenPrior()}
+            className={`grid grid-cols-[2.375rem_1fr_10rem_8.25rem_6.75rem] items-center gap-3.5 border-t border-sunbird-gray-e5 bg-sunbird-brick/5 px-[1.125rem] py-3.5 ${
+              isOpenable ? 'cursor-pointer' : 'opacity-90'
+            }`}
+            data-testid="ledger-prior-row"
+          >
+            <div className="flex h-[1.875rem] w-[1.875rem] items-center justify-center rounded-lg bg-sunbird-brick/15 text-sunbird-brick">
+              <FiHelpCircle className="h-4 w-4" />
+            </div>
+            <div>
+              <span className="block text-sm font-medium text-foreground">{model.priorAssessment.name}</span>
+              <span className="text-xs text-sunbird-gray-75">{t('learningPath.priorAssessmentSub')}</span>
+            </div>
+            <span className="text-xs text-sunbird-gray-75">{t('learningPath.definesTheScope')}</span>
+            <span className="text-sm font-medium text-sunbird-ink">
+              {priorProgress ? `${priorProgress.completed}/${priorProgress.total}` : '—'}
+            </span>
+            <span className="text-right">
+              <Badge variant={priorDone ? 'default' : 'outline'}>{t(priorLabel)}</Badge>
+            </span>
           </div>
-          <div>
-            <span className="block text-sm font-medium text-foreground">{model.priorAssessment.name}</span>
-            <span className="text-xs text-sunbird-gray-75">{t('learningPath.priorAssessmentSub')}</span>
-          </div>
-          <span className="text-xs text-sunbird-gray-75">{t('learningPath.definesTheScope')}</span>
-          <span className="text-sm font-medium text-sunbird-ink">
-            {priorProgress ? `${priorProgress.completed}/${priorProgress.total}` : '—'}
-          </span>
-          <span className="text-right">
-            <Badge variant={priorDone ? 'default' : 'outline'}>
-              {priorDone ? t('learningPath.statusCompleted') : t('learningPath.statusInProgress')}
-            </Badge>
-          </span>
-        </div>
-      )}
+        );
+      })()}
 
       {model.levels.map((level, i) => (
         <LedgerLevelRow
@@ -90,6 +110,7 @@ export function LedgerTable({
           expanded={openLevelId === level.identifier}
           summaryByCollectionId={summaryByCollectionId}
           pathSummary={pathSummary}
+          isEnrolled={isEnrolled}
           onToggle={() => setOpenLevelId((prev) => (prev === level.identifier ? null : level.identifier))}
           onOpenLevel={() => onOpenLevel(level.identifier)}
           onOpenCourse={onOpenCourse}

@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { userProxy } from '../proxies/userProxy.js';
 import { kongProxy } from '../proxies/kongProxy.js';
-import { viewerProxy } from '../proxies/viewerProxy.js';
 import { validateRecaptcha } from '../middlewares/googleAuth.js';
 import { handlePassword } from '../middlewares/passwordHandler.js';
 import { requireAuth } from '../auth/oidcMiddleware.js';
@@ -28,28 +27,40 @@ router.post('/user/v1/password/reset', handlePassword, userProxy);
 router.post('/otp/v1/verify', kongProxy);
 router.post('/user/v2/signup', handlePassword, kongProxy);
 
-// Viewer Service routes - registered above the catch-all so they resolve to
-// viewerProxy instead of kongProxy. Confirmed route list (method + path):
-//   POST   /v1/view/start
-//   POST   /v1/view/update
-//   POST   /v1/assessment/submit
-//   POST   /v1/view/end
-//   POST   /v1/view/read
-//   POST   /v1/assessment/read
-//   GET    /v1/summary/list/:userId
-//   POST   /v1/summary/read
-//   DELETE /v1/summary/delete/:userId          (?all=true for all enrolments, else specific)
-//   GET    /v1/summary/download/:userId        (?format=csv)
-router.post('/v1/view/start', requireAuth(), viewerProxy);
-router.post('/v1/view/update', requireAuth(), viewerProxy);
-router.post('/v1/assessment/submit', requireAuth(), viewerProxy);
-router.post('/v1/view/end', requireAuth(), viewerProxy);
-router.post('/v1/view/read', requireAuth(), viewerProxy);
-router.post('/v1/assessment/read', requireAuth(), viewerProxy);
-router.get('/v1/summary/list/:userId', requireAuth(), requireOwnUserId, viewerProxy);
-router.post('/v1/summary/read', requireAuth(), viewerProxy);
-router.delete('/v1/summary/delete/:userId', requireAuth(), requireOwnUserId, viewerProxy);
-router.get('/v1/summary/download/:userId', requireAuth(), requireOwnUserId, viewerProxy);
+// Viewer Service routes, now fronted by Kong: the client-facing URI is
+// `<prefix>/v1/<verb>` and Kong rewrites it onto the service's own
+// `/v1/<resource>/<verb>`. Prefixes are the Helm `view_prefix` /
+// `assessment_prefix` / `summary_prefix` values.
+//
+// These all resolve to kongProxy, which is also what the `/*rest` catch-all
+// below would give them - so the seven bodyless POST routes are documentation
+// of the supported surface rather than load-bearing routing. The three
+// `:userId` routes ARE load-bearing: they must stay registered here to pick up
+// requireOwnUserId (see above), which the catch-all does not apply.
+//
+// Confirmed route list (method + path):
+//   POST   /view/v1/start
+//   POST   /view/v1/update
+//   POST   /assessment/v1/submit
+//   POST   /view/v1/end
+//   POST   /view/v1/read
+//   POST   /assessment/v1/read
+//   GET    /summary/v1/list/:userId
+//   POST   /summary/v1/read
+//   DELETE /summary/v1/delete/:userId          (?all=true for all enrolments, else specific)
+//   GET    /summary/v1/download/:userId        (?format=csv)
+//
+// Kong also exposes /view/v1/agg, which the portal does not call.
+router.post('/view/v1/start', requireAuth(), kongProxy);
+router.post('/view/v1/update', requireAuth(), kongProxy);
+router.post('/assessment/v1/submit', requireAuth(), kongProxy);
+router.post('/view/v1/end', requireAuth(), kongProxy);
+router.post('/view/v1/read', requireAuth(), kongProxy);
+router.post('/assessment/v1/read', requireAuth(), kongProxy);
+router.get('/summary/v1/list/:userId', requireAuth(), requireOwnUserId, kongProxy);
+router.post('/summary/v1/read', requireAuth(), kongProxy);
+router.delete('/summary/v1/delete/:userId', requireAuth(), requireOwnUserId, kongProxy);
+router.get('/summary/v1/download/:userId', requireAuth(), requireOwnUserId, kongProxy);
 
 const recaptchaProtectedRoutes: string[] = [
     '/user/v1/exists/email/:emailId',

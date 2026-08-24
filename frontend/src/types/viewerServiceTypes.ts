@@ -55,6 +55,14 @@ export interface ViewerSummaryRecord {
   lastReadContentId?: string | null;
   lastReadContentStatus?: number | null;
   lastContentAccessTime?: string | number | null;
+  /**
+   * Course/leaf ids waived by a prior assessment - e.g. under the Diagnostic
+   * policy, skills the learner already demonstrated. Live field name
+   * (snake_case, as returned by the Viewer Service).
+   */
+  optional_nodes?: string[];
+  /** Normalised alias, populated by summaryMapper - see `getOptionalNodeIds`. */
+  optionalNodes?: string[];
   [key: string]: unknown;
 }
 

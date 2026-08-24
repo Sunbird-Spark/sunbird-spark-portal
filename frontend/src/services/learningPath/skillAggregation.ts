@@ -1,6 +1,7 @@
 import type { ViewerSummaryRecord } from '../../types/viewerServiceTypes';
 import type { LearningPathModel, LPLevelNode } from '../../types/learningPathTypes';
 import { computeCourseProgress, computeLevelProgress, computePathProgress, deriveLevelStatuses } from './learningPathProgress';
+import { deriveWaiversFromOptionalNodes } from './levelWaivers';
 import { getAttainedLevels, getGainedSkills } from './skillAttainment';
 
 export type PathSkillStatus = 'completed' | 'ongoing' | 'not-started';
@@ -70,9 +71,10 @@ function levelGainedAt(
  *
  * Mirrors the per-path status page (`LearningPathStatusView`): a Level's skills
  * count as gained on completion or on a waiver/credit, independent of the
- * unlock policy. Waivers are intentionally not fetched here — `useLevelWaivers`
- * is a stub returning `{}` today, so omitting them is behaviour-identical. When
- * a real waiver API ships, this page must adopt it or waived skills undercount.
+ * unlock policy. Waivers are derived directly via `deriveWaiversFromOptionalNodes`
+ * rather than the `useLevelWaivers` hook, since this is a plain function (used
+ * from a `useQueries` fan-out in `useMySkills.ts`), not a component - the pure
+ * derivation and the hook share the exact same logic.
  */
 export function buildPathSkillSummary(
   model: LearningPathModel,
@@ -87,7 +89,8 @@ export function buildPathSkillSummary(
     : null;
   const priorDone = !model.priorAssessment || (priorProgress?.pct ?? 0) >= 100;
 
-  const levelStatuses = deriveLevelStatuses(model, model.policy, levelProgress, priorDone);
+  const waivers = deriveWaiversFromOptionalNodes(model, pathSummary, summaryByCollectionId);
+  const levelStatuses = deriveLevelStatuses(model, model.policy, levelProgress, priorDone, waivers);
   const attainedLevels = getAttainedLevels(levelProgress, levelStatuses);
   const gainedSkills = getGainedSkills(model.levels, attainedLevels);
 

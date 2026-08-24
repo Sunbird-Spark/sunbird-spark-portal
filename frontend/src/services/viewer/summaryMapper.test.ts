@@ -1,12 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import {
   normaliseSummaryRecords,
+  normaliseSummaryReadRecord,
   indexSummaryByCollectionId,
   buildCourseSummaryMapForContext,
   getPathSummary,
   buildCourseContextId,
   getCourseContextId,
   parseCourseContextId,
+  getOptionalNodeIds,
 } from './summaryMapper';
 import type { ViewerSummaryListResponse, ViewerSummaryRecord } from '../../types/viewerServiceTypes';
 
@@ -111,6 +113,78 @@ describe('normaliseSummaryRecords', () => {
     expect(normaliseSummaryRecords(null)).toEqual([]);
     expect(normaliseSummaryRecords(undefined)).toEqual([]);
     expect(normaliseSummaryRecords({})).toEqual([]);
+  });
+
+  // The sample /v1/summary/read response returns optional_nodes: [] today - this
+  // must be a strict no-op for every existing caller.
+  it('defaults optionalNodes to an empty array when the field is absent', () => {
+    const records = normaliseSummaryRecords(LIVE_RESPONSE);
+    expect(records[0]!.optionalNodes).toEqual([]);
+  });
+
+  it('normalises the live snake_case optional_nodes field into optionalNodes', () => {
+    const res: ViewerSummaryListResponse = {
+      response: [{ ...LIVE_RESPONSE.response![0]!, optional_nodes: ['do_leaf_1', 'do_course_2'] }],
+    };
+    const records = normaliseSummaryRecords(res);
+    expect(records[0]!.optionalNodes).toEqual(['do_leaf_1', 'do_course_2']);
+  });
+
+  it('prefers an already-normalised optionalNodes field over optional_nodes when both are present', () => {
+    const res: ViewerSummaryListResponse = {
+      response: [
+        { ...LIVE_RESPONSE.response![0]!, optionalNodes: ['do_a'], optional_nodes: ['do_b'] },
+      ],
+    };
+    const records = normaliseSummaryRecords(res);
+    expect(records[0]!.optionalNodes).toEqual(['do_a']);
+  });
+});
+
+describe('normaliseSummaryReadRecord', () => {
+  it('normalises the live shape and defaults optionalNodes to an empty array when absent', () => {
+    const record = normaliseSummaryReadRecord({ response: LIVE_RESPONSE.response![0]! });
+    expect(record?.collectionId).toBe('do_214631618315042816133');
+    expect(record?.optionalNodes).toEqual([]);
+  });
+
+  it('normalises the live snake_case optional_nodes field into optionalNodes', () => {
+    const record = normaliseSummaryReadRecord({
+      response: { ...LIVE_RESPONSE.response![0]!, optional_nodes: ['do_leaf_1'] },
+    });
+    expect(record?.optionalNodes).toEqual(['do_leaf_1']);
+  });
+
+  it('normalises the spec shape unchanged', () => {
+    const record = normaliseSummaryReadRecord({ summary: SPEC_RESPONSE.summary![0]! });
+    expect(record?.collectionId).toBe('do_lp');
+  });
+
+  it('returns undefined for a null/undefined/empty response', () => {
+    expect(normaliseSummaryReadRecord(null)).toBeUndefined();
+    expect(normaliseSummaryReadRecord(undefined)).toBeUndefined();
+    expect(normaliseSummaryReadRecord({})).toBeUndefined();
+  });
+});
+
+describe('getOptionalNodeIds', () => {
+  it('returns an empty set when the path record has no optional_nodes', () => {
+    expect(getOptionalNodeIds(undefined)).toEqual(new Set());
+    expect(getOptionalNodeIds({ ...LIVE_RESPONSE.response![0]!, optionalNodes: [] })).toEqual(new Set());
+  });
+
+  it("unions the path record's own optional_nodes with every course record's", () => {
+    const pathSummary: ViewerSummaryRecord = { ...LIVE_RESPONSE.response![0]!, optionalNodes: ['do_a'] };
+    const courseRecords = new Map<string, ViewerSummaryRecord>([
+      ['course_1', { ...LIVE_RESPONSE.response![0]!, optionalNodes: ['do_b'] }],
+      ['course_2', { ...LIVE_RESPONSE.response![0]!, optionalNodes: ['do_a', 'do_c'] }],
+    ]);
+    expect(getOptionalNodeIds(pathSummary, courseRecords)).toEqual(new Set(['do_a', 'do_b', 'do_c']));
+  });
+
+  it('works with only the path record (no course map)', () => {
+    const pathSummary: ViewerSummaryRecord = { ...LIVE_RESPONSE.response![0]!, optionalNodes: ['do_a'] };
+    expect(getOptionalNodeIds(pathSummary)).toEqual(new Set(['do_a']));
   });
 });
 

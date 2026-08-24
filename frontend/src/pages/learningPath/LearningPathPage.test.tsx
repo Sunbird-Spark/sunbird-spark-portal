@@ -217,7 +217,7 @@ describe('LearningPathPage', () => {
     mockUseStoredAssessmentScores.mockImplementation((collectionId): StoredScoreMap =>
       collectionId === 'course_prior' ? { qs_prior: { score: 8, maxScore: 10, attempts: 1 } } : {}
     );
-    mockLpData = buildLp({ pathSummary: undefined });
+    mockLpData = buildLp({ pathSummary: undefined, enrollment: { ...buildLp().enrollment, isEnrolled: true } });
     renderAt('/learning-path/lp_1/batch/batch_1/prior');
     expect(screen.getByText('8/10')).toBeInTheDocument();
   });
@@ -229,14 +229,28 @@ describe('LearningPathPage', () => {
   });
 
   it('renders the prior assessment gate at /prior', () => {
-    mockLpData = buildLp();
+    mockLpData = buildLp({ enrollment: { ...buildLp().enrollment, isEnrolled: true } });
     renderAt('/learning-path/lp_1/batch/batch_1/prior');
+    // "Prior check" (the assessment's own name) also appears on the overview's
+    // ledger prior row, so assert on gate-specific copy too - otherwise this
+    // test can't distinguish the gate from a redirect back to the overview.
     expect(screen.getByText('Prior check')).toBeInTheDocument();
+    expect(screen.getByText('learningPath.startAssessment')).toBeInTheDocument();
+  });
+
+  // Regression: an unenrolled visitor could reach the prior-assessment gate and
+  // press "Start assessment", only to be stopped one screen later by the
+  // player's "must join" dialog - see bug: /prior route unguarded.
+  it('redirects away from /prior when the learner is not enrolled', () => {
+    mockLpData = buildLp({ enrollment: { ...buildLp().enrollment, isEnrolled: false } });
+    renderAt('/learning-path/lp_1/batch/batch_1/prior');
+    expect(screen.queryByText('learningPath.startAssessment')).not.toBeInTheDocument();
+    expect(screen.getByText('Data Foundations')).toBeInTheDocument();
   });
 
   // Regression: the prior/outcome gate screens had no way back to the path overview.
   it('has a back-to-path link on the prior gate that returns to the overview', () => {
-    mockLpData = buildLp();
+    mockLpData = buildLp({ enrollment: { ...buildLp().enrollment, isEnrolled: true } });
     renderAt('/learning-path/lp_1/batch/batch_1/prior');
     fireEvent.click(screen.getByText(/learningPath\.backToPath/));
     expect(screen.getByText('Data Foundations')).toBeInTheDocument();
@@ -316,9 +330,10 @@ describe('LearningPathPage', () => {
   });
 
   it('renders the prior assessment gate at /prior with no contextId in the URL', () => {
-    mockLpData = buildLp();
+    mockLpData = buildLp({ enrollment: { ...buildLp().enrollment, isEnrolled: true } });
     renderAt('/learning-path/lp_1/prior');
     expect(screen.getByText('Prior check')).toBeInTheDocument();
+    expect(screen.getByText('learningPath.startAssessment')).toBeInTheDocument();
   });
 
   it('renders the completion view at /complete with no contextId in the URL', () => {

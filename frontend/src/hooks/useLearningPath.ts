@@ -28,7 +28,6 @@ export function useLearningPath(pathId: string | undefined, contextIdParam: stri
   const { data: hierarchyData, isLoading: hierarchyLoading, isError: hierarchyError } = useCollection(pathId);
   const { data: summaryRecords = [], isLoading: summaryLoading } = useViewerSummary();
   const enrollment = useLearningPathEnrollment(pathId, contextIdParam, summaryRecords, isAuthenticated);
-  const waivers = useLevelWaivers(pathId);
 
   // Creator/mentor detection mirrors CollectionDetailPage.tsx: the path's own creator (or a
   // batch mentor) gets the management rail instead of the learner enrol prompt.
@@ -54,6 +53,10 @@ export function useLearningPath(pathId: string | undefined, contextIdParam: stri
     [summaryRecords, enrollment.effectiveContextId]
   );
 
+  // Needs model/pathSummary/summaryByCollectionId, so it's declared after them
+  // (moved down from a pathId-only stub - see `useLevelWaivers`).
+  const waivers = useLevelWaivers(model, pathSummary, summaryByCollectionId);
+
   const progress = useMemo(
     () => computePathProgress(model, pathSummary, summaryByCollectionId),
     [model, pathSummary, summaryByCollectionId]
@@ -73,6 +76,14 @@ export function useLearningPath(pathId: string | undefined, contextIdParam: stri
   );
   const priorState = { progress: priorProgress, done: !model.priorAssessment || (priorProgress?.pct ?? 0) >= 100 };
 
+  // Computed before outcomeState/certificateUnlocked below - both need to
+  // treat a Level waived wholesale by a prior assessment as satisfied even
+  // when `computeLevelProgress` doesn't independently reach 100 for it.
+  const levelStatuses = useMemo(
+    () => deriveLevelStatuses(model, model.policy, levelProgress, priorState.done, waivers, enrollment.isEnrolled),
+    [model, levelProgress, priorState.done, waivers, enrollment.isEnrolled]
+  );
+
   const outcomeProgress = useMemo(
     () =>
       model.outcomeAssessment
@@ -88,15 +99,15 @@ export function useLearningPath(pathId: string | undefined, contextIdParam: stri
     // outcome assessment and nothing else), so that case is special-cased here,
     // where `model.outcomeAssessment`'s presence is known, rather than in
     // `isOutcomeUnlocked` itself.
-    unlocked: model.levels.length === 0 ? Boolean(model.outcomeAssessment) : isOutcomeUnlocked(levelProgress),
+    unlocked: model.levels.length === 0 ? Boolean(model.outcomeAssessment) : isOutcomeUnlocked(levelProgress, levelStatuses),
     done: (outcomeProgress?.pct ?? 0) >= 100,
   };
 
-  const certificateUnlocked = isCertificateUnlocked(!!model.outcomeAssessment, levelProgress, outcomeProgress);
-
-  const levelStatuses = useMemo(
-    () => deriveLevelStatuses(model, model.policy, levelProgress, priorState.done, waivers),
-    [model, levelProgress, priorState.done, waivers]
+  const certificateUnlocked = isCertificateUnlocked(
+    !!model.outcomeAssessment,
+    levelProgress,
+    outcomeProgress,
+    levelStatuses
   );
 
   const resumeTarget = useMemo(
