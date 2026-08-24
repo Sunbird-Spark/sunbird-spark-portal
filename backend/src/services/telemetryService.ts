@@ -107,6 +107,12 @@ export const dispatchTelemetry = async (req: Request, events: any[]) => {
             headers: {} as Record<string, string>,
             setHeader: function(name: string, value: string) {
                 this.headers[name] = value;
+            },
+            // Mirror ClientRequest.removeHeader so decorateRequestHeaders' inbound
+            // identity-header strip works on this synthetic request instead of throwing.
+            removeHeader: function(name: string) {
+                delete this.headers[name];
+                delete this.headers[name.toLowerCase()];
             }
         };
         decorateRequestHeaders(mockClientReq as unknown as http.ClientRequest, req);
