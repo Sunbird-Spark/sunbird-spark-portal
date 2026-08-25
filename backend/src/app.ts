@@ -28,14 +28,27 @@ const __dirname = path.dirname(__filename);
 
 export const app = express();
 app.set('trust proxy', true);
-// Content-Security-Policy: the portal SPA and Sunbird content players need
-// inline/eval scripts (player runtimes) and load media/assets from cloud storage,
-// so the broad https: sources are required for content playback to work.
+// Content-Security-Policy.
+//
+// script-src must name every origin the app injects a <script> for. In
+// particular the YouTube IFrame API (content-player's youtube.html adds a
+// script tag for https://www.youtube.com/iframe_api, which then pulls its
+// player bundle from s.ytimg.com) and reCAPTCHA — omitting either silently
+// breaks YouTube telemetry/playback control and the signup captcha.
+// 'unsafe-inline'/'unsafe-eval' are required by the bundled player runtimes.
 app.use(helmet({
     contentSecurityPolicy: {
         useDefaults: true,
         directives: {
-            'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://cdnjs.cloudflare.com'],
+            'script-src': [
+                "'self'", "'unsafe-inline'", "'unsafe-eval'",
+                'https://cdnjs.cloudflare.com',
+                'https://www.youtube.com', 'https://s.ytimg.com',
+                'https://www.google.com', 'https://www.gstatic.com', 'https://www.recaptcha.net',
+            ],
+            // Legacy ECML/H5P/SCORM content uses inline handler attributes;
+            // helmet's default of 'none' would break it.
+            'script-src-attr': null,
             'style-src': ["'self'", "'unsafe-inline'", 'https:'],
             'img-src': ["'self'", 'data:', 'blob:', 'https:'],
             'media-src': ["'self'", 'data:', 'blob:', 'https:'],
@@ -49,6 +62,22 @@ app.use(helmet({
         },
     },
 }));
+
+// Paths serving packaged third-party content (ECML/H5P/SCORM archives, editor
+// plugins). What those bundles load cannot be enumerated ahead of time, so the
+// policy is lifted for them rather than enforced with an allowlist that will
+// break them — a CSP covering these paths was tried once before and reverted a
+// day later. Everything else (the SPA, APIs) keeps the policy above.
+const CSP_EXEMPT_PATHS = [
+    '/content/preview', '/content-player', '/content-plugins',
+    '/plugins', '/content-editor', '/generic-editor', '/editor',
+];
+app.use((req, res, next) => {
+    if (CSP_EXEMPT_PATHS.some((p) => req.path.startsWith(p))) {
+        res.removeHeader('Content-Security-Policy');
+    }
+    next();
+});
 app.use(pathTraversalGuard);
 
 loadTenants();
