@@ -314,6 +314,13 @@ describe('NotificationPopover', () => {
         expect(mockMutateAsync).not.toHaveBeenCalled();
     });
 
+    it('triggers notification click on Enter keydown on a notification row', async () => {
+        renderPopover();
+        openPopover();
+        fireEvent.keyDown(document.querySelectorAll('.notification-item')[0]!, { key: 'Enter' });
+        await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledWith({ ids: ['1'], userId: 'user-1' }));
+    });
+
     // ── Notification click: navigation ────────────────────────────────────────
     it('navigates to /profile for certificateUpdate action type', async () => {
         const certFeed = makeFeed('cert1', {

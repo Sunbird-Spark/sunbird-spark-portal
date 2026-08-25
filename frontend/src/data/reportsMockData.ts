@@ -15,6 +15,7 @@ import type {
   UserAssessmentHistory,
   UserConsentRecord,
 } from "@/types/reports";
+import { randomInt } from "@/utils/random";
 
 /* ── MODULE 1 – Platform ── */
 
@@ -97,11 +98,11 @@ export const adminCourseSummaries: AdminCourseSummary[] = Array.from({ length: 2
     "Statistical Analysis",
     "Leadership & Communication",
   ][i]!,
-  totalEnrolled: Math.floor(Math.random() * 500) + 100,
-  totalCompleted: Math.floor(Math.random() * 300) + 50,
-  completionPercent: Math.floor(Math.random() * 60) + 30,
-  certificatesIssued: Math.floor(Math.random() * 200) + 20,
-  lastUpdated: `2025-${String(Math.floor(Math.random() * 12) + 1).padStart(2, "0")}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, "0")}`,
+  totalEnrolled: randomInt(100, 600),
+  totalCompleted: randomInt(50, 350),
+  completionPercent: randomInt(30, 90),
+  certificatesIssued: randomInt(20, 220),
+  lastUpdated: `2025-${String(randomInt(1, 13)).padStart(2, "0")}-${String(randomInt(1, 29)).padStart(2, "0")}`,
 }));
 
 /* ── MODULE 2 – Course Report ── */
@@ -142,24 +143,24 @@ export const learnerProgressData: LearnerProgress[] = Array.from({ length: 30 },
     "Bhavna Jain", "Chirag Malhotra", "Deepika Menon", "Eshan Tiwari", "Falguni Shah",
     "Gaurav Mishra", "Hina Bose", "Ishaan Chauhan", "Jyoti Pandit", "Kunal Srinivasan",
   ][i]!,
-  enrollmentDate: `2025-0${Math.floor(Math.random() * 9) + 1}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, "0")}`,
-  progressPercent: Math.floor(Math.random() * 100),
-  status: (["In Progress", "Completed", "Not Started"] as const)[Math.floor(Math.random() * 3)]!,
-  lastActiveDate: `2025-10-${String(Math.floor(Math.random() * 28) + 1).padStart(2, "0")}`,
-  certificateStatus: (["Issued", "N/A"] as const)[Math.floor(Math.random() * 2)]!,
+  enrollmentDate: `2025-0${randomInt(1, 10)}-${String(randomInt(1, 29)).padStart(2, "0")}`,
+  progressPercent: randomInt(0, 100),
+  status: (["In Progress", "Completed", "Not Started"] as const)[randomInt(0, 3)]!,
+  lastActiveDate: `2025-10-${String(randomInt(1, 29)).padStart(2, "0")}`,
+  certificateStatus: (["Issued", "N/A"] as const)[randomInt(0, 2)]!,
 }));
 
 export const assessmentRecords: AssessmentRecord[] = Array.from({ length: 20 }, (_, i) => {
-  const score = Math.floor(Math.random() * 100);
+  const score = randomInt(0, 100);
   return {
     id: `assess-${i + 1}`,
     learnerName: learnerProgressData[i % learnerProgressData.length]!.learnerName,
-    attemptNumber: Math.floor(Math.random() * 3) + 1,
+    attemptNumber: randomInt(1, 4),
     score,
     maxScore: 100,
     percentage: score,
     passFail: score >= 40 ? "Pass" : "Fail",
-    attemptDate: `2025-10-${String(Math.floor(Math.random() * 28) + 1).padStart(2, "0")}`,
+    attemptDate: `2025-10-${String(randomInt(1, 29)).padStart(2, "0")}`,
   };
 });
 

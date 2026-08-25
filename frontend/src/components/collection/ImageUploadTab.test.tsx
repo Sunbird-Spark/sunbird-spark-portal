@@ -161,6 +161,25 @@ describe('ImageUploadTab', () => {
     expect(dropZone?.className).toContain('border-sunbird-theme-accent');
   });
 
+  it('opens the file picker on Enter or Space keydown on the drop zone, ignoring other keys', () => {
+    render(<ImageUploadTab {...defaultProps} />);
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const clickSpy = vi.spyOn(fileInput, 'click').mockImplementation(() => {});
+    const dropZone = screen.getByText('Choose or drag and drop your image here');
+
+    fireEvent.keyDown(dropZone, { key: 'Enter' });
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(dropZone, { key: ' ' });
+    expect(clickSpy).toHaveBeenCalledTimes(2);
+
+    fireEvent.keyDown(dropZone, { key: 'a' });
+    expect(clickSpy).toHaveBeenCalledTimes(2);
+
+    fireEvent.click(dropZone);
+    expect(clickSpy).toHaveBeenCalledTimes(3);
+  });
+
   it('calls handleFileInput when file input changes', () => {
     const handleFileInput = vi.fn();
     render(<ImageUploadTab {...defaultProps} handleFileInput={handleFileInput} />);

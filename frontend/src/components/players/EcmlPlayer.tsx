@@ -52,6 +52,9 @@ export const EcmlPlayer: React.FC<EcmlPlayerProps> = ({
     let cancelled = false;
 
     const messageHandler = (event: MessageEvent) => {
+      // The ECML player iframe is served from our own origin (relative
+      // /content/preview URL) — reject messages from any other origin.
+      if (event.origin !== window.location.origin) return;
       if (!event.data) return;
 
       const eventData = typeof event.data === 'string' ? (() => { try { return JSON.parse(event.data); } catch { return null; } })() : event.data;

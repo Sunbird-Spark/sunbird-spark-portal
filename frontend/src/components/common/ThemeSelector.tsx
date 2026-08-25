@@ -120,9 +120,7 @@ export function ThemeSelector({
                   data-edatatype="CLICK"
                 >
                   <div
-                    className={`h-10 rounded-md mb-2 grid grid-cols-[18px_1fr] grid-rows-[10px_1fr] gap-0.5 p-0.5 ${
-                      tpl.id === 'modern' ? 'bg-muted' : 'bg-muted'
-                    }`}
+                    className="h-10 rounded-md mb-2 grid grid-cols-[18px_1fr] grid-rows-[10px_1fr] gap-0.5 p-0.5 bg-muted"
                   >
                     <div className={`col-span-2 bg-sunbird-theme-accent ${tpl.id === 'modern' ? 'rounded-xxs' : 'rounded'}`} />
                     <div className={`bg-sunbird-theme-accent/20 ${tpl.id === 'modern' ? 'rounded-xxs' : 'rounded'}`} />

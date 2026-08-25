@@ -7,12 +7,14 @@ on:
     branches: ["main"]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   dependency-submission-frontend:
     name: Submit Frontend npm Dependencies
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -23,17 +25,17 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm install
+        run: npm ci --ignore-scripts
 
       - name: Generate SPDX SBOM (frontend)
-        uses: anchore/sbom-action@v0.24.0
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
           path: frontend
           format: spdx-json
           output-file: frontend-sbom.spdx.json
 
       - name: Submit frontend npm Dependencies
-        uses: advanced-security/spdx-dependency-submission-action@v0.2.0
+        uses: advanced-security/spdx-dependency-submission-action@169d22427d74f3faf93504e70b03eede8dab272a # v0.2.0
         with:
           filePath: .
           filePattern: frontend-sbom.spdx.json
@@ -41,6 +43,8 @@ jobs:
   dependency-submission-backend:
     name: Submit Backend npm Dependencies
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -51,17 +55,17 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: npm install
+        run: npm ci --ignore-scripts
 
       - name: Generate SPDX SBOM (backend)
-        uses: anchore/sbom-action@v0.24.0
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
           path: backend
           format: spdx-json
           output-file: backend-sbom.spdx.json
 
       - name: Submit backend npm Dependencies
-        uses: advanced-security/spdx-dependency-submission-action@v0.2.0
+        uses: advanced-security/spdx-dependency-submission-action@169d22427d74f3faf93504e70b03eede8dab272a # v0.2.0
         with:
           filePath: .
           filePattern: backend-sbom.spdx.json

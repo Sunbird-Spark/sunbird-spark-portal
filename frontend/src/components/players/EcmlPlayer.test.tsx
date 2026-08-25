@@ -294,6 +294,7 @@ describe('EcmlPlayer', () => {
     window.dispatchEvent(
       new MessageEvent('message', {
         data: { eid: 'START', edata: { type: 'content' } },
+        origin: window.location.origin,
       })
     );
 
@@ -320,6 +321,7 @@ describe('EcmlPlayer', () => {
     window.dispatchEvent(
       new MessageEvent('message', {
         data: JSON.stringify({ eid: 'END', edata: {} }),
+        origin: window.location.origin,
       })
     );
 
@@ -337,7 +339,9 @@ describe('EcmlPlayer', () => {
       expect(mockCreateConfig).toHaveBeenCalled();
     });
 
-    window.dispatchEvent(new MessageEvent('message', { data: null }));
+    window.dispatchEvent(
+      new MessageEvent('message', { data: null, origin: window.location.origin })
+    );
 
     expect(onPlayerEvent).not.toHaveBeenCalled();
   });
@@ -351,7 +355,9 @@ describe('EcmlPlayer', () => {
       expect(mockCreateConfig).toHaveBeenCalled();
     });
 
-    window.dispatchEvent(new MessageEvent('message', { data: 'not-json' }));
+    window.dispatchEvent(
+      new MessageEvent('message', { data: 'not-json', origin: window.location.origin })
+    );
 
     expect(onPlayerEvent).not.toHaveBeenCalled();
   });
@@ -370,9 +376,29 @@ describe('EcmlPlayer', () => {
     window.dispatchEvent(
       new MessageEvent('message', {
         data: { event: 'some-event', data: {} },
+        origin: window.location.origin,
       })
     );
 
     expect(onTelemetryEvent).not.toHaveBeenCalled();
+  });
+
+  it('should ignore postMessage from a foreign origin', async () => {
+    const onPlayerEvent = vi.fn();
+
+    render(<EcmlPlayer metadata={mockMetadata} onPlayerEvent={onPlayerEvent} />);
+
+    await waitFor(() => {
+      expect(mockCreateConfig).toHaveBeenCalled();
+    });
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: { eid: 'START', edata: { type: 'content' } },
+        origin: 'https://evil.example.com',
+      })
+    );
+
+    expect(onPlayerEvent).not.toHaveBeenCalled();
   });
 });
