@@ -16,6 +16,13 @@ interface LearningPathRailProps {
   levelStatuses: LevelStatusKey[];
   priorDone: boolean;
   outcomeUnlocked: boolean;
+  /**
+   * Defaults to `true`: the rail only renders inside the player, which already
+   * requires enrolment to reach - see `LearningPathPlayerView`'s "must join"
+   * dialog. Threaded through anyway for consistency with the ledger, whose
+   * prior/course rows use the same three-state pattern.
+   */
+  isEnrolled?: boolean;
   /** Levels AND the outcome assessment complete — see `isCertificateUnlocked`. */
   certificateUnlocked?: boolean;
   outcomeDone?: boolean;
@@ -49,6 +56,7 @@ export function LearningPathRail({
   outcomeUnlocked,
   certificateUnlocked = false,
   outcomeDone = false,
+  isEnrolled = true,
   summaryByCollectionId,
   pathSummary,
   activeCourseId,
@@ -92,8 +100,13 @@ export function LearningPathRail({
         <span className="block text-sm font-medium text-foreground">{t('learningPath.level')}</span>
         {model.priorAssessment && (
           <div
-            onClick={onOpenPrior}
-            className="mt-3 flex cursor-pointer items-center gap-2.5 rounded-xl border border-sunbird-gray-e5 px-3 py-2.5"
+            onClick={isEnrolled ? onOpenPrior : undefined}
+            role={isEnrolled ? 'button' : undefined}
+            tabIndex={isEnrolled ? 0 : undefined}
+            onKeyDown={(e) => isEnrolled && e.key === 'Enter' && onOpenPrior()}
+            className={`mt-3 flex items-center gap-2.5 rounded-xl border border-sunbird-gray-e5 px-3 py-2.5 ${
+              isEnrolled ? 'cursor-pointer' : 'cursor-default opacity-75'
+            }`}
           >
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sunbird-brick text-white">
               <FiHelpCircle className="h-3.5 w-3.5" />
@@ -101,7 +114,13 @@ export function LearningPathRail({
             <div className="min-w-0 flex-1">
               <span className="block truncate text-[0.8125rem] font-medium text-foreground">{model.priorAssessment.name}</span>
               <span className="text-[0.6875rem] text-sunbird-gray-75">
-                {priorDone ? t('learningPath.statusCompleted') : t('learningPath.statusInProgress')}
+                {/* Three states, matching the Ledger's prior row - see bug: unenrolled
+                    learner shown "In progress" on the prior assessment. */}
+                {!isEnrolled
+                  ? t('learningPath.statusLocked')
+                  : priorDone
+                    ? t('learningPath.statusCompleted')
+                    : t('learningPath.statusInProgress')}
               </span>
             </div>
           </div>
@@ -135,20 +154,25 @@ export function LearningPathRail({
                     what's inside it while consuming - not just the Level's rolled-up percentage. */}
                 {!locked && level.courses.length > 0 && (
                   <div className="flex flex-col gap-2 border-t border-sunbird-gray-e5 p-2.5 pl-3">
-                    {level.courses.map((course) => (
-                      <LedgerCourseRow
-                        key={course.identifier}
-                        course={course}
-                        progress={computeCourseProgress(course, summaryByCollectionId, pathSummary)}
-                        onOpen={() => onOpenCourse(course.identifier, course.leafIds[0] ?? '')}
-                        isExpanded={expanded.includes(course.identifier)}
-                        onToggle={() => toggleCourse(course.identifier)}
-                        onOpenContent={(contentId) => onOpenCourse(course.identifier, contentId)}
-                        contentStatus={getCourseContentStatus(course, summaryByCollectionId, pathSummary)}
-                        assessmentInfo={assessmentInfo}
-                        activeContentId={activeContentId ?? null}
-                      />
-                    ))}
+                    {level.courses.map((course) => {
+                      const courseProgress = computeCourseProgress(course, summaryByCollectionId, pathSummary);
+                      return (
+                        <LedgerCourseRow
+                          key={course.identifier}
+                          course={course}
+                          progress={courseProgress}
+                          onOpen={() => onOpenCourse(course.identifier, course.leafIds[0] ?? '')}
+                          isExpanded={expanded.includes(course.identifier)}
+                          onToggle={() => toggleCourse(course.identifier)}
+                          onOpenContent={(contentId) => onOpenCourse(course.identifier, contentId)}
+                          contentStatus={getCourseContentStatus(course, summaryByCollectionId, pathSummary)}
+                          assessmentInfo={assessmentInfo}
+                          activeContentId={activeContentId ?? null}
+                          isEnrolled={isEnrolled}
+                          isOptional={courseProgress.optional}
+                        />
+                      );
+                    })}
                   </div>
                 )}
               </div>

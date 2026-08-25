@@ -95,7 +95,7 @@ export interface PathProgressInfo extends ProgressInfo {
   levelCount: number;
 }
 
-/** Placeholder shape for future waiver/credit data — no backend endpoint exists yet. */
+/** Waiver/credit status for a Level, derived from the Viewer Service's `optional_nodes` - see `deriveWaiversFromOptionalNodes`. */
 export interface WaiverInfo {
   status: 'waived' | 'credited' | 'creditedPending';
   note: string;

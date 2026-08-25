@@ -35,7 +35,13 @@ vi.mock('./useAuthInfo', () => ({
   useIsAuthenticated: () => ({ isAuthenticated: mockIsAuthenticated, isLoading: false }),
 }));
 
-const mockEnrollment = { isEnrolled: false, effectiveContextId: undefined };
+// Defaults to enrolled: most tests in this file exercise progress/model
+// computation, not the enrollment gate itself (see the dedicated "not
+// enrolled" tests below, which set this to false deliberately).
+let mockEnrollment: { isEnrolled: boolean; effectiveContextId: string | undefined } = {
+  isEnrolled: true,
+  effectiveContextId: undefined,
+};
 vi.mock('./useLearningPathEnrollment', () => ({
   useLearningPathEnrollment: () => mockEnrollment,
 }));
@@ -60,12 +66,15 @@ describe('useLearningPath', () => {
   it('parses the hierarchy into a model and reports zero progress when not enrolled', () => {
     mockUseCollectionData = mockCollectionData;
     mockSummaryRecords = [];
+    mockEnrollment = { isEnrolled: false, effectiveContextId: undefined };
 
     const { result } = renderHook(() => useLearningPath(LP_HIERARCHY_NO_ASSESSMENTS.identifier, undefined));
 
     expect(result.current.model.levels).toHaveLength(2);
     expect(result.current.progress.pct).toBe(0);
-    expect(result.current.levelStatuses).toEqual(['notStarted', 'locked']);
+    // Every level is locked while unenrolled, regardless of policy - see bug:
+    // unenrolled learner shown a "notStarted" (openable-looking) Level.
+    expect(result.current.levelStatuses).toEqual(['locked', 'locked']);
     expect(result.current.resumeTarget).toBeNull();
   });
 
@@ -92,6 +101,7 @@ describe('useLearningPath', () => {
 
   it('reports full progress and no locked levels for the known-good, fully-completed account', () => {
     mockUseCollectionData = mockCollectionData;
+    mockEnrollment = { isEnrolled: true, effectiveContextId: '0146338062206566400' };
     mockSummaryRecords = [
       {
         userId: 'u1',
@@ -149,6 +159,7 @@ describe('useLearningPath', () => {
   // (see bug: unenrolled Learning Path showing "Completed").
   it('ignores a foreign-context summary record for the same course id when not enrolled in this path', () => {
     mockUseCollectionData = mockCollectionData;
+    mockEnrollment = { isEnrolled: false, effectiveContextId: undefined };
     mockSummaryRecords = [
       {
         userId: 'u1',
@@ -166,7 +177,9 @@ describe('useLearningPath', () => {
 
     expect(result.current.progress.pct).toBe(0);
     expect(result.current.levelProgress[0]?.pct).toBe(0);
-    expect(result.current.levelStatuses).toEqual(['notStarted', 'locked']);
+    // Unenrolled in THIS path - every level is locked, independent of the
+    // (ignored) foreign-context progress data.
+    expect(result.current.levelStatuses).toEqual(['locked', 'locked']);
   });
 
   it('reports isLoading while the hierarchy is missing', () => {

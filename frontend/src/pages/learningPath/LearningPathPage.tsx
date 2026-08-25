@@ -35,7 +35,7 @@ const LearningPathPage = () => {
   });
 
   const lp = useLearningPath(pathId, contextId);
-  const { model, policy, levelStatuses, pathSummary, outcomeState } = lp;
+  const { model, policy, levelStatuses, pathSummary, outcomeState, enrollment } = lp;
 
   // Durable local scores (survive the `['viewerSummary']` refetch that wipes
   // `pathSummary.assessmentStatus`) - merged with the path record below via
@@ -90,6 +90,12 @@ const LearningPathPage = () => {
   }
 
   if (location.pathname.endsWith('/prior') && model.priorAssessment) {
+    // Unenrolled learners must never reach this gate - see bug: unenrolled
+    // learner able to press "Start assessment" only to be stopped one screen
+    // later by the player's "must join" dialog. Mirrors the /outcome guard below.
+    if (!enrollment.isEnrolled) {
+      return <Navigate to={basePath} replace />;
+    }
     return (
       <div className="flex-1 min-w-0 mx-auto max-w-[85rem] px-6 py-7">
         <AssessmentGate
@@ -177,6 +183,7 @@ const LearningPathPage = () => {
             status={levelStatuses[idx] ?? 'locked'}
             summaryByCollectionId={lp.summaryByCollectionId}
             pathSummary={pathSummary}
+            isEnrolled={enrollment.isEnrolled}
             onBack={goOverview}
             onOpenCourse={openCourse}
           />

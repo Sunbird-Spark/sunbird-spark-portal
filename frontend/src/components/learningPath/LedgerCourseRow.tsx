@@ -23,6 +23,20 @@ interface LedgerCourseRowProps {
   /** Best score / attempts per leaf, forwarded to the unit tree. */
   assessmentInfo?: Record<string, LPAssessmentInfo>;
   activeContentId?: string | null;
+  /**
+   * Defaults to `true` so every existing caller is unaffected. When `false`
+   * (the learner has not joined this Learning Path), the CTA reads "Enrol to
+   * start" instead of Start/Resume/Revisit, and the row is not clickable -
+   * see bug: unenrolled learner could open course content from the ledger.
+   */
+  isEnrolled?: boolean;
+  /**
+   * Defaults to `false`. When `true` (the course was waived by a prior
+   * assessment - see `computeCourseProgress`'s `optional` flag), an "Optional"
+   * badge is shown beside the question-set-only badge. The course stays fully
+   * visible and openable either way - only progress denominators exclude it.
+   */
+  isOptional?: boolean;
 }
 
 // "Revisit" rather than "Review" for a finished course: "Review" is taken by the
@@ -44,6 +58,8 @@ export function LedgerCourseRow({
   contentStatus,
   assessmentInfo,
   activeContentId = null,
+  isEnrolled = true,
+  isOptional = false,
 }: LedgerCourseRowProps) {
   const { t } = useAppI18n();
   const Icon = course.isAssessmentCourse ? FiHelpCircle : FiBookOpen;
@@ -53,12 +69,12 @@ export function LedgerCourseRow({
   return (
     <div className="rounded-md border border-sunbird-gray-e5 bg-surface" data-testid="ledger-course-row-wrapper">
       <div
-        onClick={onOpen}
-        className="flex cursor-pointer items-center gap-3 px-3.5 py-3"
+        onClick={isEnrolled ? onOpen : undefined}
+        className={`flex items-center gap-3 px-3.5 py-3 ${isEnrolled ? 'cursor-pointer' : 'cursor-default'}`}
         data-testid="ledger-course-row"
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && onOpen()}
+        role={isEnrolled ? 'button' : undefined}
+        tabIndex={isEnrolled ? 0 : undefined}
+        onKeyDown={(e) => isEnrolled && e.key === 'Enter' && onOpen()}
       >
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sunbird-brick/15 text-sunbird-brick">
           <Icon className="h-4 w-4" />
@@ -71,12 +87,19 @@ export function LedgerCourseRow({
                 {t('learningPath.questionSetOnly')}
               </Badge>
             )}
+            {isOptional && (
+              <Badge variant="secondary" className="text-[0.6875rem]">
+                {t('learningPath.optional')}
+              </Badge>
+            )}
           </div>
           <span className="text-xs text-sunbird-gray-75">
             {progress.completed}/{progress.total} · {progress.pct}%
           </span>
         </div>
-        <span className="shrink-0 text-sm font-medium text-sunbird-brick">{t(CTA_KEY[progress.status])}</span>
+        <span className="shrink-0 text-sm font-medium text-sunbird-brick">
+          {isEnrolled ? t(CTA_KEY[progress.status]) : t('learningPath.enrolToStart')}
+        </span>
         {isExpandable && (
           // Stops propagation so toggling the unit list never navigates into the course.
           <button

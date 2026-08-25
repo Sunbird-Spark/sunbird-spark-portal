@@ -80,6 +80,7 @@ export function LearningPathOverview({
               outcomeProgress={outcomeState.progress}
               summaryByCollectionId={summaryByCollectionId}
               pathSummary={pathSummary}
+              isEnrolled={enrollment.isEnrolled}
               onOpenLevel={onOpenLevel}
               onOpenPrior={onOpenPrior}
               onOpenOutcome={model.outcomeAssessment ? onOpenOutcome : undefined}

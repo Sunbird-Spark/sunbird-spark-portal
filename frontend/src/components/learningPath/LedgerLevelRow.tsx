@@ -14,6 +14,8 @@ interface LedgerLevelRowProps {
   expanded: boolean;
   summaryByCollectionId: Map<string, ViewerSummaryRecord>;
   pathSummary?: ViewerSummaryRecord;
+  /** Forwarded to each course row's CTA - see `LedgerCourseRow`'s `isEnrolled`. */
+  isEnrolled: boolean;
   onToggle: () => void;
   onOpenLevel: () => void;
   onOpenCourse: (courseId: string, contentId: string) => void;
@@ -28,6 +30,7 @@ export function LedgerLevelRow({
   expanded,
   summaryByCollectionId,
   pathSummary,
+  isEnrolled,
   onToggle,
   onOpenLevel,
   onOpenCourse,
@@ -80,6 +83,8 @@ export function LedgerLevelRow({
                   course={course}
                   progress={courseProgress}
                   onOpen={() => onOpenCourse(course.identifier, course.leafIds[0] ?? '')}
+                  isEnrolled={isEnrolled}
+                  isOptional={courseProgress.optional}
                 />
               );
             })}

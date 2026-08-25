@@ -39,6 +39,7 @@ export function LearningPathRailContainer({ courseContextId }: LearningPathRailC
       levelStatuses={lp.levelStatuses}
       priorDone={lp.priorState.done}
       outcomeUnlocked={lp.outcomeState.unlocked}
+      isEnrolled={lp.enrollment.isEnrolled}
       certificateUnlocked={lp.certificateUnlocked}
       outcomeDone={lp.outcomeState.done}
       summaryByCollectionId={lp.summaryByCollectionId}

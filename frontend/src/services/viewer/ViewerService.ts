@@ -16,7 +16,7 @@ import type {
  * Thin client over the Viewer Service: granular view-lifecycle APIs and
  * summary APIs that replace the legacy content/state/read|update +
  * enrollment/list triad for Learning Path consumption. Proxied through the
- * backend at `/portal/v1/...`.
+ * backend at `/portal/...`, which forwards to Kong.
  *
  * WIRE NAMING: the portal speaks `collectionId`/`contextId` internally (the
  * design doc's names), but the service reads ONLY `courseId`/`batchId` -
@@ -29,19 +29,39 @@ import type {
  * single write-side translation point, mirroring what `summaryMapper.ts` does
  * for the response direction.
  *
+ * ROUTING: these are the Kong-fronted URIs (`<prefix>/v1/<verb>`), which Kong
+ * rewrites to the service's own `/v1/<resource>/<verb>`. The prefixes live in
+ * the three constants below so a Helm-side prefix change is a one-line edit
+ * here. Previously the portal called the service's raw paths directly via a
+ * dedicated `viewerProxy`; that proxy is gone and everything now goes through
+ * `kongProxy` like every other API in the portal.
+ *
  * Confirmed route list (method + path), superseding the design doc's naming
  * where they diverge:
- *   POST   /v1/view/start
- *   POST   /v1/view/update
- *   POST   /v1/assessment/submit   (NOT /v1/view/assess - that route 404s)
- *   POST   /v1/view/end
- *   POST   /v1/view/read
- *   POST   /v1/assessment/read
- *   GET    /v1/summary/list/:userId
- *   POST   /v1/summary/read
- *   DELETE /v1/summary/delete/:userId       (?all=true for every enrolment, else a specific one)
- *   GET    /v1/summary/download/:userId     (?format=csv)
+ *   POST   /view/v1/start
+ *   POST   /view/v1/update
+ *   POST   /assessment/v1/submit    (NOT /view/v1/assess - that route 404s)
+ *   POST   /view/v1/end
+ *   POST   /view/v1/read
+ *   POST   /assessment/v1/read
+ *   GET    /summary/v1/list/:userId
+ *   POST   /summary/v1/read
+ *   DELETE /summary/v1/delete/:userId       (?all=true for every enrolment, else a specific one)
+ *   GET    /summary/v1/download/:userId     (?format=csv)
+ *
+ * Kong also exposes `/view/v1/agg`. The portal does not call it and its purpose
+ * is unconfirmed - do not wire it up speculatively.
  */
+
+/**
+ * Kong route prefixes (Helm `view_prefix` / `assessment_prefix` /
+ * `summary_prefix`). Kong maps `<prefix>/v1/<verb>` onto the Viewer Service's
+ * own `/v1/<resource>/<verb>`.
+ */
+const VIEW = '/view/v1';
+const ASSESSMENT = '/assessment/v1';
+const SUMMARY = '/summary/v1';
+
 /** Drops `collectionId`/`contextId` and emits `courseId`/`batchId` - the only keys
  * `ViewerRequestKeys.scala` reads. Blank/undefined values are omitted so the
  * actor's own cascade (courseId <- contentId, batchId <- courseId <- contentId)
@@ -59,34 +79,34 @@ function toWireIds<T extends { collectionId?: string; contextId?: string }>(
 
 export class ViewerService {
   public viewStart(request: ViewRequest): Promise<ApiResponse<unknown>> {
-    return getClient().post('/v1/view/start', { request: toWireIds(request) });
+    return getClient().post(`${VIEW}/start`, { request: toWireIds(request) });
   }
 
   public viewUpdate(request: ViewUpdateRequest): Promise<ApiResponse<unknown>> {
-    return getClient().post('/v1/view/update', { request: toWireIds(request) });
+    return getClient().post(`${VIEW}/update`, { request: toWireIds(request) });
   }
 
   /** Submits assessment events. */
   public viewAssess(request: ViewAssessRequest): Promise<ApiResponse<unknown>> {
-    return getClient().post('/v1/assessment/submit', { request: toWireIds(request) });
+    return getClient().post(`${ASSESSMENT}/submit`, { request: toWireIds(request) });
   }
 
   public viewEnd(request: ViewRequest): Promise<ApiResponse<unknown>> {
-    return getClient().post('/v1/view/end', { request: toWireIds(request) });
+    return getClient().post(`${VIEW}/end`, { request: toWireIds(request) });
   }
 
   public viewRead(request: ViewReadRequest): Promise<ApiResponse<ViewReadResponse>> {
-    return getClient().post<ViewReadResponse>('/v1/view/read', { request: toWireIds(request) });
+    return getClient().post<ViewReadResponse>(`${VIEW}/read`, { request: toWireIds(request) });
   }
 
   public assessmentRead(
     request: ViewReadRequest
   ): Promise<ApiResponse<AssessmentReadResponse>> {
-    return getClient().post<AssessmentReadResponse>('/v1/assessment/read', { request: toWireIds(request) });
+    return getClient().post<AssessmentReadResponse>(`${ASSESSMENT}/read`, { request: toWireIds(request) });
   }
 
   public summaryList(userId: string): Promise<ApiResponse<ViewerSummaryListResponse>> {
-    return getClient().get<ViewerSummaryListResponse>(`/v1/summary/list/${userId}`);
+    return getClient().get<ViewerSummaryListResponse>(`${SUMMARY}/list/${userId}`);
   }
 
   public summaryRead(request: {
@@ -94,7 +114,7 @@ export class ViewerService {
     collectionId: string;
     contextId: string;
   }): Promise<ApiResponse<ViewerSummaryReadResponse>> {
-    return getClient().post<ViewerSummaryReadResponse>('/v1/summary/read', { request: toWireIds(request) });
+    return getClient().post<ViewerSummaryReadResponse>(`${SUMMARY}/read`, { request: toWireIds(request) });
   }
 
   public summaryDelete({ userId, all, collectionId, contextId }: SummaryDeleteParams): Promise<ApiResponse<unknown>> {
@@ -103,11 +123,11 @@ export class ViewerService {
     if (collectionId) params.set('courseId', collectionId);
     if (contextId) params.set('batchId', contextId);
     const query = params.toString();
-    return getClient().delete(`/v1/summary/delete/${userId}${query ? `?${query}` : ''}`);
+    return getClient().delete(`${SUMMARY}/delete/${userId}${query ? `?${query}` : ''}`);
   }
 
   public summaryDownload(userId: string, format?: string): Promise<ApiResponse<SummaryDownloadResponse>> {
     const query = format ? `?format=${encodeURIComponent(format)}` : '';
-    return getClient().get<SummaryDownloadResponse>(`/v1/summary/download/${userId}${query}`);
+    return getClient().get<SummaryDownloadResponse>(`${SUMMARY}/download/${userId}${query}`);
   }
 }

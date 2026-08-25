@@ -15,6 +15,8 @@ interface LevelDetailViewProps {
   waiverNote?: string;
   summaryByCollectionId: Map<string, ViewerSummaryRecord>;
   pathSummary?: ViewerSummaryRecord;
+  /** Forwarded to each course row's CTA - see `LedgerCourseRow`'s `isEnrolled`. Defaults to `true`. */
+  isEnrolled?: boolean;
   onBack: () => void;
   onOpenCourse: (courseId: string, contentId: string) => void;
 }
@@ -28,6 +30,7 @@ export function LevelDetailView({
   waiverNote,
   summaryByCollectionId,
   pathSummary,
+  isEnrolled = true,
   onBack,
   onOpenCourse,
 }: LevelDetailViewProps) {
@@ -69,14 +72,19 @@ export function LevelDetailView({
           </div>
         </div>
         <div className="flex flex-col gap-2 p-6">
-          {level.courses.map((course) => (
-            <LedgerCourseRow
-              key={course.identifier}
-              course={course}
-              progress={computeCourseProgress(course, summaryByCollectionId, pathSummary)}
-              onOpen={() => onOpenCourse(course.identifier, course.leafIds[0] ?? '')}
-            />
-          ))}
+          {level.courses.map((course) => {
+            const courseProgress = computeCourseProgress(course, summaryByCollectionId, pathSummary);
+            return (
+              <LedgerCourseRow
+                key={course.identifier}
+                course={course}
+                progress={courseProgress}
+                onOpen={() => onOpenCourse(course.identifier, course.leafIds[0] ?? '')}
+                isEnrolled={isEnrolled}
+                isOptional={courseProgress.optional}
+              />
+            );
+          })}
         </div>
       </div>
       <div className="flex flex-col gap-4">

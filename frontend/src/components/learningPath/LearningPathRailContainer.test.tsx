@@ -48,6 +48,7 @@ describe('LearningPathRailContainer', () => {
         levelStatuses: [],
         priorState: { done: false },
         outcomeState: { unlocked: false },
+        enrollment: { isEnrolled: true },
       };
     });
 

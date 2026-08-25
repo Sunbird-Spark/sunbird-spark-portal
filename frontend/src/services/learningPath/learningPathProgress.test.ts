@@ -118,7 +118,7 @@ describe('computeCourseProgress', () => {
 
   it('returns zero progress when the user is not enrolled (no records at all)', () => {
     const result = computeCourseProgress(course1, new Map());
-    expect(result).toEqual({ pct: 0, completed: 0, total: 2, status: 'notStarted' });
+    expect(result).toEqual({ pct: 0, completed: 0, total: 2, status: 'notStarted', optional: false });
   });
 
   // Regression: a stale aggregate completionPercentage must never mask a
@@ -273,6 +273,49 @@ describe('deriveLevelStatuses', () => {
     });
     expect(statuses[0]).toBe('waived');
     expect(statuses[1]).toBe('locked');
+  });
+
+  // Regression: an unenrolled visitor on a Fixed-policy path with real
+  // completion data (a foreign/stale summary record, or a preview render)
+  // must never see an openable-looking level - see bug: unenrolled learner
+  // shown "In progress"/"notStarted" instead of "Locked".
+  it('locks every level when not enrolled, under Fixed policy, regardless of progress data', () => {
+    const partial = [
+      { pct: 100, completed: 2, total: 2, doneCourses: 1 },
+      { pct: 50, completed: 0, total: 1, doneCourses: 0 },
+    ];
+    const statuses = deriveLevelStatuses(model, 'Fixed', partial, true, {}, false);
+    expect(statuses).toEqual(['locked', 'locked']);
+  });
+
+  // Regression: under Diagnostic/PriorLearning with NO prior assessment,
+  // `priorDone` defaults to true, so every level used to resolve to
+  // `notStarted` (openable) for an unenrolled visitor.
+  it('locks every level when not enrolled, under Diagnostic policy, even with no prior assessment (priorDone=true)', () => {
+    const partial = [
+      { pct: 0, completed: 0, total: 2, doneCourses: 0 },
+      { pct: 0, completed: 0, total: 1, doneCourses: 0 },
+    ];
+    const statuses = deriveLevelStatuses(model, 'Diagnostic', partial, true, {}, false);
+    expect(statuses).toEqual(['locked', 'locked']);
+  });
+
+  it('locks every level when not enrolled, under PriorLearning policy', () => {
+    const partial = [
+      { pct: 0, completed: 0, total: 2, doneCourses: 0 },
+      { pct: 0, completed: 0, total: 1, doneCourses: 0 },
+    ];
+    const statuses = deriveLevelStatuses(model, 'PriorLearning', partial, false, {}, false);
+    expect(statuses).toEqual(['locked', 'locked']);
+  });
+
+  it('defaults isEnrolled to true, so every existing call site is unaffected', () => {
+    const partial = [
+      { pct: 100, completed: 2, total: 2, doneCourses: 1 },
+      { pct: 0, completed: 0, total: 1, doneCourses: 0 },
+    ];
+    const statuses = deriveLevelStatuses(model, 'Fixed', partial, true);
+    expect(statuses).toEqual(['completed', 'notStarted']);
   });
 });
 

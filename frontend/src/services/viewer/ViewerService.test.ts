@@ -16,16 +16,16 @@ vi.mock('../../lib/http-client', () => ({
 /**
  * Locks in the confirmed Viewer Service route list (method + path), which in
  * a few places diverges from the design doc's naming:
- *   POST   /v1/view/start
- *   POST   /v1/view/update
- *   POST   /v1/assessment/submit   (NOT /v1/view/assess - that route 404s)
- *   POST   /v1/view/end
- *   POST   /v1/view/read
- *   POST   /v1/assessment/read
- *   GET    /v1/summary/list/:userId
- *   POST   /v1/summary/read
- *   DELETE /v1/summary/delete/:userId
- *   GET    /v1/summary/download/:userId
+ *   POST   /view/v1/start
+ *   POST   /view/v1/update
+ *   POST   /assessment/v1/submit   (NOT /view/v1/assess - that route 404s)
+ *   POST   /view/v1/end
+ *   POST   /view/v1/read
+ *   POST   /assessment/v1/read
+ *   GET    /summary/v1/list/:userId
+ *   POST   /summary/v1/read
+ *   DELETE /summary/v1/delete/:userId
+ *   GET    /summary/v1/download/:userId
  *
  * Also locks in the wire-naming translation: the portal speaks
  * `collectionId`/`contextId` internally, but `ViewerRequestKeys.scala` reads
@@ -44,21 +44,21 @@ describe('ViewerService', () => {
     mockDelete.mockReset().mockResolvedValue(okResponse);
   });
 
-  it('viewStart posts to /v1/view/start with collectionId/contextId translated to courseId/batchId', async () => {
+  it('viewStart posts to /view/v1/start with collectionId/contextId translated to courseId/batchId', async () => {
     const request = { userId: 'u1', contentId: 'do_1', collectionId: 'do_c', contextId: 'batch_1' };
     await service.viewStart(request);
-    expect(mockPost).toHaveBeenCalledWith('/v1/view/start', {
+    expect(mockPost).toHaveBeenCalledWith('/view/v1/start', {
       request: { userId: 'u1', contentId: 'do_1', courseId: 'do_c', batchId: 'batch_1' },
     });
   });
 
-  it('viewUpdate posts to /v1/view/update without collectionId/contextId when absent', async () => {
+  it('viewUpdate posts to /view/v1/update without collectionId/contextId when absent', async () => {
     const request = { userId: 'u1', contentId: 'do_1', progressDetails: { progress: 50 }, timespent: 12.63 };
     await service.viewUpdate(request);
-    expect(mockPost).toHaveBeenCalledWith('/v1/view/update', { request });
+    expect(mockPost).toHaveBeenCalledWith('/view/v1/update', { request });
   });
 
-  it('viewAssess posts to /v1/assessment/submit (not /v1/view/assess) with courseId/batchId', async () => {
+  it('viewAssess posts to /assessment/v1/submit (not /view/v1/assess) with courseId/batchId', async () => {
     const request = {
       userId: 'u1',
       contentId: 'do_1',
@@ -71,7 +71,7 @@ describe('ViewerService', () => {
       maxScore: 5,
     };
     await service.viewAssess(request);
-    expect(mockPost).toHaveBeenCalledWith('/v1/assessment/submit', {
+    expect(mockPost).toHaveBeenCalledWith('/assessment/v1/submit', {
       request: {
         userId: 'u1',
         contentId: 'do_1',
@@ -86,61 +86,61 @@ describe('ViewerService', () => {
     });
   });
 
-  it('viewEnd posts to /v1/view/end', async () => {
+  it('viewEnd posts to /view/v1/end', async () => {
     const request = { userId: 'u1', contentId: 'do_1' };
     await service.viewEnd(request);
-    expect(mockPost).toHaveBeenCalledWith('/v1/view/end', { request });
+    expect(mockPost).toHaveBeenCalledWith('/view/v1/end', { request });
   });
 
-  it('viewRead posts to /v1/view/read with courseId/batchId', async () => {
+  it('viewRead posts to /view/v1/read with courseId/batchId', async () => {
     const request = { userId: 'u1', contentId: ['do_1', 'do_2'], collectionId: 'do_c', contextId: 'batch_1' };
     await service.viewRead(request);
-    expect(mockPost).toHaveBeenCalledWith('/v1/view/read', {
+    expect(mockPost).toHaveBeenCalledWith('/view/v1/read', {
       request: { userId: 'u1', contentId: ['do_1', 'do_2'], courseId: 'do_c', batchId: 'batch_1' },
     });
   });
 
-  it('assessmentRead posts to /v1/assessment/read', async () => {
+  it('assessmentRead posts to /assessment/v1/read', async () => {
     const request = { userId: 'u1', contentId: ['do_1'] };
     await service.assessmentRead(request);
-    expect(mockPost).toHaveBeenCalledWith('/v1/assessment/read', { request });
+    expect(mockPost).toHaveBeenCalledWith('/assessment/v1/read', { request });
   });
 
-  it('summaryList gets /v1/summary/list/:userId', async () => {
+  it('summaryList gets /summary/v1/list/:userId', async () => {
     await service.summaryList('u1');
-    expect(mockGet).toHaveBeenCalledWith('/v1/summary/list/u1');
+    expect(mockGet).toHaveBeenCalledWith('/summary/v1/list/u1');
   });
 
-  it('summaryRead posts to /v1/summary/read with courseId/batchId, not collectionId/contextId', async () => {
+  it('summaryRead posts to /summary/v1/read with courseId/batchId, not collectionId/contextId', async () => {
     const request = { userId: 'u1', collectionId: 'do_lp', contextId: 'batch_1' };
     await service.summaryRead(request);
-    expect(mockPost).toHaveBeenCalledWith('/v1/summary/read', {
+    expect(mockPost).toHaveBeenCalledWith('/summary/v1/read', {
       request: { userId: 'u1', courseId: 'do_lp', batchId: 'batch_1' },
     });
   });
 
-  it('summaryDelete DELETEs /v1/summary/delete/:userId with ?all=true for every enrolment', async () => {
+  it('summaryDelete DELETEs /summary/v1/delete/:userId with ?all=true for every enrolment', async () => {
     await service.summaryDelete({ userId: 'u1', all: true });
-    expect(mockDelete).toHaveBeenCalledWith('/v1/summary/delete/u1?all=true');
+    expect(mockDelete).toHaveBeenCalledWith('/summary/v1/delete/u1?all=true');
   });
 
-  it('summaryDelete DELETEs /v1/summary/delete/:userId with courseId/batchId for a specific enrolment', async () => {
+  it('summaryDelete DELETEs /summary/v1/delete/:userId with courseId/batchId for a specific enrolment', async () => {
     await service.summaryDelete({ userId: 'u1', collectionId: 'do_lp', contextId: 'batch_1' });
-    expect(mockDelete).toHaveBeenCalledWith('/v1/summary/delete/u1?courseId=do_lp&batchId=batch_1');
+    expect(mockDelete).toHaveBeenCalledWith('/summary/v1/delete/u1?courseId=do_lp&batchId=batch_1');
   });
 
-  it('summaryDelete DELETEs /v1/summary/delete/:userId with no query string when nothing else is specified', async () => {
+  it('summaryDelete DELETEs /summary/v1/delete/:userId with no query string when nothing else is specified', async () => {
     await service.summaryDelete({ userId: 'u1' });
-    expect(mockDelete).toHaveBeenCalledWith('/v1/summary/delete/u1');
+    expect(mockDelete).toHaveBeenCalledWith('/summary/v1/delete/u1');
   });
 
-  it('summaryDownload gets /v1/summary/download/:userId with a format query', async () => {
+  it('summaryDownload gets /summary/v1/download/:userId with a format query', async () => {
     await service.summaryDownload('u1', 'csv');
-    expect(mockGet).toHaveBeenCalledWith('/v1/summary/download/u1?format=csv');
+    expect(mockGet).toHaveBeenCalledWith('/summary/v1/download/u1?format=csv');
   });
 
-  it('summaryDownload gets /v1/summary/download/:userId with no query when format is omitted', async () => {
+  it('summaryDownload gets /summary/v1/download/:userId with no query when format is omitted', async () => {
     await service.summaryDownload('u1');
-    expect(mockGet).toHaveBeenCalledWith('/v1/summary/download/u1');
+    expect(mockGet).toHaveBeenCalledWith('/summary/v1/download/u1');
   });
 });

@@ -101,6 +101,44 @@ function renderRail(overrides: Partial<Parameters<typeof LearningPathRail>[0]> =
   return { onOpenCourse };
 }
 
+function buildModelWithPrior(): LearningPathModel {
+  return {
+    ...buildModel(),
+    priorAssessment: {
+      identifier: 'course_prior',
+      name: 'LP-PriorAssess-Course',
+      leafNodesCount: 1,
+      leafIds: ['leaf_prior'],
+      skills: [],
+      isAssessmentCourse: true,
+    },
+  };
+}
+
+describe('LearningPathRail prior row', () => {
+  // Regression: an unenrolled visitor saw "In progress" on the prior
+  // assessment row here too (same binary check as the Ledger's prior row).
+  it('shows Locked, not "In progress", when the learner is not enrolled', () => {
+    renderRail({ model: buildModelWithPrior(), priorDone: false, isEnrolled: false });
+    expect(screen.getByText('learningPath.statusLocked')).toBeInTheDocument();
+    expect(screen.queryByText('learningPath.statusInProgress')).not.toBeInTheDocument();
+  });
+
+  it('is not clickable when not enrolled', () => {
+    const onOpenPrior = vi.fn();
+    renderRail({ model: buildModelWithPrior(), priorDone: false, isEnrolled: false, onOpenPrior });
+    fireEvent.click(screen.getByText('LP-PriorAssess-Course'));
+    expect(onOpenPrior).not.toHaveBeenCalled();
+  });
+
+  it('opens the prior assessment when clicked while enrolled', () => {
+    const onOpenPrior = vi.fn();
+    renderRail({ model: buildModelWithPrior(), priorDone: false, isEnrolled: true, onOpenPrior });
+    fireEvent.click(screen.getByText('LP-PriorAssess-Course'));
+    expect(onOpenPrior).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('LearningPathRail', () => {
   it('shows the child courses of an unlocked Level', () => {
     renderRail();
