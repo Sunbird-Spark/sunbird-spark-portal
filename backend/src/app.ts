@@ -73,7 +73,8 @@ const CSP_EXEMPT_PATHS = [
     '/plugins', '/content-editor', '/generic-editor', '/editor',
 ];
 app.use((req, res, next) => {
-    if (CSP_EXEMPT_PATHS.some((p) => req.path.startsWith(p))) {
+    // Match on a path-segment boundary so /content/previewX isn't exempted too.
+    if (CSP_EXEMPT_PATHS.some((p) => req.path === p || req.path.startsWith(`${p}/`))) {
         res.removeHeader('Content-Security-Policy');
     }
     next();
