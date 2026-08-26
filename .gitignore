@@ -12,6 +12,7 @@ backend/node_modules/
 .pnp.js
 package-lock.json
 backend/package-lock.json
+!frontend/package-lock.json
 
 # =========================
 # Build outputs
