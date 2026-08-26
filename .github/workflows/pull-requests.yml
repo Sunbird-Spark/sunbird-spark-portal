@@ -17,6 +17,13 @@ jobs:
         with:
           node-version: 24.12.0
 
+      # NOTE: frontend/package-lock.json must be regenerated on Linux, not macOS.
+      # `npm install` on macOS prunes Linux-only optional dependencies (the
+      # @emnapi/* packages pulled in by @unrs/resolver-binding-wasm32-wasi), and
+      # `npm ci` then fails here with "Missing: @emnapi/core from lock file".
+      # To refresh it:
+      #   docker run --rm -v "$PWD/frontend:/w" -w /w node:24 \
+      #     npm install --ignore-scripts --package-lock-only
       - name: Install frontend dependencies
         working-directory: frontend
         run: |
