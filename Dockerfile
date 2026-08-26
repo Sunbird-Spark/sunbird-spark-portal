@@ -14,7 +14,7 @@ ARG NPM_VERSION
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 COPY frontend/copy-assets.js ./
-RUN npm install --no-save --prefix /tmp/npm npm@${NPM_VERSION} \
+RUN npm install --no-save --ignore-scripts --prefix /tmp/npm "npm@${NPM_VERSION}" \
  && node /tmp/npm/node_modules/npm/bin/npm-cli.js ci --ignore-scripts \
  && rm -rf /tmp/npm && npm cache clean --force
 COPY frontend/ .
@@ -26,7 +26,7 @@ FROM ${DHI_IMAGE_DEV} AS backend-builder
 ARG NPM_VERSION
 WORKDIR /app/backend
 COPY backend/package*.json ./
-RUN npm install --no-save --prefix /tmp/npm npm@${NPM_VERSION} \
+RUN npm install --no-save --ignore-scripts --prefix /tmp/npm "npm@${NPM_VERSION}" \
  && node /tmp/npm/node_modules/npm/bin/npm-cli.js ci --ignore-scripts \
  && rm -rf /tmp/npm && npm cache clean --force
 COPY backend/ .
@@ -39,7 +39,7 @@ FROM ${DHI_IMAGE_DEV} AS prod-deps
 ARG NPM_VERSION
 WORKDIR /app
 COPY --from=backend-builder /app/backend/package*.json ./
-RUN npm install --no-save --prefix /tmp/npm npm@${NPM_VERSION} \
+RUN npm install --no-save --ignore-scripts --prefix /tmp/npm "npm@${NPM_VERSION}" \
  && node /tmp/npm/node_modules/npm/bin/npm-cli.js ci --omit=dev --ignore-scripts \
  && rm -rf /tmp/npm && npm cache clean --force
 
