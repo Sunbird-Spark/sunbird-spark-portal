@@ -11,7 +11,6 @@ backend/node_modules/
 .pnp
 .pnp.js
 package-lock.json
-frontend/package-lock.json
 backend/package-lock.json
 
 # =========================
@@ -76,6 +75,8 @@ pnpm-debug.log*
 *.bcmap
 
 public/assets/**/*.svg
+
+graphify-out/
 
 # =========================
 # Player files (copied from node_modules)
