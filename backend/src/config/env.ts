@@ -4,6 +4,12 @@ dotenv.config();
 
 const env = process.env;
 
+// Protocol for cluster-internal service calls. Defaults to plain HTTP because
+// these services are only reachable inside the Kubernetes network (TLS is
+// terminated at the gateway/ingress); set to 'https' when running a TLS-enabled
+// service mesh or pointing at external endpoints.
+const internalServiceProtocol = env.INTERNAL_SERVICE_PROTOCOL || 'http';
+
 export const envConfig = {
     ENVIRONMENT: env.ENVIRONMENT || '',
     SERVER_URL: env.SERVER_URL || '',
@@ -45,7 +51,10 @@ export const envConfig = {
     GOOGLE_RECAPTCHA_VERIFY_URL: env.GOOGLE_RECAPTCHA_VERIFY_URL || 'https://www.google.com/recaptcha/api/siteverify',
     GOOGLE_RECAPTCHA_SECRET: env.GOOGLE_RECAPTCHA_SECRET || '',
     APPID: (env.ENVIRONMENT || 'local') + '.' + (env.SUNBIRD_PORTAL_INSTANCE || 'sunbird') + '.portal',
-    LEARN_BASE_URL: env.LEARN_BASE_URL || 'http://userorg-service:9000',
-    KNOWLG_MW_BASE_URL: env.KNOWLG_MW_BASE_URL || 'http://knowledge-mw-service:5000',
+    LEARN_BASE_URL: env.LEARN_BASE_URL || `${internalServiceProtocol}://userorg-service:9000`,
+    KNOWLG_MW_BASE_URL: env.KNOWLG_MW_BASE_URL || `${internalServiceProtocol}://knowledge-mw-service:5000`,
     ENABLE_AI_SEARCH: env.ENABLE_AI_SEARCH || 'true',
+    // Comma-separated list of extra origins allowed by CORS (in addition to the
+    // dev frontend URL and the mobile webview origins wired up in app.ts).
+    CORS_ALLOWED_ORIGINS: env.CORS_ALLOWED_ORIGINS || '',
 };

@@ -318,7 +318,7 @@ const WorkspacePage = () => {
 
   // Memoize content IDs to prevent unnecessary lock list API calls
   const visibleContentIds = useMemo(
-    () => JSON.stringify(visibleContents.map((c) => c.id).sort()),
+    () => JSON.stringify(visibleContents.map((c) => c.id).sort((a, b) => a.localeCompare(b))),
     [visibleContents],
   );
 

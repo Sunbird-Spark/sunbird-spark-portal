@@ -77,6 +77,9 @@ export default function ContentNameDialog({
     <div
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       onClick={handleClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && !isLoading) handleClose();
+      }}
       role="dialog"
       aria-modal="true"
       aria-label={t('workspace.enterContentName')}
@@ -84,6 +87,11 @@ export default function ContentNameDialog({
       <div
         className="bg-white rounded-2xl max-w-md w-full p-6"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key === 'Escape' && !isLoading) handleClose();
+        }}
+        role="presentation"
       >
         <h2 className="text-xl font-bold font-rubik text-foreground mb-2">
           {t('create')} {optionTitle || t('content.label')}

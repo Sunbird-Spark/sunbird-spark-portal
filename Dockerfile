@@ -6,14 +6,16 @@ FROM ${DHI_IMAGE_DEV} AS frontend-builder
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 COPY frontend/copy-assets.js ./
-RUN npm i && npm cache clean --force
+RUN npm ci --ignore-scripts && npm cache clean --force
 COPY frontend/ .
+# --ignore-scripts skips the postinstall hook, so run the (trusted, first-party) asset copy explicitly
+RUN node copy-assets.js
 RUN npm run build
 
 FROM ${DHI_IMAGE_DEV} AS backend-builder
 WORKDIR /app/backend
 COPY backend/package*.json ./
-RUN npm i && npm cache clean --force
+RUN npm ci --ignore-scripts && npm cache clean --force
 COPY backend/ .
 ARG COMMIT_HASH
 RUN node -e 'if (!process.env.COMMIT_HASH) { console.error("COMMIT_HASH is required"); process.exit(1); } const pkg = require("./package.json"); pkg.buildHash = process.env.COMMIT_HASH; require("fs").writeFileSync("./package.json", JSON.stringify(pkg, null, 2));'
@@ -23,7 +25,7 @@ RUN npm run build
 FROM ${DHI_IMAGE_DEV} AS prod-deps
 WORKDIR /app
 COPY --from=backend-builder /app/backend/package*.json ./
-RUN npm i --only=production && npm cache clean --force
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
 # Stage 4: Final Production Image
 FROM ${DHI_IMAGE_RUNTIME} AS production

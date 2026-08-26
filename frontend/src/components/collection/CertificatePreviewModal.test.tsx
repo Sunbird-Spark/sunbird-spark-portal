@@ -99,6 +99,23 @@ describe('CertificatePreviewModal', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it('calls onClose when Escape is pressed on the overlay', () => {
+    const onClose = vi.fn();
+    render(<CertificatePreviewModal {...defaultProps} onClose={onClose} />);
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('calls onClose once on Escape inside the panel and ignores other keys', () => {
+    const onClose = vi.fn();
+    render(<CertificatePreviewModal {...defaultProps} onClose={onClose} />);
+    const panelContent = screen.getByText('courseDetails.previewCertificate');
+    fireEvent.keyDown(panelContent, { key: 'Enter' });
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.keyDown(panelContent, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   describe('with details and HttpService', () => {
     beforeEach(() => {
       vi.mocked(axios.get).mockReset();

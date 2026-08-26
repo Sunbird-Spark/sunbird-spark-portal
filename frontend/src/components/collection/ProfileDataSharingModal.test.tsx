@@ -89,6 +89,23 @@ describe('ProfileDataSharingModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('calls onClose when Escape is pressed on the overlay', () => {
+    const onClose = vi.fn();
+    render(<ProfileDataSharingModal {...defaultProps} onClose={onClose} />);
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('calls onClose once on Escape inside the panel and ignores other keys', () => {
+    const onClose = vi.fn();
+    render(<ProfileDataSharingModal {...defaultProps} onClose={onClose} />);
+    const title = screen.getByText('profileDataSharing.consentTitle');
+    fireEvent.keyDown(title, { key: 'Enter' });
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.keyDown(title, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('Share button is disabled until checkbox is checked', () => {
     render(<ProfileDataSharingModal {...defaultProps} />);
     const shareBtn = screen.getByRole('button', { name: 'profileDataSharing.share' });
