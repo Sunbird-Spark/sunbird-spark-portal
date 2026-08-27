@@ -7,6 +7,7 @@ import PageLoader from '@/components/common/PageLoader';
 import { Toaster } from '@/components/common/Toaster';
 import { portalInitializer } from './utils/portalInitializer';
 import { TncCheckWrapper } from '@/components/termsAndCondition/TncCheckWrapper';
+import { SsoProvidersBridge } from '@/components/common/SsoProvidersBridge';
 import { createQueryClient } from './queryClient';
 
 const queryClient = createQueryClient();
@@ -43,6 +44,7 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SsoProvidersBridge />
       <TncCheckWrapper />
       <BrowserRouter>
         <AppRoutes />
