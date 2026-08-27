@@ -17,9 +17,17 @@ jobs:
         with:
           node-version: 24.12.0
 
+      # Regenerate package-lock.json only with the Node version in .nvmrc, which
+      # matches the one pinned above and in the Dockerfile. A newer npm places the
+      # @emnapi/* packages (via @unrs/resolver-binding-wasm32-wasi) differently in
+      # the tree, and `npm ci` in the release image build then rejects the lockfile
+      # with "Missing: @emnapi/core@... from lock file" -- even though CI passes.
+      # The OS does not matter here; the npm version does.
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm install
+        run: |
+          npm ci --ignore-scripts
+          node copy-assets.js
 
       - name: Frontend lint
         working-directory: frontend
@@ -48,7 +56,7 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: npm install
+        run: npm ci --ignore-scripts
 
       - name: Backend lint
         working-directory: backend

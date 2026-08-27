@@ -97,6 +97,12 @@ export const SelectOTPDelivery: React.FC<SelectOTPDeliveryProps> = ({
                         key={`${identifier.type}-${identifier.value}`}
                         className={`delivery-option ${selectedIdentifier?.value === identifier.value ? 'delivery-option-selected' : ''}`}
                         onClick={() => setSelectedIdentifier(identifier)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                setSelectedIdentifier(identifier);
+                            }
+                        }}
                     >
                         <input
                             type="radio"

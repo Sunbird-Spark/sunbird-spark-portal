@@ -171,7 +171,14 @@ const SearchModal = ({ isOpen, onClose }: SearchModalProps) => {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {results.map((item) => (
-                  <div key={item.identifier} onClick={onClose}>
+                  <div
+                    key={item.identifier}
+                    onClick={onClose}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") onClose();
+                    }}
+                    role="presentation"
+                  >
                     {item.mimeType === COLLECTION_MIME_TYPE ? (
                       <CollectionCard item={item} />
                     ) : (

@@ -1,4 +1,5 @@
 import React from 'react';
+import { randomBetween, randomFloat, randomInt } from '@/utils/random';
 
 export type SubVariant = 'classic' | 'ember' | 'shatter' | 'melt' | 'ashes';
 
@@ -12,7 +13,7 @@ const COLORS = ['#dc7727', '#bd4527', '#f5c48a', '#7a2b14', '#e8a055'];
 
 function easeIn(t: number) { return t * t * t; }
 function easeOut(t: number) { return 1 - Math.pow(1 - t, 3); }
-function rand(a: number, b: number) { return a + Math.random() * (b - a); }
+const rand = randomBetween;
 
 export type Particle = {
   x: number; y: number; vx: number; vy: number;
@@ -130,11 +131,11 @@ export function spawnParticles(p: number, sv: SubVariant, W: number, H: number, 
   if (sv === 'classic') {
     if (p > 0.28 && p < 0.72) {
       const intensity = Math.sin((p - 0.28) / 0.44 * Math.PI);
-      if (Math.random() < intensity * 0.35) {
+      if (randomFloat() < intensity * 0.35) {
         particles.push({
           x: px, y: py, vx: rand(-0.4, 0.4), vy: rand(-1.2, -0.3),
           size: rand(2, 5), alpha: rand(0.4, 0.8), decay: rand(0.008, 0.018),
-          color: (COLORS[Math.floor(Math.random() * COLORS.length)] || COLORS[0]) as string, type: 'circle',
+          color: (COLORS[randomInt(0, COLORS.length)] || COLORS[0]) as string, type: 'circle',
           blur: rand(0, 2), life: 1,
         });
       }
@@ -142,11 +143,11 @@ export function spawnParticles(p: number, sv: SubVariant, W: number, H: number, 
   } else if (sv === 'ember') {
     if (p > 0.18 && p < 0.68) {
       const intensity = Math.sin((p - 0.18) / 0.5 * Math.PI);
-      if (Math.random() < intensity * 0.5) {
+      if (randomFloat() < intensity * 0.5) {
         particles.push({
           x: px, y: py, vx: rand(-1.2, 1.2), vy: rand(-2.5, -0.8),
           size: rand(2, 4), alpha: 1, decay: rand(0.015, 0.03),
-          color: (COLORS[Math.floor(Math.random() * 3)] || COLORS[0]) as string, type: 'circle',
+          color: (COLORS[randomInt(0, 3)] || COLORS[0]) as string, type: 'circle',
           glow: true, life: 1,
         });
       }
@@ -154,12 +155,12 @@ export function spawnParticles(p: number, sv: SubVariant, W: number, H: number, 
   } else if (sv === 'shatter') {
     if (p > 0.2 && p < 0.6) {
       const intensity = Math.sin((p - 0.2) / 0.4 * Math.PI);
-      if (Math.random() < intensity * 0.4) {
+      if (randomFloat() < intensity * 0.4) {
         const angle = rand(0, Math.PI * 2); const speed = rand(1, 4);
         particles.push({
           x: px, y: py, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1,
           rot: rand(0, Math.PI * 2), rotV: rand(-0.15, 0.15), w: rand(4, 12), h: rand(2, 5), size: rand(2, 5),
-          alpha: rand(0.5, 0.9), decay: rand(0.018, 0.032), color: (COLORS[Math.floor(Math.random() * COLORS.length)] || COLORS[0]) as string,
+          alpha: rand(0.5, 0.9), decay: rand(0.018, 0.032), color: (COLORS[randomInt(0, COLORS.length)] || COLORS[0]) as string,
           type: 'rect', life: 1,
         });
       }
@@ -167,11 +168,11 @@ export function spawnParticles(p: number, sv: SubVariant, W: number, H: number, 
   } else if (sv === 'melt') {
     if (p > 0.22 && p < 0.66) {
       const intensity = Math.sin((p - 0.22) / 0.44 * Math.PI);
-      if (Math.random() < intensity * 0.28) {
+      if (randomFloat() < intensity * 0.28) {
         particles.push({
           x: rand(logoX(200), logoX(1100)), y: logoY(rand(500, 760)),
           vx: rand(-0.1, 0.1), vy: rand(0.8, 2.5), size: rand(3, 7),
-          alpha: rand(0.5, 0.85), decay: rand(0.012, 0.022), color: (COLORS[Math.floor(Math.random() * 3)] || COLORS[0]) as string,
+          alpha: rand(0.5, 0.85), decay: rand(0.012, 0.022), color: (COLORS[randomInt(0, 3)] || COLORS[0]) as string,
           type: 'teardrop', life: 1,
         });
       }
@@ -179,7 +180,7 @@ export function spawnParticles(p: number, sv: SubVariant, W: number, H: number, 
   } else if (sv === 'ashes') {
     if (p > 0.18 && p < 0.65) {
       const intensity = Math.sin((p - 0.18) / 0.47 * Math.PI);
-      if (Math.random() < intensity * 0.45) {
+      if (randomFloat() < intensity * 0.45) {
         particles.push({
           x: px, y: py, vx: rand(-0.6, 0.6), vy: rand(-0.5, -0.1),
           size: rand(1.5, 4), alpha: rand(0.3, 0.7), decay: rand(0.006, 0.015),

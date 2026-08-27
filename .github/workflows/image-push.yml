@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Build Docker Image
         if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
@@ -36,26 +36,35 @@ jobs:
 
       - name: Login Docker Registry
         if: ${{ env.BUILD_DOCKER_IMAGE == 'true' }}
+        env:
+          REGISTRY_PROVIDER: ${{ vars.REGISTRY_PROVIDER }}
+          GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          REGISTRY_NAME: ${{ secrets.REGISTRY_NAME }}
+          REGISTRY_URL_INPUT: ${{ secrets.REGISTRY_URL }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_ACTOR: ${{ github.actor }}
         run: |
-          case "${{ vars.REGISTRY_PROVIDER }}" in
+          case "$REGISTRY_PROVIDER" in
           "gcp")
-            echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" | base64 --decode > $HOME/gcloud-key.json
-            gcloud auth activate-service-account --key-file=$HOME/gcloud-key.json
-            gcloud auth configure-docker ${{ secrets.REGISTRY_NAME }}
-            REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
+            echo "$GCP_SERVICE_ACCOUNT_KEY" | base64 --decode > "$HOME/gcloud-key.json"
+            gcloud auth activate-service-account --key-file="$HOME/gcloud-key.json"
+            gcloud auth configure-docker "$REGISTRY_NAME"
+            REGISTRY_URL=$(echo "$REGISTRY_URL_INPUT" | tr '[:upper:]' '[:lower:]')
             IMAGE_REF="${REGISTRY_URL}/${IMAGE_NAME}"
             ;;
           "azure")
             # Azure ACR: registry host only, image repo handled by IMAGE_NAME
-            echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login "${{ secrets.REGISTRY_NAME }}" \
-              --username "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
-            REGISTRY_URL=$(echo "${{ secrets.REGISTRY_URL }}" | tr '[:upper:]' '[:lower:]')
+            echo "$REGISTRY_PASSWORD" | docker login "$REGISTRY_NAME" \
+              --username "$REGISTRY_USERNAME" --password-stdin
+            REGISTRY_URL=$(echo "$REGISTRY_URL_INPUT" | tr '[:upper:]' '[:lower:]')
             IMAGE_REF="${REGISTRY_URL}/${IMAGE_NAME}"
             ;;
           "dockerhub")
             # Docker Hub: login without host and use username/image for IMAGE_NAME
-            echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login --username "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
-            IMAGE_NAME="${{ secrets.REGISTRY_USERNAME }}/$IMAGE_NAME"
+            echo "$REGISTRY_PASSWORD" | docker login --username "$REGISTRY_USERNAME" --password-stdin
+            IMAGE_NAME="${REGISTRY_USERNAME}/${IMAGE_NAME}"
             echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
             REGISTRY_URL="docker.io"
             IMAGE_REF="${REGISTRY_URL}/${IMAGE_NAME}"
@@ -63,7 +72,7 @@ jobs:
           *)
             # GHCR: repository path already ends in the image name, so push to it directly
             REPO_NAME_LOWERCASE=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
             REGISTRY_URL="ghcr.io/$REPO_NAME_LOWERCASE"
             IMAGE_REF="${REGISTRY_URL}"
             ;;
