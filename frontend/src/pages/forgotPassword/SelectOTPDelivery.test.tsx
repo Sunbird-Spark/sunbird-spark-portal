@@ -81,6 +81,30 @@ describe('SelectOTPDelivery', () => {
         expect(getOtpBtn).not.toBeDisabled();
     });
 
+    it('selects an identifier via Enter or Space keydown, ignoring other keys', () => {
+        render(
+            <SelectOTPDelivery
+                validIdentifiers={validIdentifiers}
+                googleCaptchaSiteKey={googleCaptchaSiteKey}
+                generateOtp={mockGenerateOtp}
+                onSuccess={mockOnSuccess}
+            />
+        );
+
+        const getOtpBtn = screen.getByRole('button', { name: /get otp/i });
+        expect(getOtpBtn).toBeDisabled();
+
+        fireEvent.keyDown(screen.getByText('masked-9876543210'), { key: 'Tab' });
+        expect(getOtpBtn).toBeDisabled();
+
+        fireEvent.keyDown(screen.getByText('masked-9876543210'), { key: 'Enter' });
+        expect(getOtpBtn).not.toBeDisabled();
+
+        fireEvent.keyDown(screen.getByText('masked-test@test.com'), { key: ' ' });
+        const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+        expect(radios[1]?.checked).toBe(true);
+    });
+
     it('handles successful OTP generation', async () => {
         mockGenerateOtp.mockResolvedValue({ status: 200 });
 

@@ -317,6 +317,13 @@ describe('SearchModal', () => {
       fireEvent.click(screen.getByText('Click Me'));
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
+
+    it('calls onClose when Escape is pressed on a result card wrapper', () => {
+      mockUseContentSearch.mockReturnValue(withResults(twoResults));
+      renderModal();
+      fireEvent.keyDown(screen.getByText('Course Alpha'), { key: 'Escape' });
+      expect(mockOnClose).toHaveBeenCalled();
+    });
   });
 
   describe('accessibility', () => {
