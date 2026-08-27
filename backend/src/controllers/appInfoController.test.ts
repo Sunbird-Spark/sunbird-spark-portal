@@ -47,6 +47,7 @@ describe('GET /app/v1/info', () => {
             appId: 'mock.app.id',
             enableAiSearch: 'true',
             cloudStorageUrls: 'https://s3.example.com,https://cdn.example.com',
+            enabledSsoProviders: ['google'],
         });
     });
 });
