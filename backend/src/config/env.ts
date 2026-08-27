@@ -4,6 +4,19 @@ dotenv.config();
 
 const env = process.env;
 
+// NOTE: intentionally uses console.error, not utils/logger.js — logger.js imports
+// envConfig from this file for SUNBIRD_PORTAL_LOG_LEVEL, so importing logger.js here
+// would create a circular import that throws on module evaluation.
+const parseEnabledProviders = (raw: string): string[] => {
+    try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : ['google'];
+    } catch {
+        console.error(`Invalid ENABLED_SSO_PROVIDERS value, falling back to google-only: "${raw}"`);
+        return ['google'];
+    }
+};
+
 export const envConfig = {
     ENVIRONMENT: env.ENVIRONMENT || '',
     SERVER_URL: env.SERVER_URL || '',
@@ -48,4 +61,5 @@ export const envConfig = {
     LEARN_BASE_URL: env.LEARN_BASE_URL || 'http://userorg-service:9000',
     KNOWLG_MW_BASE_URL: env.KNOWLG_MW_BASE_URL || 'http://knowledge-mw-service:5000',
     ENABLE_AI_SEARCH: env.ENABLE_AI_SEARCH || 'true',
+    ENABLED_SSO_PROVIDERS: parseEnabledProviders(env.ENABLED_SSO_PROVIDERS || '["google"]'),
 };
