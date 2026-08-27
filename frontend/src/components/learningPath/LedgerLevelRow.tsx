@@ -42,6 +42,7 @@ export function LedgerLevelRow({
     <div>
       <div
         onClick={isLocked ? undefined : onToggle}
+        onKeyDown={(e) => !isLocked && e.key === 'Enter' && onToggle()}
         className={`grid grid-cols-[2.375rem_1fr_10rem_8.25rem_6.75rem] items-center gap-3.5 border-t border-sunbird-gray-e5 px-[1.125rem] py-3.5 ${
           isLocked ? 'cursor-default opacity-65' : 'cursor-pointer'
         } ${expanded ? 'bg-sunbird-ivory' : 'bg-surface'}`}

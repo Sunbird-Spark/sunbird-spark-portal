@@ -134,6 +134,9 @@ export function LearningPathRail({
               <div key={level.identifier} className="rounded-xl border border-sunbird-gray-e5">
                 <div
                   onClick={locked ? undefined : () => onOpenLevel(level.identifier)}
+                  role={locked ? undefined : 'button'}
+                  tabIndex={locked ? undefined : 0}
+                  onKeyDown={(e) => !locked && e.key === 'Enter' && onOpenLevel(level.identifier)}
                   className={`flex items-start gap-2.5 px-3 py-2.5 ${locked ? 'cursor-default opacity-60' : 'cursor-pointer'}`}
                 >
                   <div
