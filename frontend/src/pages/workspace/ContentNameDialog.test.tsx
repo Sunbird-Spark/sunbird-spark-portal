@@ -153,6 +153,28 @@ describe('ContentNameDialog', () => {
     expect(defaultProps.onClose).not.toHaveBeenCalled();
   });
 
+  it('should close when Escape is pressed on the backdrop element', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(defaultProps.onClose).toHaveBeenCalled();
+  });
+
+  it('should close once when Escape is pressed inside the dialog panel', () => {
+    render(<ContentNameDialog {...defaultProps} />);
+
+    fireEvent.keyDown(screen.getByPlaceholderText('Enter content name'), { key: 'Escape' });
+    expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not close on panel or backdrop Escape while loading', () => {
+    render(<ContentNameDialog {...defaultProps} isLoading={true} />);
+
+    fireEvent.keyDown(screen.getByPlaceholderText('Enter content name'), { key: 'Escape' });
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(defaultProps.onClose).not.toHaveBeenCalled();
+  });
+
   it('should reset name when dialog is closed via open prop', () => {
     const { rerender } = render(<ContentNameDialog {...defaultProps} />);
 

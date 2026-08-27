@@ -105,6 +105,9 @@ export default function CertificatePreviewModal({
     <div
       className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4"
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
       role="dialog"
       aria-modal="true"
       aria-label={t("courseDetails.previewCertificate")}
@@ -112,6 +115,11 @@ export default function CertificatePreviewModal({
       <div
         className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key === "Escape") onClose();
+        }}
+        role="presentation"
       >
         <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
           <h2 className="text-lg font-semibold font-rubik text-foreground">

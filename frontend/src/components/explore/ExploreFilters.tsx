@@ -201,6 +201,7 @@ const ExploreFilters = ({ filters, setFilters }: ExploreFiltersProps) => {
                                         key={option.id}
                                         className="flex items-center justify-start gap-3 cursor-pointer group"
                                         onClick={handleAccordionItemClick}
+                                        onKeyDown={handleAccordionItemClick}
                                     >
                                         <Checkbox
                                             checked={isChecked(option)}

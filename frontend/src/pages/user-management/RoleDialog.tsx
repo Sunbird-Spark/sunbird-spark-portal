@@ -76,11 +76,22 @@ export const RoleDialog = ({
     <div
       className="um-dialog-overlay"
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && !isSavingRole) onClose();
+      }}
       role="dialog"
       aria-modal="true"
       aria-label={dialogTitle}
     >
-      <div className="um-dialog-panel" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="um-dialog-panel"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key === "Escape" && !isSavingRole) onClose();
+        }}
+        role="presentation"
+      >
         <div className="um-dialog-header">
           <h2 className="um-dialog-title">{dialogTitle}</h2>
           <button

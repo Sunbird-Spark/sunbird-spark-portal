@@ -85,6 +85,14 @@ const HelpSupport = () => {
                             <div
                                 key={cat.slug}
                                 onClick={() => navigate(`/help-support/${cat.slug}`)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        navigate(`/help-support/${cat.slug}`);
+                                    }
+                                }}
+                                role="button"
+                                tabIndex={0}
                                 className="bg-sunbird-base-white rounded-xs overflow-hidden flex flex-col shadow-sunbird-md hover:shadow-md transition-shadow cursor-pointer"
                                 data-edataid="help-category-click"
                                 data-pageid="help-support"

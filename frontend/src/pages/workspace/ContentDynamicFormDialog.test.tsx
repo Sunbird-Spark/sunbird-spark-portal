@@ -343,6 +343,16 @@ describe('ContentDynamicFormDialog', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('should close on Escape keydown on the panel and the overlay', async () => {
+    const onClose = vi.fn();
+    renderWithQueryClient(<ContentDynamicFormDialog {...defaultProps} onClose={onClose} />);
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    fireEvent.keyDown(screen.getByText('Create Content'), { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(onClose.mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
   it('should not close on escape when loading', async () => {
     const onClose = vi.fn();
     renderWithQueryClient(<ContentDynamicFormDialog {...defaultProps} onClose={onClose} isLoading={true} />);

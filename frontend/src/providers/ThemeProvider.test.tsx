@@ -1,5 +1,5 @@
 import { render, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ThemeProvider, useTheme } from './ThemeProvider';
 import { useAppI18n } from '@/hooks/useAppI18n';
 
@@ -107,5 +107,43 @@ describe('ThemeProvider — font + language interaction', () => {
 
     expect(document.documentElement.style.getPropertyValue('--app-font-family'))
       .toBe("'Noto Sans Arabic', sans-serif");
+  });
+});
+
+describe('ThemeProvider — URL param hand-off', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    mockLanguage(false);
+  });
+
+  afterEach(() => {
+    window.history.replaceState({}, '', '/');
+  });
+
+  it('persists matched catalog ids to localStorage for valid params', () => {
+    window.history.replaceState({}, '', '/?template=modern&theme=blue&font=satisfy&layout=top');
+    render(
+      <ThemeProvider>
+        <Harness onReady={() => {}} />
+      </ThemeProvider>
+    );
+    expect(localStorage.getItem('sunbird-template')).toBe('modern');
+    expect(localStorage.getItem('sunbird-theme')).toBe('blue');
+    expect(localStorage.getItem('sunbird-font')).toBe('satisfy');
+    expect(localStorage.getItem('sunbird-layout')).toBe('top');
+  });
+
+  it('does not write to localStorage for params that match no catalog entry', () => {
+    window.history.replaceState({}, '', '/?template=evil&theme=evil&font=evil&layout=evil');
+    render(
+      <ThemeProvider>
+        <Harness onReady={() => {}} />
+      </ThemeProvider>
+    );
+    expect(localStorage.getItem('sunbird-template')).toBeNull();
+    expect(localStorage.getItem('sunbird-theme')).toBeNull();
+    expect(localStorage.getItem('sunbird-font')).toBeNull();
+    expect(localStorage.getItem('sunbird-layout')).toBeNull();
   });
 });
