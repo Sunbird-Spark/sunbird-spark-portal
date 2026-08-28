@@ -17,13 +17,12 @@ jobs:
         with:
           node-version: 24.12.0
 
-      # `npm ci` fails if the lockfile was written by a different npm than the one
-      # reading it -- npm 11.6.2 and 11.17 disagree on where the @emnapi/* packages
-      # (via @unrs/resolver-binding-wasm32-wasi) belong in the tree, giving
-      # "Missing: @emnapi/core@... from lock file". This is an npm-version
-      # difference, not an OS one: Linux and macOS produce identical lockfiles on
-      # the same npm. Use the Node version in .nvmrc locally -- it matches the
-      # version pinned above -- and the lockfile will stay stable for everyone.
+      # Regenerate package-lock.json only with the Node version in .nvmrc, which
+      # matches the one pinned above and in the Dockerfile. A newer npm places the
+      # @emnapi/* packages (via @unrs/resolver-binding-wasm32-wasi) differently in
+      # the tree, and `npm ci` in the release image build then rejects the lockfile
+      # with "Missing: @emnapi/core@... from lock file" -- even though CI passes.
+      # The OS does not matter here; the npm version does.
       - name: Install frontend dependencies
         working-directory: frontend
         run: |

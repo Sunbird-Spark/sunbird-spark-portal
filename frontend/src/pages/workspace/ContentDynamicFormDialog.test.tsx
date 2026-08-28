@@ -336,11 +336,13 @@ describe('ContentDynamicFormDialog', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
-    act(() => {
+    // Re-fire until it registers: the dialog is in the DOM once React commits,
+    // but the effect that attaches the window listener flushes afterwards, so a
+    // single keydown can land before there is anything listening for it.
+    await waitFor(() => {
       fireEvent.keyDown(window, { key: 'Escape' });
+      expect(onClose).toHaveBeenCalled();
     });
-
-    expect(onClose).toHaveBeenCalled();
   });
 
   it('should close on Escape keydown on the panel and the overlay', async () => {
