@@ -1,0 +1,85 @@
+---
+description: Use when implementing or modifying authentication, session management, OTP verification, or OAuth flows in the Sunbird Spark Portal. Covers OIDC/PKCE with Keycloak, Google OAuth, mobile Keycloak redirect, and OTP-based field verification.
+---
+
+
+## Overview
+
+The portal supports four authentication paths: OIDC/PKCE via Keycloak (primary SSO), Google OAuth (social login), mobile Keycloak redirect (native app handshake), and OTP verification for sensitive profile field changes (email, phone). Sessions are stored in PostgreSQL via `connect-pg-simple`. The frontend reads auth state from `/portal/user/v1/auth/info` (returns `sid` and `uid`) and user profile from `/api/user/v1/read/:userId`. All auth logic is in `backend/src/auth/` and `backend/src/routes/`.
+
+## When to Use
+
+**Use when:**
+- Adding a new OAuth provider or SSO integration
+- Modifying the OIDC callback, token exchange, or session setup
+- Adding OTP-based verification for a new user field
+- Implementing or changing the post-login redirect logic
+- Debugging session expiry, silent auth failure, or logout issues
+
+**Exclude when:**
+- Modifying UI-only components that simply read from the auth context
+- Adding RBAC checks to an existing authenticated route (use `sunbird-rbac` skill)
+
+## Core Process
+
+1. **Understand the OIDC/PKCE flow** before modifying auth routes:
+   - `GET /portal/login` — generates PKCE `code_verifier` and `code_challenge`, stores in session, redirects to Keycloak
+   - `GET /portal/auth/callback` — exchanges `code` + `code_verifier` for tokens, validates the ID token, sets session fields (`userId`, `userName`, `roles`, `orgs`, `rootOrgId`)
+   - `ALL /portal/logout` — destroys session and redirects to Keycloak logout endpoint
+   - Library: `openid-client` v6 — use its APIs; do not implement token exchange manually
+
+2. **Session fields are the contract** — downstream middleware and frontend read these from the session:
+   ```typescript
+   req.session.userId    // Sunbird user ID
+   req.session.userName  // username / sub
+   req.session.roles     // string[] of role codes
+   req.session.orgs      // organisations array
+   req.session.rootOrgId // root organisation ID
+   req.session.rootOrg   // root org object
+   ```
+   Never rename or remove these fields without updating all consumers.
+
+3. **Google OAuth flow** lives in `src/routes/googleRoutes.ts` and `src/auth/googleController.ts`:
+   - `GET /google/auth` — initiates OAuth with `google-auth-library`
+   - `GET /google/auth/callback` — validates ID token, merges with Sunbird user record, sets same session fields as OIDC flow
+
+4. **OTP verification** for profile fields (email, phone, alternate email):
+   - Initiation: POST to `/portal/user/v1/generate/otp` with reCAPTCHA token — proxied to upstream
+   - Verification: POST to `/portal/otp/v1/verify` — proxied to upstream
+   - Frontend flow in `src/components/profile/EditProfileDialog.tsx` + `src/components/profile/VerifyOtpDialog.tsx`
+   - reCAPTCHA token must be obtained via `react-google-recaptcha` before calling initiation endpoint
+   - Resend cooldown: 20 seconds; max attempts: 4 — enforce in the frontend hook, not just the UI
+
+5. **Validate redirect URIs** before following any post-login redirect:
+   - Only follow redirects to `http://` or `https://` URLs on the same origin or an explicit allowlist
+   - The existing `portalAuthRoutes.ts` shows the correct validation pattern
+
+6. **Test the auth flow** end-to-end with a real Keycloak instance in development (`ENVIRONMENT=local`).
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "I'll implement token exchange manually — `openid-client` is complex" | Manual token exchange misses signature verification, nonce validation, and clock skew handling; `openid-client` handles all of these |
+| "Session fields can be anything — I'll add a new field for convenience" | Undocumented session fields break downstream middleware that iterates or validates the session shape |
+| "I'll skip reCAPTCHA for OTP in development — it's inconvenient" | reCAPTCHA protects OTP endpoints from enumeration; disable it via the `ENVIRONMENT=local` flag already in `env.ts`, not by removing the check |
+| "The frontend can verify the OTP directly against Keycloak" | OTP verification must proxy through the portal backend to attach the authenticated session context |
+
+## Red Flags
+
+Watch for:
+- Token exchange or JWT validation implemented without using `openid-client`
+- `req.session.userId` set from `req.body` or `req.query` without token verification
+- A post-login redirect that follows a user-supplied URL without scheme/host validation
+- reCAPTCHA verification skipped in production code paths (check for `ENVIRONMENT !== 'local'` guard)
+- OTP resend allowed without enforcing the 20-second cooldown and 4-attempt limit
+
+## Verification
+
+□ OIDC token exchange uses `openid-client` APIs — no manual JWT parsing  
+□ All session fields (`userId`, `roles`, `orgs`, `rootOrgId`) are set from verified token claims  
+□ Post-login redirect validates scheme and host before following  
+□ OTP endpoints require reCAPTCHA token in non-local environments  
+□ Resend cooldown (20s) and max attempts (4) enforced in frontend hook  
+□ `cd backend && npm run lint && npm run type-check && npm run test:run` all exit 0  
+□ Session is destroyed on logout with `req.session.destroy()` before redirecting to Keycloak logout

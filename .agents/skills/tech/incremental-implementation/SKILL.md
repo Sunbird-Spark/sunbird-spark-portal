@@ -1,0 +1,73 @@
+---
+name: incremental-implementation
+description: Use when building any feature in the Sunbird Spark Portal to deliver working, tested, committed slices rather than a big-bang implementation. Each increment must pass lint and tests before the next begins.
+---
+
+## Overview
+
+Large features fail silently when built all at once — broken imports, type errors, and test failures accumulate faster than they can be diagnosed. Incremental implementation slices work vertically (type → API → service → component → test → commit) so every commit is a green, deployable unit. This is especially important in this monorepo where frontend and backend are independent apps with separate CI checks.
+
+## When to Use
+
+**Use when:**
+- Implementing a feature that spans more than one file
+- Adding a new page, route, or API endpoint
+- Migrating or refactoring existing code
+
+**Exclude when:**
+- Fixing a single-line typo or config value
+- Updating locale strings only
+
+## Core Process
+
+1. **Define the vertical slice** — identify the smallest end-to-end unit of value (e.g., "the API returns the correct shape" or "the component renders the loading state").
+2. **Start with types** — define TypeScript interfaces in `src/types/` (frontend) or inline in the route/service file (backend) before writing logic. This surfaces mismatches early.
+3. **Implement one layer at a time**, in this order for new features:
+   - Backend: `types` → `service` → `controller` → `route` → `app.ts` registration
+   - Frontend: `types` → `api/` function → `hook` → `component` → `page`
+4. **Run lint and type-check after each layer**:
+   ```bash
+   # Backend layer done
+   cd backend && npm run type-check && npm run lint
+   # Frontend layer done
+   cd frontend && npm run type-check && npm run lint
+   ```
+5. **Write the test for the layer** before moving to the next layer.
+6. **Commit the completed layer** with a conventional commit:
+   ```
+   feat(api): add getSkills service and route
+   feat(hooks): add useSkills TanStack Query hook
+   feat(components): add SkillsSection with loading and error states
+   ```
+7. **Repeat** until the full feature is assembled.
+8. **Run the full suite** once all layers are assembled:
+   ```bash
+   cd frontend && npm run test:run && npm run build
+   cd backend && npm run test:run && npm run build
+   ```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "I'll commit everything at once when it's done" | Large commits make bisect and review impossible; one broken import blocks the entire feature |
+| "Types can wait — I'll add them at the end" | `noUncheckedIndexedAccess` and strict mode will surface type errors at compile time regardless; fixing them early is cheaper |
+| "Lint can wait until the end" | ESLint's `max-lines` rule (250 lines) and `no-unused-vars` accumulate silently; CI will block the PR |
+| "Backend and frontend can be built in parallel by different agents" | They share types via API contracts; mismatches discovered late require rework on both sides |
+
+## Red Flags
+
+Watch for:
+- A single commit touching more than 5 files across both frontend and backend
+- TypeScript errors accumulating across multiple files without a `type-check` run between layers
+- A component being written before the API function and hook it depends on exist
+- Files exceeding 250 lines (backend: 250, test files: 500) — the ESLint rule will catch this at lint time
+
+## Verification
+
+□ Each layer has its own conventional commit with a clear scope  
+□ `npm run type-check` passes after every layer  
+□ `npm run lint` passes after every layer (no `max-lines` violations)  
+□ `npm run test:run` passes after each increment  
+□ Final `npm run build` succeeds for both frontend and backend  
+□ No TODO/FIXME comments left in committed code referencing incomplete layers

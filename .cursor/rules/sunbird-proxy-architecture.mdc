@@ -1,0 +1,88 @@
+---
+description: Use when adding, modifying, or debugging proxy routes in the Sunbird Spark Portal backend that forward requests to upstream Sunbird microservices via Kong API gateway. Covers authenticated proxy, anonymous proxy, knowledge-mw-service proxy, and Vite dev proxy.
+---
+
+
+## Overview
+
+The portal backend is primarily a reverse proxy and session manager. It sits between the React frontend and the upstream Sunbird ecosystem (Kong API gateway, knowledge-mw-service). Requests are authenticated, decorated with session headers, and forwarded upstream. There are four proxy layers: `portalProxyRoutes` (authenticated, Kong), `portalAnonymousProxyRoutes` (anonymous, Kong), `knowlgMwProxyRoutes` (content operations, knowledge-mw-service), and the Vite dev proxy (frontend dev server → backend). Understanding this layering is essential before adding any new route.
+
+## When to Use
+
+**Use when:**
+- Adding a new proxied route to an upstream Sunbird service
+- Debugging a 404, 502, or auth failure on an existing proxy route
+- Adding or modifying request/response header transformations
+- Configuring a new upstream service URL in `env.ts`
+
+**Exclude when:**
+- Adding a portal-native endpoint that does NOT proxy to an upstream service (use `api-design-best-practices` skill)
+- Modifying the frontend Vite proxy configuration (`vite.config.ts`) for a new dev-only path
+
+## Core Process
+
+1. **Identify which proxy layer the route belongs to**:
+   - `/portal/*` authenticated routes → `src/routes/portalProxyRoutes.ts` (catch-all proxies to Kong with session headers)
+   - `/portal/*` anonymous routes → `src/routes/portalAnonymousProxyRoutes.ts` (no session required)
+   - `/action/*` content/editor routes → `src/routes/knowlgMwProxyRoutes.ts` (proxies to knowledge-mw-service)
+   - `/data/v1/form/*` form config routes → `src/routes/formsRoutes.ts` (portal-native Cassandra read/write)
+   - Editor-specific actions → `src/routes/editorRoutes.ts`
+
+2. **Authenticated proxy routes** must apply `requireSession` — the middleware injects the user's Keycloak token and session context as upstream headers. Check `src/auth/middleware.ts` for the header names.
+
+3. **Register the route in `src/app.ts`** before the catch-all handler. Route registration order matters — specific paths must be registered before wildcard catch-alls.
+
+4. **Add the upstream URL to `src/config/env.ts`** if pointing to a new service:
+   ```typescript
+   // env.ts
+   export const SKILLS_SERVICE_URL = process.env.SKILLS_SERVICE_URL ?? 'http://localhost:9000';
+   ```
+   Add the corresponding entry to `backend/.envExample`.
+
+5. **Configure `http-proxy-middleware`** for the new route:
+   ```typescript
+   import { createProxyMiddleware } from 'http-proxy-middleware';
+   router.use('/portal/skills/*rest', requireSession, createProxyMiddleware({
+     target: env.SKILLS_SERVICE_URL,
+     changeOrigin: true,
+     pathRewrite: { '^/portal/skills': '/api/skills' },
+   }));
+   ```
+
+6. **Test the proxy** with a curl or Supertest call that verifies:
+   - The route is reachable (200/expected status)
+   - The session header is forwarded (`x-authenticated-user-token` or equivalent)
+   - An unauthenticated request returns 401
+
+7. **Update the Vite dev proxy** (`frontend/vite.config.ts`) if the new path prefix is not already included, so the frontend dev server forwards it to the backend:
+   ```typescript
+   '/portal/skills': { target: 'http://localhost:3000', changeOrigin: true }
+   ```
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "I'll add a new catch-all route at the top for simplicity" | Catch-all routes before specific routes shadow them; always register specific paths first |
+| "The upstream service doesn't need auth headers — I'll skip `requireSession`" | Skipping session middleware exposes the route to unauthenticated callers; always apply it and let the upstream decide |
+| "I'll hardcode the upstream URL in the proxy config" | Hardcoded URLs break environment promotion; all URLs must come from `env.ts` |
+| "The Vite proxy is separate — I don't need to update it" | In development, all frontend requests go through Vite on port 5173; if the path isn't proxied, the browser hits Vite's 404 handler |
+
+## Red Flags
+
+Watch for:
+- A new `/portal/*` route registered after the existing catch-all `*ALL /portal/*rest` in `portalProxyRoutes.ts`
+- An upstream URL string literal in a proxy configuration (should come from `env.ts`)
+- A proxy route missing `requireSession` for an endpoint that returns user-specific data
+- A new path prefix in `portalProxyRoutes.ts` not added to `frontend/vite.config.ts` proxy entries
+- `changeOrigin: false` when the upstream host differs from the portal host — this causes CORS failures
+
+## Verification
+
+□ New route registered in the correct route file before any catch-all handler  
+□ Upstream URL sourced from `env.ts` with a default value and `.envExample` entry  
+□ `requireSession` applied for authenticated routes  
+□ Vite dev proxy config updated with the new path prefix  
+□ Curl or Supertest test confirms the route proxies correctly with a valid session  
+□ Unauthenticated request to an authenticated route returns 401  
+□ `cd backend && npm run lint && npm run type-check` exit 0
