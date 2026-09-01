@@ -46,7 +46,7 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "^10.0.1",
     "@types/cassandra-driver": "^4.1.1",
     "@types/connect-pg-simple": "^7.0.3",
     "@types/cors": "^2.8.19",
