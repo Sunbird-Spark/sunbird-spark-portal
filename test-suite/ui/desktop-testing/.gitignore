@@ -1,0 +1,8 @@
+# Playwright artifacts
+test-results/
+playwright-report/
+blob-report/
+
+# Environment secrets — never commit
+.env
+.env.local

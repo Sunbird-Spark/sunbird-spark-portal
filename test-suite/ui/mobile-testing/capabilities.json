@@ -1,0 +1,14 @@
+{
+  "android": {
+    "platformName": "Android",
+    "appium:platformVersion": "14",
+    "appium:deviceName": "Android Emulator",
+    "appium:app": "C:\\Users\\Accel\\OneDrive\\Desktop\\sunbird-coss\\app\\app\\android\\Sunbird.apk",
+    "appium:automationName": "UiAutomator2",
+    "appium:ensureWebviewsHavePages": true,
+    "appium:nativeWebScreenshot": true,
+    "appium:newCommandTimeout": 3600,
+    "appium:connectHardwareKeyboard": true
+  }
+
+}

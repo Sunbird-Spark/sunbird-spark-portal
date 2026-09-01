@@ -97,3 +97,4 @@ frontend/public/assets/video-player/
 frontend/public/assets/*
 .claude/settings.local.json
 backend/app.log
+
