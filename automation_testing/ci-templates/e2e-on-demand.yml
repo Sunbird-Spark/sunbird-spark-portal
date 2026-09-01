@@ -1,0 +1,84 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# OPTIONAL: On-Demand E2E workflow
+#
+# To activate, copy this file to .github/workflows/e2e-on-demand.yml
+# Then follow the setup steps in automation_testing/README.md
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: E2E Tests (On Demand)
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Target environment URL'
+        required: false
+        default: 'https://test.sunbirded.org'
+
+concurrency:
+  group: e2e-pages-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  e2e:
+    name: Run E2E Tests & Publish Report
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    defaults:
+      run:
+        working-directory: automation_testing/web-portal
+    env:
+      BASE_URL: ${{ inputs.base_url || vars.E2E_BASE_URL || 'https://test.sunbirded.org' }}
+      REGISTERED_USER_EMAIL: ${{ vars.E2E_REGISTERED_USER_EMAIL || 'user1@yopmail.com' }}
+      REGISTERED_USER_PASSWORD: ${{ vars.E2E_REGISTERED_USER_PASSWORD || 'User1@123' }}
+      USER2_EMAIL: ${{ vars.E2E_USER2_EMAIL || 'user2@yopmail.com' }}
+      USER2_PASSWORD: ${{ vars.E2E_USER2_PASSWORD || 'User2@123' }}
+      CI: true
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.12.0
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ hashFiles('automation_testing/web-portal/package.json') }}
+
+      - name: Install Playwright browsers and system dependencies
+        run: npx playwright install chromium --with-deps
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        continue-on-error: true
+
+      - name: Ensure report directory exists
+        if: always()
+        run: mkdir -p playwright-report
+
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: automation_testing/web-portal/playwright-report
+
+      - name: Deploy report to GitHub Pages
+        if: always()
+        id: deploy
+        uses: actions/deploy-pages@v4
