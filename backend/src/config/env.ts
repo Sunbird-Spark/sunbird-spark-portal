@@ -10,10 +10,10 @@ const env = process.env;
 const parseEnabledProviders = (raw: string): string[] => {
     try {
         const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : ['google'];
+        return Array.isArray(parsed) ? parsed : [];
     } catch {
-        console.error(`Invalid ENABLED_SSO_PROVIDERS value, falling back to google-only: "${raw}"`);
-        return ['google'];
+        console.error(`Invalid ENABLED_SSO_PROVIDERS value, falling back to no SSO providers: "${raw}"`);
+        return [];
     }
 };
 
