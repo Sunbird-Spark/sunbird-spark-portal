@@ -99,9 +99,10 @@ export const handleUserAuthentication = async (
         throw new Error('SSO_EMAIL_NOT_FOUND');
     }
 
+    const { getUserByEmail, createUserWithEmail } = await import('./userService.js');
+
     let userExists;
     try {
-        const { getUserByEmail } = await import('./userService.js');
         userExists = await getUserByEmail(ssoUser.emailId, req);
     } catch (error) {
         logger.error('Error fetching user by email:', error);
@@ -110,7 +111,6 @@ export const handleUserAuthentication = async (
 
     if (!userExists) {
         try {
-            const { createUserWithEmail } = await import('./userService.js');
             await createUserWithEmail(ssoUser, client_id, req);
         } catch (error) {
             logger.error('Error creating user:', error);
