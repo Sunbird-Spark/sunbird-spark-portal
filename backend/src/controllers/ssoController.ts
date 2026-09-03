@@ -13,14 +13,20 @@ import { validateSsoConfig } from '../bootstrap/validateSsoConfig.js';
 import { regenerateSession, saveSession } from '../utils/sessionUtils.js';
 import { fetchUserById, setUserSession } from '../services/userService.js';
 import { envConfig } from '../config/env.js';
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import logger from '../utils/logger.js';
 import _ from 'lodash';
 
-export const initiateSsoAuth = async (req: Request, res: Response) => {
+export const initiateSsoAuth = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const provider = req.params.provider as string;
-        if (!ssoProviders[provider] || !validateSsoConfig().includes(provider)) {
+        // Unregistered provider name — not an SSO route at all, let it fall
+        // through to later middleware (SPA catch-all / proxy) instead of
+        // shadowing unrelated two-segment paths like /content/auth.
+        if (!ssoProviders[provider]) {
+            return next();
+        }
+        if (!validateSsoConfig().includes(provider)) {
             return res.status(404).send('SSO_PROVIDER_NOT_FOUND');
         }
 
@@ -63,14 +69,24 @@ export const initiateSsoAuth = async (req: Request, res: Response) => {
     }
 };
 
-export const handleSsoAuthCallback = async (req: Request, res: Response) => {
+export const handleSsoAuthCallback = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const provider = req.params.provider as string;
-        if (!ssoProviders[provider] || !validateSsoConfig().includes(provider)) {
+        // Unregistered provider name — not an SSO route at all, let it fall
+        // through to later middleware (SPA catch-all / proxy) instead of
+        // shadowing unrelated two-segment paths like /content/auth/callback.
+        if (!ssoProviders[provider]) {
+            return next();
+        }
+        if (!validateSsoConfig().includes(provider)) {
             return res.status(404).send('SSO_PROVIDER_NOT_FOUND');
         }
 
         const { state, codeVerifier, client_id } = validateOAuthSession(req);
+
+        if (req.session.ssoOAuth?.provider !== provider) {
+            return res.status(400).send('SSO_PROVIDER_MISMATCH');
+        }
 
         // Capture redirect_uri before session cleanup in finally
         const redirectUri = req.session.ssoOAuth?.redirect_uri;

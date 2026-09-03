@@ -78,6 +78,7 @@ vi.mock('openid-client', () => ({
 describe('SsoController', () => {
     let mockReq: Partial<Request>;
     let mockRes: Partial<Response>;
+    let mockNext: ReturnType<typeof vi.fn>;
     let initiateSsoAuth: any;
     let handleSsoAuthCallback: any;
     let mockValidateOAuthSession: any;
@@ -117,10 +118,12 @@ describe('SsoController', () => {
             status: vi.fn().mockReturnThis(),
             send: vi.fn().mockReturnThis(),
         };
+
+        mockNext = vi.fn();
     });
 
     describe('GET /:provider/auth', () => {
-        it('returns 404 for an unknown provider', async () => {
+        it('calls next() for an unregistered provider, without touching the response', async () => {
             mockReq.params = { provider: 'microsoft' };
             mockReq.query = {
                 client_id: 'test-client',
@@ -128,10 +131,11 @@ describe('SsoController', () => {
                 error_callback: 'https://example.com/error',
             };
 
-            await initiateSsoAuth(mockReq, mockRes);
+            await initiateSsoAuth(mockReq, mockRes, mockNext);
 
-            expect(mockRes.status).toHaveBeenCalledWith(404);
-            expect(mockRes.send).toHaveBeenCalledWith('SSO_PROVIDER_NOT_FOUND');
+            expect(mockNext).toHaveBeenCalledWith();
+            expect(mockRes.status).not.toHaveBeenCalled();
+            expect(mockRes.send).not.toHaveBeenCalled();
         });
 
         it('returns 404 for a registered provider that is not in the validated enabled list', async () => {
@@ -235,14 +239,42 @@ describe('SsoController', () => {
             tokenClaims: { sub: 'f:google:user-id', email: 'test@example.com' },
         };
 
-        it('returns 404 for an unknown provider', async () => {
+        it('calls next() for an unregistered provider, without touching the response', async () => {
             mockReq.params = { provider: 'microsoft' };
             mockReq.query = { code: 'test-code', state: 'test-state' };
 
-            await handleSsoAuthCallback(mockReq, mockRes);
+            await handleSsoAuthCallback(mockReq, mockRes, mockNext);
 
-            expect(mockRes.status).toHaveBeenCalledWith(404);
-            expect(mockRes.send).toHaveBeenCalledWith('SSO_PROVIDER_NOT_FOUND');
+            expect(mockNext).toHaveBeenCalledWith();
+            expect(mockRes.status).not.toHaveBeenCalled();
+            expect(mockRes.send).not.toHaveBeenCalled();
+        });
+
+        it('rejects a callback whose provider does not match the session-stored provider', async () => {
+            mockReq.params = { provider: 'google' };
+            mockReq.query = { code: 'test-code', state: 'test-state' };
+            mockReq.session = {
+                ssoOAuth: {
+                    provider: 'not-google',
+                    state: 'test-state',
+                    codeVerifier: 'test-verifier',
+                    client_id: 'test-client',
+                    redirect_uri: 'https://example.com/callback',
+                    error_callback: 'https://example.com/error',
+                    timestamp: Date.now(),
+                    sessionUsed: false,
+                },
+            } as any;
+            mockValidateOAuthSession.mockReturnValue({
+                state: 'test-state',
+                codeVerifier: 'test-verifier',
+                client_id: 'test-client',
+            });
+
+            await handleSsoAuthCallback(mockReq, mockRes, mockNext);
+
+            expect(mockRes.status).toHaveBeenCalledWith(400);
+            expect(mockRes.send).toHaveBeenCalledWith('SSO_PROVIDER_MISMATCH');
         });
 
         it('should redirect with error if OAuth session is missing', async () => {
