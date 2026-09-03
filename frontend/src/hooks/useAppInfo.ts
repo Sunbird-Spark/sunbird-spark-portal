@@ -7,6 +7,7 @@ interface AppInfo {
   buildHash: string;
   /** 'true' | 'false' (string from backend env). Defaults to enabled when absent. */
   enableAiSearch?: string;
+  enabledSsoProviders?: string[];
 }
 
 export const useAppInfo = (): UseQueryResult<ApiResponse<AppInfo>, Error> => {

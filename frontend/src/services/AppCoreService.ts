@@ -7,6 +7,7 @@ interface AppInfo {
     version: string;
     buildHash: string;
     cloudStorageUrls?: string;
+    enabledSsoProviders?: string[];
 }
 
 class AppCoreService {
