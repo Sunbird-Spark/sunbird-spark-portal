@@ -6,9 +6,10 @@ let validatedSsoProviders: string[] | null = null;
 
 /**
  * Validates envConfig.ENABLED_SSO_PROVIDERS against the ssoProviders registry,
- * dropping (and logging) any unregistered provider name, and falling back to
- * ['google'] if nothing valid remains. Memoized — call once at startup, reuse
- * the result for route gating and appInfoController.
+ * dropping (and logging) any unregistered provider name. An empty result is
+ * respected as-is (no SSO providers enabled) rather than falling back to
+ * ['google']. Memoized — call once at startup, reuse the result for route
+ * gating and appInfoController.
  */
 export const validateSsoConfig = (): string[] => {
     if (validatedSsoProviders) {
@@ -24,6 +25,6 @@ export const validateSsoConfig = (): string[] => {
         return true;
     });
 
-    validatedSsoProviders = valid.length > 0 ? valid : ['google'];
+    validatedSsoProviders = valid;
     return validatedSsoProviders;
 };
