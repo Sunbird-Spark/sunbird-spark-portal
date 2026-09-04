@@ -1,8 +1,6 @@
 import type { HierarchyContentNode } from "../../types/collectionTypes";
+import { CONTENT_STATUS } from "../../types/collectionTypes";
 import { getLeafContentIdsFromHierarchy } from "./hierarchyTree";
-
-/** Content state 2 = completed (see `getContentStatusMap` in `enrollmentMapper.ts`). */
-const COMPLETED = 2;
 
 /**
  * Sequential access: a learner must finish the current content before the next
@@ -35,7 +33,7 @@ export function getLockedContentIds(
   let seenIncomplete = false;
 
   for (const id of leafIds) {
-    const isCompleted = contentStatusMap[id] === COMPLETED;
+    const isCompleted = contentStatusMap[id] === CONTENT_STATUS.Completed;
     if (seenIncomplete && !isCompleted) {
       locked.add(id);
     }

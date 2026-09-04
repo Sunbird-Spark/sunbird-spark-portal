@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getFirstLeafContentIdFromHierarchy, getLeafContentIdsFromHierarchy } from "@/services/collection/hierarchyTree";
+import { CONTENT_STATUS } from "@/types/collectionTypes";
 import type { CollectionData } from "@/types/collectionTypes";
 
 interface UseInitialCollectionContentNavigationParams {
@@ -35,6 +36,46 @@ export function useInitialCollectionContentNavigation({
   const navigate = useNavigate();
   const location = useLocation();
 
+  /**
+   * Everything both learner effects below need, or null when learner navigation
+   * doesn't apply at all (creator/mentor, non-trackable collection, not enrolled,
+   * content state not loaded yet, empty course).
+   *
+   * Returned as an object rather than a boolean so the narrowed `collectionId` and
+   * `batchIdParam` survive into the effects, and so the hierarchy is walked once
+   * here instead of separately in each effect.
+   */
+  const learnerNav = useMemo(() => {
+    const hierarchyRoot = collectionData?.hierarchyRoot;
+    if (!hierarchyRoot || !isTrackable || contentCreatorPrivilege) return null;
+    if (!hasBatchInRoute || !batchIdParam || !isEnrolledInCurrentBatch) return null;
+    if (!contentStatusMap || !collectionId || !contentStateFetched) return null;
+
+    const leafIds = getLeafContentIdsFromHierarchy(hierarchyRoot);
+    if (!leafIds.length) return null;
+
+    // First leaf in depth-first order with status !== 2. If all are completed, the first leaf.
+    const firstUnconsumedId =
+      leafIds.find((id) => contentStatusMap[id] !== CONTENT_STATUS.Completed) ?? leafIds[0];
+    if (!firstUnconsumedId) return null;
+
+    return {
+      url: `/collection/${collectionId}/batch/${batchIdParam}/content/${firstUnconsumedId}`,
+      firstUnconsumedId,
+    };
+  }, [
+    collectionData?.hierarchyRoot,
+    isTrackable,
+    contentCreatorPrivilege,
+    hasBatchInRoute,
+    batchIdParam,
+    isEnrolledInCurrentBatch,
+    contentStatusMap,
+    collectionId,
+    contentStateFetched,
+  ]);
+
+  // No content selected in the URL: land on the right starting point.
   useEffect(() => {
     if (!collectionData?.hierarchyRoot || contentId) return;
 
@@ -46,29 +87,17 @@ export function useInitialCollectionContentNavigation({
       return;
     }
 
-    // Learner view: navigate to the first unconsumed content in the whole course (all units),
-    // i.e. first leaf in depth-first order with status !== 2. If all are completed, land on first leaf.
-    // Wait for content state to be fetched so we don't navigate to first leaf when map is still empty on first load.
-    if (!hasBatchInRoute || !batchIdParam || !isEnrolledInCurrentBatch || !contentStatusMap || !collectionId || !contentStateFetched) {
-      return;
-    }
-    const leafIds = getLeafContentIdsFromHierarchy(collectionData.hierarchyRoot);
-    if (!leafIds.length) return;
-    const isCompleted = (id: string) => contentStatusMap[id] === 2;
-    const firstUnconsumedId = leafIds.find((id) => !isCompleted(id));
-    const targetContentId = firstUnconsumedId ?? leafIds[0];
-    navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${targetContentId}`, { replace: true, state: location.state });
+    // Learner view: the first unconsumed content in the whole course (all units). Waits for
+    // content state so we don't land on the first leaf while the status map is still empty.
+    if (!learnerNav) return;
+    navigate(learnerNav.url, { replace: true, state: location.state });
   }, [
     collectionData?.hierarchyRoot,
     contentId,
     isTrackable,
     contentCreatorPrivilege,
-    hasBatchInRoute,
-    batchIdParam,
-    isEnrolledInCurrentBatch,
-    contentStatusMap,
-    contentStateFetched,
     collectionId,
+    learnerNav,
     location.state,
     navigate,
   ]);
@@ -78,38 +107,13 @@ export function useInitialCollectionContentNavigation({
   // URL is directly routable and the player would otherwise just load it. Bounce it to
   // the first unconsumed content instead.
   useEffect(() => {
-    if (!collectionData?.hierarchyRoot || !contentId) return;
-    // Creators, mentors and non-trackable collections are never locked.
-    if (!isTrackable || contentCreatorPrivilege) return;
-    if (
-      !hasBatchInRoute ||
-      !batchIdParam ||
-      !isEnrolledInCurrentBatch ||
-      !contentStatusMap ||
-      !collectionId ||
-      !contentStateFetched ||
-      !lockedContentIds?.has(contentId)
-    ) {
-      return;
-    }
-    const leafIds = getLeafContentIdsFromHierarchy(collectionData.hierarchyRoot);
-    const targetContentId = leafIds.find((id) => contentStatusMap[id] !== 2) ?? leafIds[0];
-    if (!targetContentId || targetContentId === contentId) return;
-    navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${targetContentId}`, { replace: true, state: location.state });
-  }, [
-    collectionData?.hierarchyRoot,
-    contentId,
-    isTrackable,
-    contentCreatorPrivilege,
-    hasBatchInRoute,
-    batchIdParam,
-    isEnrolledInCurrentBatch,
-    contentStatusMap,
-    contentStateFetched,
-    lockedContentIds,
-    collectionId,
-    location.state,
-    navigate,
-  ]);
+    if (!contentId || !learnerNav) return;
+    if (!lockedContentIds?.has(contentId)) return;
+    if (learnerNav.firstUnconsumedId === contentId) return;
+    // The redirect target is never locked today (the first unconsumed leaf is always open).
+    // Bail rather than trust that, so a future change to the lock rule degrades into no
+    // enforcement instead of a redirect loop.
+    if (lockedContentIds.has(learnerNav.firstUnconsumedId)) return;
+    navigate(learnerNav.url, { replace: true, state: location.state });
+  }, [contentId, learnerNav, lockedContentIds, location.state, navigate]);
 }
-

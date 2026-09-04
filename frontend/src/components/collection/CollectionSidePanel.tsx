@@ -76,6 +76,11 @@ export default function CollectionSidePanel({
   const navigate = useNavigate();
   const { t } = useAppI18n();
 
+  /** Learner-only progress state (completion, attempts, sequential locks). Creators and
+   *  mentors, unenrolled viewers and non-trackable collections see none of it. */
+  const showLearnerProgress =
+    isTrackable && hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege;
+
   const certPreviewClick = () => {
     if (firstCertPreviewUrl) {
       setCertificatePreviewUrl(firstCertPreviewUrl);
@@ -118,9 +123,9 @@ export default function CollectionSidePanel({
           toggleMainUnit={toggleModule}
           activeContentId={contentId ?? null}
           contentBlocked={contentBlocked}
-          contentStatusMap={hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege ? contentStatusMap : undefined}
-          contentAttemptInfoMap={hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege ? contentAttemptInfoMap : undefined}
-          lockedContentIds={hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege ? lockedContentIds : undefined}
+          contentStatusMap={showLearnerProgress ? contentStatusMap : undefined}
+          contentAttemptInfoMap={showLearnerProgress ? contentAttemptInfoMap : undefined}
+          lockedContentIds={showLearnerProgress ? lockedContentIds : undefined}
         />
       </div>
 
