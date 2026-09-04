@@ -52,6 +52,7 @@ export default function CollectionSidePanel({
   const {
     contentStatusMap,
     contentAttemptInfoMap,
+    lockedContentIds,
     batches,
     selectedBatchId,
     setSelectedBatchId,
@@ -119,6 +120,7 @@ export default function CollectionSidePanel({
           contentBlocked={contentBlocked}
           contentStatusMap={hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege ? contentStatusMap : undefined}
           contentAttemptInfoMap={hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege ? contentAttemptInfoMap : undefined}
+          lockedContentIds={hasBatchInRoute && isEnrolledInCurrentBatch && !contentCreatorPrivilege ? lockedContentIds : undefined}
         />
       </div>
 

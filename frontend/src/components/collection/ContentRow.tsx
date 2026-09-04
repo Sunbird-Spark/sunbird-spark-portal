@@ -2,6 +2,7 @@ import type { SyntheticEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { CiCircleCheck } from "react-icons/ci";
+import { FiLock } from "react-icons/fi";
 import { VideoIcon, DocumentIcon } from "./CollectionIcons";
 import { useToast } from "@/hooks/useToast";
 import type { HierarchyContentNode } from "@/types/collectionTypes";
@@ -26,6 +27,8 @@ export interface ContentRowProps {
   isActive: boolean;
   contentStatusMap?: Record<string, number>;
   contentAttemptInfoMap?: Record<string, ContentAttemptInfo>;
+  /** Sequential access: an earlier content isn't complete yet, so this one isn't reachable. */
+  isLocked?: boolean;
   t: (key: string, data?: Record<string, unknown>) => string;
 }
 
@@ -36,6 +39,7 @@ export default function ContentRow({
   isActive,
   contentStatusMap,
   contentAttemptInfoMap,
+  isLocked = false,
   t,
 }: ContentRowProps) {
   const navigate = useNavigate();
@@ -64,7 +68,7 @@ export default function ContentRow({
     maxAttempts - attemptCount === 1 &&
     !isDisabledByAttempts;
 
-  const baseClass = contentBlocked
+  const baseClass = contentBlocked || isLocked
     ? "flex items-center gap-3 rounded-xs px-4 py-3 w-full h-[4.375rem] border border-transparent bg-white shadow-sunbird-sm opacity-60 pointer-events-none cursor-not-allowed select-none"
     : isDisabledByAttempts
       ? "flex items-center gap-3 rounded-xs px-4 py-3 w-full h-[4.375rem] border border-transparent bg-white shadow-sunbird-sm cursor-not-allowed select-none"
@@ -72,7 +76,7 @@ export default function ContentRow({
         ? "border border-sunbird-theme-accent bg-white shadow-sunbird-sm opacity-100"
         : "border border-transparent bg-white shadow-sunbird-sm opacity-90"
       }`;
-  const interactiveClass = contentBlocked ? "" : (isDisabledByAttempts ? "" : "hover:bg-gray-200 transition-colors cursor-pointer");
+  const interactiveClass = contentBlocked || isLocked ? "" : (isDisabledByAttempts ? "" : "hover:bg-gray-200 transition-colors cursor-pointer");
 
   const title = node.name ?? "Untitled";
   const showAttempts =
@@ -99,7 +103,13 @@ export default function ContentRow({
           </span>
         )}
       </span>
-      {showStatus && (
+      {isLocked ? (
+        <FiLock
+          role="img"
+          aria-label={t("courseDetails.contentLocked")}
+          className="w-4 h-4 flex-shrink-0 text-muted-foreground"
+        />
+      ) : showStatus && (
         <span
           className={`font-rubik font-normal text-[0.625rem] leading-[100%] flex-shrink-0 flex flex-col items-end gap-0.5 ${
             status === 2
@@ -125,7 +135,7 @@ export default function ContentRow({
   );
 
   const handleClick = (e: SyntheticEvent) => {
-    if (contentBlocked) return;
+    if (contentBlocked || isLocked) return;
     e.preventDefault();
     if (isDisabledByAttempts) {
       toast({ title: t("courseDetails.selfAssessMaxAttempt"), variant: "destructive" });
@@ -136,19 +146,23 @@ export default function ContentRow({
     }
   };
 
-  if (contentBlocked || isDisabledByAttempts) {
+  // A locked row is fully inert: no click, and no keyboard entry either (pointer-events-none
+  // alone wouldn't stop Enter/Space on the attempts-exhausted branch below).
+  const attemptsInteractive = isDisabledByAttempts && !isLocked;
+
+  if (contentBlocked || isDisabledByAttempts || isLocked) {
     return (
       <div
         className={`${baseClass} ${interactiveClass}`}
         aria-disabled="true"
-        onClick={isDisabledByAttempts ? handleClick : undefined}
+        onClick={attemptsInteractive ? handleClick : undefined}
         onKeyDown={
-          isDisabledByAttempts
+          attemptsInteractive
             ? (e) => { if (e.key === "Enter" || e.key === " ") { handleClick(e); } }
             : undefined
         }
-        role={isDisabledByAttempts ? "button" : undefined}
-        tabIndex={isDisabledByAttempts ? 0 : undefined}
+        role={attemptsInteractive ? "button" : undefined}
+        tabIndex={attemptsInteractive ? 0 : undefined}
       >
         {content}
       </div>

@@ -244,4 +244,65 @@ describe('useInitialCollectionContentNavigation', () => {
       });
     });
   });
+  describe('sequential access deep-link guard', () => {
+    // The first effect bails whenever the URL already carries a contentId, so a pasted
+    // or bookmarked link to locked content is only stopped by the second effect.
+    const lockedParams = {
+      ...defaultParams,
+      collectionData: makeCollectionData({ hierarchyRoot: makeTwoUnitHierarchy() }) as CollectionData,
+      contentId: 'l4',
+      contentStatusMap: { l1: 2, l2: 0, l3: 0, l4: 0 } as Record<string, number>,
+      lockedContentIds: new Set(['l3', 'l4']),
+    };
+
+    it('redirects a locked contentId to the first unconsumed content', () => {
+      renderHook(() => useInitialCollectionContentNavigation(lockedParams));
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/collection/col-1/batch/batch-1/content/l2',
+        { replace: true, state: mockLocation.state }
+      );
+    });
+
+    it('leaves an unlocked contentId alone', () => {
+      renderHook(() =>
+        useInitialCollectionContentNavigation({ ...lockedParams, contentId: 'l2' })
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('does not redirect a creator or mentor', () => {
+      renderHook(() =>
+        useInitialCollectionContentNavigation({ ...lockedParams, contentCreatorPrivilege: true })
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('does not redirect when the collection is not trackable', () => {
+      renderHook(() =>
+        useInitialCollectionContentNavigation({ ...lockedParams, isTrackable: false })
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('does not redirect before content state has been fetched', () => {
+      renderHook(() =>
+        useInitialCollectionContentNavigation({ ...lockedParams, contentStateFetched: false })
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('does not redirect when no locked set is supplied (fails open)', () => {
+      renderHook(() =>
+        useInitialCollectionContentNavigation({ ...lockedParams, lockedContentIds: undefined })
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
+    it('does not redirect a learner who is not enrolled in the batch', () => {
+      renderHook(() =>
+        useInitialCollectionContentNavigation({ ...lockedParams, isEnrolledInCurrentBatch: false })
+      );
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+  });
 });

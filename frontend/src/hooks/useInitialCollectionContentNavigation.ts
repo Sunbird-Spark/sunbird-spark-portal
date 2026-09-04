@@ -15,6 +15,8 @@ interface UseInitialCollectionContentNavigationParams {
   contentStatusMap: Record<string, number> | undefined;
   /** When false, wait before running learner "first unconsumed" navigation (content state not yet loaded). */
   contentStateFetched: boolean;
+  /** Leaf ids locked by sequential access, from `useCollectionEnrollment`. */
+  lockedContentIds?: Set<string>;
 }
 
 export function useInitialCollectionContentNavigation({
@@ -28,6 +30,7 @@ export function useInitialCollectionContentNavigation({
   isEnrolledInCurrentBatch,
   contentStatusMap,
   contentStateFetched,
+  lockedContentIds,
 }: UseInitialCollectionContentNavigationParams): void {
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,6 +68,45 @@ export function useInitialCollectionContentNavigation({
     isEnrolledInCurrentBatch,
     contentStatusMap,
     contentStateFetched,
+    collectionId,
+    location.state,
+    navigate,
+  ]);
+
+  // Sequential access enforcement. The effect above only runs when the URL carries no
+  // contentId, so it can't cover a pasted or bookmarked link to a locked content — that
+  // URL is directly routable and the player would otherwise just load it. Bounce it to
+  // the first unconsumed content instead.
+  useEffect(() => {
+    if (!collectionData?.hierarchyRoot || !contentId) return;
+    // Creators, mentors and non-trackable collections are never locked.
+    if (!isTrackable || contentCreatorPrivilege) return;
+    if (
+      !hasBatchInRoute ||
+      !batchIdParam ||
+      !isEnrolledInCurrentBatch ||
+      !contentStatusMap ||
+      !collectionId ||
+      !contentStateFetched ||
+      !lockedContentIds?.has(contentId)
+    ) {
+      return;
+    }
+    const leafIds = getLeafContentIdsFromHierarchy(collectionData.hierarchyRoot);
+    const targetContentId = leafIds.find((id) => contentStatusMap[id] !== 2) ?? leafIds[0];
+    if (!targetContentId || targetContentId === contentId) return;
+    navigate(`/collection/${collectionId}/batch/${batchIdParam}/content/${targetContentId}`, { replace: true, state: location.state });
+  }, [
+    collectionData?.hierarchyRoot,
+    contentId,
+    isTrackable,
+    contentCreatorPrivilege,
+    hasBatchInRoute,
+    batchIdParam,
+    isEnrolledInCurrentBatch,
+    contentStatusMap,
+    contentStateFetched,
+    lockedContentIds,
     collectionId,
     location.state,
     navigate,
