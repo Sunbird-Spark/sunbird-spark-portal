@@ -10,13 +10,14 @@ function course(overrides: Partial<LPCourseNode>): LPCourseNode {
     leafNodesCount: 1,
     leafIds: ['leaf'],
     skills: [],
+    competencies: [],
     isAssessmentCourse: false,
     ...overrides,
   };
 }
 
 function level(overrides: Partial<LPLevelNode>): LPLevelNode {
-  return { identifier: 'lvl', name: 'Level', index: 0, skills: [], courses: [], ...overrides };
+  return { identifier: 'lvl', name: 'Level', index: 0, competencies: [], skills: [], courses: [], ...overrides };
 }
 
 function model(overrides: Partial<LearningPathModel>): LearningPathModel {

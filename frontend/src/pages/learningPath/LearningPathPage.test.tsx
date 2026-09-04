@@ -30,6 +30,7 @@ const priorCourse: LPCourseNode = {
   leafNodesCount: 1,
   leafIds: ['qs_prior'],
   skills: ['Data literacy'],
+  competencies: [],
   isAssessmentCourse: true,
   questionCount: 10,
 };
@@ -40,6 +41,7 @@ const outcomeCourse: LPCourseNode = {
   leafNodesCount: 1,
   leafIds: ['qs_outcome'],
   skills: ['Data literacy'],
+  competencies: [],
   isAssessmentCourse: true,
 };
 
@@ -48,6 +50,7 @@ const level1: LPLevelNode = {
   name: 'Foundations',
   index: 1,
   skills: ['Data literacy'],
+  competencies: [],
   courses: [
     {
       identifier: 'course_1',
@@ -55,6 +58,7 @@ const level1: LPLevelNode = {
       leafNodesCount: 1,
       leafIds: ['res_1'],
       skills: [],
+      competencies: [],
       isAssessmentCourse: false,
     },
   ],

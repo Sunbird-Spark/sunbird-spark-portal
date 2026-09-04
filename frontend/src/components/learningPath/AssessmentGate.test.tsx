@@ -13,6 +13,7 @@ const assessment: LPCourseNode = {
   leafNodesCount: 1,
   leafIds: ['qs_1'],
   skills: ['Python Programming'],
+  competencies: [],
   isAssessmentCourse: true,
   questionCount: 5,
 };

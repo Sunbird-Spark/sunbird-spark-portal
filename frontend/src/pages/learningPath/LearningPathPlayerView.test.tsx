@@ -58,6 +58,7 @@ const course1: LPCourseNode = {
   leafNodesCount: 2,
   leafIds: ['res_1', 'res_2'],
   skills: [],
+  competencies: [],
   isAssessmentCourse: false,
 };
 
@@ -66,6 +67,7 @@ const level1: LPLevelNode = {
   name: 'Foundations',
   index: 1,
   skills: [],
+  competencies: [],
   courses: [course1],
 };
 

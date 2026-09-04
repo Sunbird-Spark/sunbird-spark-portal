@@ -13,8 +13,9 @@ const level1: LPLevelNode = {
   name: 'Foundations',
   index: 1,
   skills: ['SQL'],
+  competencies: [],
   courses: [
-    { identifier: 'course_1', name: 'Intro to SQL', leafNodesCount: 1, leafIds: ['res_1'], skills: [], isAssessmentCourse: false },
+    { identifier: 'course_1', name: 'Intro to SQL', leafNodesCount: 1, leafIds: ['res_1'], competencies: [], skills: [], isAssessmentCourse: false },
   ],
 };
 
@@ -23,6 +24,7 @@ const level2: LPLevelNode = {
   name: 'Advanced',
   index: 2,
   skills: ['Python'],
+  competencies: [],
   courses: [],
 };
 

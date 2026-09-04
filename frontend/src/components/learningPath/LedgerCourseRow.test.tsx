@@ -14,6 +14,7 @@ function buildCourse(): LPCourseNode {
     leafNodesCount: 1,
     leafIds: ['leaf_1'],
     skills: [],
+    competencies: [],
     isAssessmentCourse: false,
   };
 }
