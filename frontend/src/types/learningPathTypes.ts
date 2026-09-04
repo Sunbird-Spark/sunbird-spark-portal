@@ -39,6 +39,20 @@ export interface LPUnitNode {
   maxAttempts?: number;
 }
 
+/**
+ * A normalised competency claim — what completing the content develops, and to what
+ * proficiency level. `level` is a term code from the framework's `proficiencylevel`
+ * category, absent only for legacy string-shaped tags that never carried one.
+ *
+ * Kept separate from `skills` on purpose: skills are a catalogue facet used for
+ * display and filtering, whereas competencies are the authoritative capability claim
+ * that attainment, waiving and the passbook are meant to be computed from.
+ */
+export interface LPCompetency {
+  code: string;
+  level?: string;
+}
+
 export interface LPCourseNode {
   identifier: string;
   name: string;
@@ -48,7 +62,10 @@ export interface LPCourseNode {
   leafIds: string[];
   /** The course's own children (units/leaves), preserved for the expandable rail rows. */
   units?: LPUnitNode[];
+  /** Discovery facet: the union of the node's `skill` and `se_skills` terms. */
   skills: string[];
+  /** Capability claims from the course's `competencyFramework`. */
+  competencies: LPCompetency[];
   /** True when every leaf under this course is a QuML question set. */
   isAssessmentCourse: boolean;
   questionCount?: number;
@@ -59,7 +76,10 @@ export interface LPLevelNode {
   name: string;
   index: number;
   description?: string;
+  /** Discovery facet — the Level's own terms, else the union of its courses'. */
   skills: string[];
+  /** Capability claims — the Level's own, else the union of its courses'. */
+  competencies: LPCompetency[];
   courses: LPCourseNode[];
 }
 

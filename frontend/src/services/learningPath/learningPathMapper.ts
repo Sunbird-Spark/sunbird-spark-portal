@@ -1,7 +1,8 @@
-import type { HierarchyContentNode } from '../../types/collectionTypes';
+import type { HierarchyContentNode, RawCompetencyClaim } from '../../types/collectionTypes';
 import type {
   LearningPathModel,
   LearningPathPolicy,
+  LPCompetency,
   LPCourseNode,
   LPLevelNode,
   LPUnitNode,
@@ -78,15 +79,52 @@ function mapUnitNode(node: HierarchyContentNode): LPUnitNode {
   };
 }
 
+/**
+ * Unions the DISCOVERY facet only — `skill` and `se_skills`, which are the same
+ * framework category arriving over the graph and the search transports respectively.
+ *
+ * `competencies` is deliberately not folded in here. It is a different axis and a
+ * different shape (`{code, level}`), and merging the two flattened a levelled
+ * capability claim into a bare display string — besides putting objects into a
+ * `Set<string>`, which then reached React as a child and crashed the page.
+ */
 function unionSkills(...lists: Array<string[] | undefined>): string[] {
   const set = new Set<string>();
   lists.forEach((list) => (list ?? []).forEach((s) => s && set.add(s)));
   return Array.from(set);
 }
 
+/**
+ * Normalises authored competency tags to `{code, level}`, accepting both the current
+ * object shape and the bare strings earlier authoring wrote. Entries without a usable
+ * code are dropped; duplicates are collapsed on code+level, so the same competency
+ * claimed at two levels stays two claims (the framework's level ordering is not known
+ * here, so this cannot pick the higher one).
+ */
+function normalizeCompetencies(raw: Array<RawCompetencyClaim | string> | undefined): LPCompetency[] {
+  const seen = new Set<string>();
+  const out: LPCompetency[] = [];
+  (raw ?? []).forEach((entry) => {
+    const code = (typeof entry === 'string' ? entry : entry?.code ?? '').trim();
+    if (!code) return;
+    const level = typeof entry === 'string' ? undefined : entry?.level?.trim() || undefined;
+    const key = `${code}|${level ?? ''}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(level ? { code, level } : { code });
+  });
+  return out;
+}
+
+/** Collapses competency claims from several nodes, keeping distinct code+level pairs. */
+function unionCompetencies(lists: LPCompetency[][]): LPCompetency[] {
+  return normalizeCompetencies(lists.flat());
+}
+
 function mapCourseNode(courseNode: HierarchyContentNode): LPCourseNode {
   const leafIds = getLeafContentIdsFromHierarchy(courseNode);
-  const skills = unionSkills(courseNode.competencies, courseNode.skill, courseNode.se_skills);
+  const skills = unionSkills(courseNode.skill, courseNode.se_skills);
+  const competencies = normalizeCompetencies(courseNode.competencies);
   const isAssessment = isAssessmentCourse(courseNode, leafIds);
   return {
     identifier: courseNode.identifier,
@@ -97,6 +135,7 @@ function mapCourseNode(courseNode: HierarchyContentNode): LPCourseNode {
     leafIds,
     units: (courseNode.children ?? []).map(mapUnitNode),
     skills,
+    competencies,
     isAssessmentCourse: isAssessment,
     ...(isAssessment ? { questionCount: leafIds.length } : {}),
   };
@@ -104,14 +143,20 @@ function mapCourseNode(courseNode: HierarchyContentNode): LPCourseNode {
 
 function mapLevelNode(levelNode: HierarchyContentNode): LPLevelNode {
   const courses = (levelNode.children ?? []).map(mapCourseNode);
-  const ownSkills = unionSkills(levelNode.competencies, levelNode.skill, levelNode.se_skills);
+  // Each axis inherits from the Level's courses independently: a Level may declare its
+  // own facets while leaving competencies to its courses, or the reverse.
+  const ownSkills = unionSkills(levelNode.skill, levelNode.se_skills);
   const skills = ownSkills.length > 0 ? ownSkills : unionSkills(...courses.map((c) => c.skills));
+  const ownCompetencies = normalizeCompetencies(levelNode.competencies);
+  const competencies =
+    ownCompetencies.length > 0 ? ownCompetencies : unionCompetencies(courses.map((c) => c.competencies));
   return {
     identifier: levelNode.identifier,
     name: levelNode.name ?? '',
     index: levelNode.index ?? 0,
     description: levelNode.description,
     skills,
+    competencies,
     courses,
   };
 }

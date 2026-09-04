@@ -66,11 +66,34 @@ export interface HierarchyContentNode {
   policy?: string;
   /** Sort order among siblings (Levels, framework categories). */
   index?: number;
-  /** Framework "skill" category terms (USF) — used for Learning Path skill scoping. */
+  /**
+   * Framework "skill" category terms (e.g. the USF framework's `skill` category) — a
+   * DISCOVERY facet, on the same footing as board/medium/subject. Present on graph reads.
+   */
   skill?: string[];
+  /**
+   * The same `skill` terms as indexed by Elasticsearch — the category's
+   * `searchLabelFieldName`. Present on search reads. Not a second concept: `skill` and
+   * `se_skills` are one facet arriving over two transports, which is why they are
+   * unioned with each other but with nothing else.
+   */
   se_skills?: string[];
-  /** Level/Course skill tags persisted on the unit node (Learning Path authoring). */
-  competencies?: string[];
+  /**
+   * Competency claims from the node's `competencyFramework`: what completing this
+   * develops, and to what proficiency level.
+   *
+   * A different axis from `skill`/`se_skills` — those say where content sits in a
+   * catalogue, these say what it makes you able to do — so the two are deliberately
+   * NOT merged. Objects are the current shape; bare strings are tolerated because
+   * earlier Learning Path authoring wrote them that way.
+   */
+  competencies?: Array<RawCompetencyClaim | string>;
+}
+
+/** A competency claim as authored on a content node. */
+export interface RawCompetencyClaim {
+  code?: string;
+  level?: string;
 }
 
 export interface CourseHierarchyResponse {
