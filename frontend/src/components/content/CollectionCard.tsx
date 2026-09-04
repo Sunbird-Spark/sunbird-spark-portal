@@ -4,6 +4,7 @@ import { ContentSearchItem } from "@/types/workspaceTypes";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { getPlaceholderImage } from "@/utils/getPlaceholderImage";
 import { getCategoryLabel } from "@/utils/i18nUtils";
+import { getContentDetailPath } from "@/utils/getContentDetailPath";
 
 interface ContentCardProps {
   item: ContentSearchItem;
@@ -19,7 +20,7 @@ const CollectionCard = ({ item, linkState }: ContentCardProps) => {
   
   return (
     <Link
-      to={`/collection/${item.identifier}`}
+      to={getContentDetailPath(item.identifier, item.primaryCategory)}
       state={{ from: location.pathname + location.search, ...linkState }}
       className="related-resource-card-link"
       data-edataid="collection-card-click"

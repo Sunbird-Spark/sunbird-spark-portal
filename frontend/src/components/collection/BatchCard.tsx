@@ -17,6 +17,8 @@ import useInteract from "@/hooks/useInteract";
 interface BatchCardProps {
   collectionId: string;
   collectionName?: string;
+  /** Overrides the header copy (defaults to "Manage batches for this course") — used by non-Course callers like the Learning Path creator rail. */
+  title?: string;
 }
 
 import { BatchRow, getBatchStatus } from "./BatchRow";
@@ -24,7 +26,7 @@ import { TabBar, ActiveTab } from "./BatchTabBar";
 
 /* ── BatchCard ── */
 
-const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
+const BatchCard = ({ collectionId, collectionName, title }: BatchCardProps) => {
   const { toast } = useToast();
   const { t } = useAppI18n();
   const { interact } = useInteract();
@@ -104,7 +106,7 @@ const BatchCard = ({ collectionId, collectionName }: BatchCardProps) => {
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <p className="text-sm font-semibold text-foreground font-rubik">
-            {t('batch.manageBatches')}
+            {title ?? t('batch.manageBatches')}
           </p>
           <div className="flex items-center gap-2">
             <button

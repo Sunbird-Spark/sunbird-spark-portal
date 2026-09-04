@@ -15,6 +15,7 @@ const DEFAULT_PRIMARY_CATEGORIES = [
   'Content Playlist',
   'Course',
   'Course Assessment',
+  'Learning Path',
   'Digital Textbook',
   'eTextbook',
   'Explanation Content',

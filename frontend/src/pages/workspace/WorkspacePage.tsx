@@ -25,7 +25,6 @@ import ContentDynamicFormDialog, { type ContentFormData } from "./ContentDynamic
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import "../home/home.css";
 import "./workspace.css";
-import { QumlEditor } from "@/components/quml-editor";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import useInteract from "@/hooks/useInteract";
 
@@ -206,7 +205,7 @@ const WorkspacePage = () => {
   const [sortBy] = useState<SortOption>('updated');
   const [typeFilter, setTypeFilter] = useState<ContentTypeFilter>(() => {
     const type = searchParams.get('type');
-    return ['all', 'course', 'content', 'quiz', 'collection'].includes(type ?? '')
+    return ['all', 'course', 'content', 'quiz', 'collection', 'learningPath'].includes(type ?? '')
       ? (type as ContentTypeFilter)
       : 'all';
   });
@@ -240,7 +239,7 @@ const WorkspacePage = () => {
   // Sync typeFilter, activeView, secondaryView, transcriptFilter from URL on back/forward
   useEffect(() => {
     const urlType = searchParams.get('type');
-    if (urlType && ['all', 'course', 'content', 'quiz', 'collection'].includes(urlType)) {
+    if (urlType && ['all', 'course', 'content', 'quiz', 'collection', 'learningPath'].includes(urlType)) {
       setTypeFilter(urlType as ContentTypeFilter);
     }
     const urlView = searchParams.get('view');
@@ -495,7 +494,7 @@ const WorkspacePage = () => {
     navigate(`/edit/quml-editor/${contentId}`, { state: { from: location.pathname + location.search } });
   };
 
-  const handleContentNameSubmit = async (name: string, extra?: { description?: string }) => {
+  const handleContentNameSubmit = async (name: string, extra?: { description?: string; isEvaluationCourse?: boolean }) => {
     setIsCreating(true);
     try {
       if (selectedOption && SIMPLE_COLLECTION_OPTIONS.includes(selectedOption)) {
@@ -509,6 +508,9 @@ const WorkspacePage = () => {
           createdBy,
           creator,
           ...apiConfig,
+          ...(selectedOption === 'course' && extra?.isEvaluationCourse
+            ? { primaryCategory: 'Evaluation Course' }
+            : {}),
           description: extra?.description || t(descriptionKey),
           organisation,
           createdFor,
