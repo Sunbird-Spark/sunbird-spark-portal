@@ -20,8 +20,14 @@ type StoredScoreMap = Record<string, { score: number; maxScore: number; attempts
 const mockUseStoredAssessmentScores = vi.fn(
   (_collectionId: string | undefined): StoredScoreMap => ({})
 );
+type ServerScoreMap = Record<string, { score: number; maxScore: number; attempts?: number }>;
+const mockUseAssessmentReadMap = vi.fn(
+  (_collectionId: string | undefined, _contextId: string | undefined, _contentIds: string[]): ServerScoreMap => ({})
+);
 vi.mock('@/hooks/useAssessmentScores', () => ({
   useStoredAssessmentScores: (collectionId: string | undefined) => mockUseStoredAssessmentScores(collectionId),
+  useAssessmentReadMap: (collectionId: string | undefined, contextId: string | undefined, contentIds: string[]) =>
+    mockUseAssessmentReadMap(collectionId, contextId, contentIds),
 }));
 
 const priorCourse: LPCourseNode = {
@@ -212,6 +218,7 @@ function renderAt(path: string, state?: unknown) {
 describe('LearningPathPage', () => {
   beforeEach(() => {
     mockUseStoredAssessmentScores.mockReset().mockReturnValue({});
+    mockUseAssessmentReadMap.mockReset().mockReturnValue({});
   });
 
   // Regression: the gate/complete screens used to read the score only from
@@ -224,6 +231,26 @@ describe('LearningPathPage', () => {
     mockLpData = buildLp({ pathSummary: undefined, enrollment: { ...buildLp().enrollment, isEnrolled: true } });
     renderAt('/learning-path/lp_1/batch/batch_1/prior');
     expect(screen.getByText('8/10')).toBeInTheDocument();
+  });
+
+  // Regression: /v1/assessment/read was never called - `useAssessmentReadMap` had no
+  // callers and `mergeAssessmentSources`' third argument was left defaulting to {} - so a
+  // score submitted in another session (or after the local store was cleared) showed as "-"
+  // even though the Viewer Service was holding it.
+  it('shows the prior assessment score from the server when the local store is empty', () => {
+    mockUseAssessmentReadMap.mockImplementation((collectionId, contextId, contentIds): ServerScoreMap =>
+      contentIds.includes('qs_prior') ? { qs_prior: { score: 5, maxScore: 5 } } : {}
+    );
+    mockLpData = buildLp({ pathSummary: undefined, enrollment: { ...buildLp().enrollment, isEnrolled: true } });
+    renderAt('/learning-path/lp_1/batch/batch_1/prior');
+    expect(screen.getByText('5/5')).toBeInTheDocument();
+  });
+
+  it('queries the server for the assessment leaf ids, not the wrapping course id', () => {
+    mockLpData = buildLp({ enrollment: { ...buildLp().enrollment, isEnrolled: true } });
+    renderAt('/learning-path/lp_1/batch/batch_1/prior');
+    // the Viewer Service keys attempts by question set, so the leaf ids are what it needs
+    expect(mockUseAssessmentReadMap).toHaveBeenCalledWith('lp_1', 'batch_1', ['qs_prior']);
   });
 
   it('renders the overview screen (Ledger table) by default', () => {

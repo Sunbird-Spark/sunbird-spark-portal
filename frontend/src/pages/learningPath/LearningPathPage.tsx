@@ -10,7 +10,7 @@ import { PathCompletionView } from '@/components/learningPath/PathCompletionView
 import { LearningPathOverview } from './LearningPathOverview';
 import { LearningPathPlayerView } from './LearningPathPlayerView';
 import { LearningPathStatusView } from './LearningPathStatusView';
-import { useStoredAssessmentScores } from '@/hooks/useAssessmentScores';
+import { useAssessmentReadMap, useStoredAssessmentScores } from '@/hooks/useAssessmentScores';
 import { mergeAssessmentSources, resolveAssessmentInfo } from '@/services/learningPath/learningPathAssessment';
 import type { ScoreRow } from '@/components/learningPath/ScoreRows';
 
@@ -43,17 +43,24 @@ const LearningPathPage = () => {
   // cache invalidation/reload (see bug: prior/outcome score reverts to "—").
   const priorLocalScores = useStoredAssessmentScores(model.priorAssessment?.identifier);
   const outcomeLocalScores = useStoredAssessmentScores(model.outcomeAssessment?.identifier);
+  // Server-held scores, the only source that survives a different browser or a cleared store.
+  // Keyed by the assessment's LEAF ids: the Viewer Service records an attempt against the
+  // question set, not the Evaluation Course that wraps it. Without this the page had only the
+  // local store and `pathSummary.assessmentStatus` - both empty on a fresh session - so a
+  // submitted score displayed as "—" even though /v1/assessment/read had it.
+  const priorServerScores = useAssessmentReadMap(pathId, contextId, model.priorAssessment?.leafIds ?? []);
+  const outcomeServerScores = useAssessmentReadMap(pathId, contextId, model.outcomeAssessment?.leafIds ?? []);
   const getPriorScore = () =>
     resolveAssessmentInfo(
       model.priorAssessment?.identifier,
       model.priorAssessment?.leafIds,
-      mergeAssessmentSources(pathSummary, priorLocalScores)
+      mergeAssessmentSources(pathSummary, priorLocalScores, priorServerScores)
     );
   const getOutcomeScore = () =>
     resolveAssessmentInfo(
       model.outcomeAssessment?.identifier,
       model.outcomeAssessment?.leafIds,
-      mergeAssessmentSources(pathSummary, outcomeLocalScores)
+      mergeAssessmentSources(pathSummary, outcomeLocalScores, outcomeServerScores)
     );
 
   const basePath = contextId ? `/learning-path/${pathId}/batch/${contextId}` : `/learning-path/${pathId}`;
