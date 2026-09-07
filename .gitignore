@@ -69,6 +69,12 @@ pnpm-debug.log*
 .sonar/
 
 # =========================
+# MCP (Model Context Protocol)
+# =========================
+.mcp.json
+.playwright-mcp/
+
+# =========================
 # Misc
 # =========================
 *.local
