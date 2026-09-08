@@ -190,4 +190,105 @@ describe('proxyUtils', () => {
             expect(mockProxyReq.setHeader).toHaveBeenCalledWith('x-auth-token', 'oidc-token');
         });
     });
+
+    describe('inbound identity header stripping (H1 trust boundary)', () => {
+        // A ClientRequest-like mock that actually tracks headers so we can assert
+        // what survives after decoration (http-proxy-middleware pre-copies inbound headers).
+        const makeProxyReq = () => {
+            const headers: Record<string, string> = {};
+            return {
+                headers,
+                setHeader: vi.fn(function (name: string, value: string) {
+                    headers[name.toLowerCase()] = value;
+                }),
+                removeHeader: vi.fn(function (name: string) {
+                    delete headers[name.toLowerCase()];
+                }),
+                getHeader: (name: string) => headers[name.toLowerCase()],
+            } as any;
+        };
+
+        it('strips spoofed inbound identity headers for an anonymous request', async () => {
+            const { decorateRequestHeaders } = await importProxyUtils();
+            const proxyReq = makeProxyReq();
+            // attacker-supplied inbound headers
+            proxyReq.headers['x-authenticated-userid'] = 'victim-user';
+            proxyReq.headers['x-authenticated-user-token'] = 'forged-token';
+            proxyReq.headers['x-authenticated-for'] = 'victim-managed';
+            proxyReq.headers['x-app-id'] = 'client-supplied-app';
+
+            const mockReq = {
+                session: {},
+                sessionID: 'session-123',
+                get: vi.fn().mockReturnValue(undefined),
+            } as unknown as Request;
+
+            decorateRequestHeaders(proxyReq, mockReq);
+
+            expect(proxyReq.getHeader('x-authenticated-userid')).toBeUndefined();
+            expect(proxyReq.getHeader('x-authenticated-user-token')).toBeUndefined();
+            expect(proxyReq.getHeader('x-authenticated-for')).toBeUndefined();
+            // App-Id is always the server value, never the client's
+            expect(proxyReq.getHeader('x-app-id')).toBe('test-app-id');
+        });
+
+        it('removes every header in INBOUND_IDENTITY_HEADERS', async () => {
+            const { decorateRequestHeaders, INBOUND_IDENTITY_HEADERS } = await importProxyUtils();
+            const proxyReq = makeProxyReq();
+            const mockReq = {
+                session: {},
+                sessionID: 'session-123',
+                get: vi.fn().mockReturnValue(undefined),
+            } as unknown as Request;
+
+            decorateRequestHeaders(proxyReq, mockReq);
+
+            for (const header of INBOUND_IDENTITY_HEADERS) {
+                expect(proxyReq.removeHeader).toHaveBeenCalledWith(header);
+            }
+        });
+
+        it('always sets the server X-App-Id even when the client supplies one', async () => {
+            const { decorateRequestHeaders } = await importProxyUtils();
+            const proxyReq = makeProxyReq();
+            proxyReq.headers['x-app-id'] = 'client-supplied-app';
+            const mockReq = {
+                session: { userId: 'user-1' },
+                sessionID: 'session-123',
+                get: vi.fn().mockReturnValue('client-supplied-app'),
+            } as unknown as Request;
+
+            decorateRequestHeaders(proxyReq, mockReq);
+
+            expect(proxyReq.getHeader('x-app-id')).toBe('test-app-id');
+        });
+
+        it('sources X-Session-Id only from req.sessionID, not an inbound header', async () => {
+            const { decorateRequestHeaders } = await importProxyUtils();
+            const proxyReq = makeProxyReq();
+            proxyReq.headers['x-session-id'] = 'spoofed-session';
+            const mockReq = {
+                session: {},
+                sessionID: undefined,
+                get: vi.fn().mockReturnValue('spoofed-session'),
+            } as unknown as Request;
+
+            decorateRequestHeaders(proxyReq, mockReq);
+
+            // spoofed value stripped, and no server session id to set → header absent
+            expect(proxyReq.getHeader('x-session-id')).toBeUndefined();
+        });
+
+        it('does not throw when proxyReq has no removeHeader (setHeader-only mock)', async () => {
+            const { decorateRequestHeaders } = await importProxyUtils();
+            const setOnlyProxyReq = { setHeader: vi.fn() } as unknown as http.ClientRequest;
+            const mockReq = {
+                session: {},
+                sessionID: 'session-123',
+                get: vi.fn().mockReturnValue(undefined),
+            } as unknown as Request;
+
+            expect(() => decorateRequestHeaders(setOnlyProxyReq, mockReq)).not.toThrow();
+        });
+    });
 });
