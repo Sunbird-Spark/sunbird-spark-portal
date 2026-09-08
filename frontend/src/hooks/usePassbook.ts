@@ -1,23 +1,13 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { competencyService, normalisePassbook, primaryFrameworkId, humaniseCode } from '@/services/competency';
+import { frameworkCategories, type TaxonomyFrameworkResponse } from '@/services/competency/passbookGrouping';
 import { FrameworkService } from '@/services/FrameworkService';
 import { useUserId } from './useAuthInfo';
 import type { PassbookEntry } from '@/types/competencyServiceTypes';
 
 const frameworkService = new FrameworkService();
 
-interface FrameworkTerm {
-  code?: string;
-  name?: string;
-}
-interface FrameworkCategory {
-  code?: string;
-  terms?: FrameworkTerm[];
-}
-interface TaxonomyFrameworkResponse {
-  result?: { framework?: { categories?: FrameworkCategory[] } };
-}
 
 /**
  * The learner's passbook. `evidence: true` so a card can answer "what proved
@@ -62,7 +52,7 @@ export function useCompetencyLabels(frameworkId: string | undefined): Record<str
   });
 
   return useMemo(() => {
-    const categories = data?.data?.result?.framework?.categories ?? [];
+    const categories = frameworkCategories(data?.data);
     const labels: Record<string, string> = {};
     categories.forEach((category) => {
       (category.terms ?? []).forEach((term) => {

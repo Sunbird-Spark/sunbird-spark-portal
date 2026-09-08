@@ -1,23 +1,16 @@
 import { useMemo } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { FrameworkService } from '@/services/FrameworkService';
-import { buildAreaIndex, type FrameworkVocabulary } from '@/services/competency/passbookGrouping';
+import {
+  buildAreaIndex,
+  frameworkCategories,
+  type FrameworkVocabulary,
+  type TaxonomyFrameworkResponse,
+} from '@/services/competency/passbookGrouping';
 import { humaniseCode } from '@/services/competency';
 
 const frameworkService = new FrameworkService();
 
-interface Term {
-  code?: string;
-  name?: string;
-  associations?: Array<{ category?: string; code?: string }>;
-}
-interface Category {
-  code?: string;
-  terms?: Term[];
-}
-interface TaxonomyFrameworkResponse {
-  result?: { framework?: { categories?: Category[] } };
-}
 
 /**
  * Display names and competency-area membership for EVERY framework the learner
@@ -50,7 +43,7 @@ export function useCompetencyVocabulary(frameworkIds: string[]): {
   const vocabularies = useMemo(() => {
     const out: Record<string, FrameworkVocabulary | undefined> = {};
     ids.forEach((id, i) => {
-      const categories = queries[i]?.data?.data?.result?.framework?.categories ?? [];
+      const categories = frameworkCategories(queries[i]?.data?.data);
       const labels: Record<string, string> = {};
       categories.forEach((category) => {
         (category.terms ?? []).forEach((term) => {

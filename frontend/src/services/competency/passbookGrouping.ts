@@ -93,6 +93,39 @@ export function buildFrameworkSections(
     });
 }
 
+/** A taxonomy framework read, in either the enveloped or the adapter-unwrapped shape. */
+export interface TaxonomyFrameworkBody {
+  framework?: { categories?: FrameworkCategoryLike[] };
+}
+export interface TaxonomyFrameworkResponse extends TaxonomyFrameworkBody {
+  result?: TaxonomyFrameworkBody;
+}
+export interface FrameworkTermLike {
+  code?: string;
+  name?: string;
+  associations?: Array<{ category?: string; code?: string }>;
+}
+export interface FrameworkCategoryLike {
+  code?: string;
+  terms?: FrameworkTermLike[];
+}
+
+/**
+ * Categories out of a taxonomy framework read, whichever shape arrives.
+ *
+ * `AxiosAdapter.mapResponse` strips `result` before a caller sees the body, so the
+ * unwrapped form is the normal one. Reading `result.framework` returned undefined,
+ * which silently emptied every label and area - the passbook then rendered
+ * de-slugged codes ("Health data reporting" instead of "Health Data and Reporting")
+ * and no area grouping at all. Handling both shapes in one place stops this
+ * recurring per call site.
+ */
+export function frameworkCategories(
+  body: TaxonomyFrameworkResponse | undefined | null
+): FrameworkCategoryLike[] {
+  return body?.framework?.categories ?? body?.result?.framework?.categories ?? [];
+}
+
 /**
  * Builds `competency -> area` from a taxonomy framework read.
  *

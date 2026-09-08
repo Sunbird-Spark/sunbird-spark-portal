@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { buildFrameworkSections, buildAreaIndex, type FrameworkVocabulary } from './passbookGrouping';
+import {
+  buildFrameworkSections,
+  buildAreaIndex,
+  frameworkCategories,
+  type FrameworkVocabulary,
+} from './passbookGrouping';
 import { PASSBOOK_STATUS, type PassbookEntry } from '../../types/competencyServiceTypes';
 
 const entry = (competencyId: string, frameworkId = 'fw2', over: Partial<PassbookEntry> = {}): PassbookEntry => ({
@@ -58,6 +63,29 @@ describe('buildAreaIndex', () => {
   it('is empty for a framework with no associations at all', () => {
     // fw_health_competency2 is exactly this - its sheet omitted the Area column
     expect(buildAreaIndex([{ code: 'med' }, { code: 'ipc' }], [{ code: 'domain' }])).toEqual({});
+  });
+});
+
+// AxiosAdapter.mapResponse strips `result` before a caller sees the body, so the
+// UNWRAPPED form is what actually arrives. Reading `result.framework` silently
+// emptied every label and area: the passbook rendered de-slugged codes
+// ("Health data reporting" rather than "Health Data and Reporting") and no grouping.
+describe('frameworkCategories', () => {
+  const categories = [{ code: 'competency', terms: [{ code: 'med', name: 'Medication Administration' }] }];
+
+  it('reads the unwrapped shape the http adapter delivers', () => {
+    expect(frameworkCategories({ framework: { categories } })).toEqual(categories);
+  });
+
+  it('still reads the enveloped shape', () => {
+    expect(frameworkCategories({ result: { framework: { categories } } })).toEqual(categories);
+  });
+
+  it('returns [] rather than throwing on an unexpected body', () => {
+    expect(frameworkCategories(undefined)).toEqual([]);
+    expect(frameworkCategories(null)).toEqual([]);
+    expect(frameworkCategories({})).toEqual([]);
+    expect(frameworkCategories({ framework: {} })).toEqual([]);
   });
 });
 
