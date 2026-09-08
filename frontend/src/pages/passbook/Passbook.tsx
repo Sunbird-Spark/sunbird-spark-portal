@@ -4,56 +4,65 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 import useImpression from '@/hooks/useImpression';
 import PageLoader from '@/components/common/PageLoader';
 import { PassbookHero } from '@/components/passbook/PassbookHero';
-import { PositionPicker } from '@/components/passbook/PositionPicker';
-import { CompetencyCard } from '@/components/passbook/CompetencyCard';
-import { GapTable } from '@/components/passbook/GapTable';
-import { usePassbook, useCompetencyLabels, labelFor as resolveLabel } from '@/hooks/usePassbook';
-import { useCompetencyFramework, useCompetencyGap, useSaveTargetPosition } from '@/hooks/useCompetencyGap';
+import { FrameworkSectionView } from '@/components/passbook/FrameworkSectionView';
+import { usePassbook } from '@/hooks/usePassbook';
+import { useCompetencyVocabulary, labelIn } from '@/hooks/useCompetencyVocabulary';
+import { useCompetencyFrameworks, useCompetencyGap, useSaveTargetPosition } from '@/hooks/useCompetencyGap';
+import { buildFrameworkSections } from '@/services/competency/passbookGrouping';
 import { isHeld } from '@/services/competency';
 
 /**
- * The learner's competency passbook, and readiness against a target position.
+ * The learner's competency passbook: what they hold, grouped by competency area,
+ * and readiness against a target role.
  *
- * WHY THE POSITION IS CHOSEN HERE rather than read from the learner's record:
+ * MULTIPLE FRAMEWORKS ARE FIRST-CLASS. A learner can hold competencies from more
+ * than one framework - two Learning Paths built on different frameworks, or a
+ * platform mid-migration (User 23 on the test cluster holds both
+ * fw_health_competency and fw_health_competency2). One flat list would mix
+ * vocabularies, and a gap can only be computed against one framework's requirement
+ * set, so the page renders a section per framework with its own roles and gap.
+ *
+ * WHY THE ROLE IS CHOSEN HERE rather than read from the learner's record:
  * `user_competency_position` is written only by an HR feed or the privileged
- * position API, so for most learners it is empty - and `gap/read` reports that
- * as `readiness: 0`, which must not be shown as a score. Letting the learner
- * pick a target makes the comparison meaningful today, and the choice is saved
- * back as `targetPositions` (the one field the public route accepts).
+ * position API, so for most learners it is empty - and `gap/read` reports that as
+ * `readiness: 0`, which must not be shown as a score.
  */
 const Passbook = () => {
   const { t } = useAppI18n();
   useImpression({ type: 'view', pageid: 'competency-passbook', env: 'profile' });
 
-  const { entries, frameworkId, isLoading, isError, refetch } = usePassbook();
-  const labels = useCompetencyLabels(frameworkId);
-  const label = (code: string) => resolveLabel(labels, code);
+  const { entries, isLoading, isError, refetch } = usePassbook();
 
-  const { meta } = useCompetencyFramework(frameworkId);
-  const [position, setPosition] = useState<string>();
-  const { gap } = useCompetencyGap(frameworkId, position);
-  const saveTarget = useSaveTargetPosition(frameworkId);
+  const frameworkIds = useMemo(
+    () => Array.from(new Set(entries.map((e) => e.frameworkId).filter(Boolean))),
+    [entries]
+  );
+  const { vocabularies } = useCompetencyVocabulary(frameworkIds);
+  const { metas } = useCompetencyFrameworks(frameworkIds);
 
-  const [expanded, setExpanded] = useState<string | null>(null);
+  // One target at a time: the gap is per (framework, role), and a learner aims at
+  // one role. Held as a pair so picking a role in one framework's section cannot
+  // leave a stale gap rendered under another's.
+  const [target, setTarget] = useState<{ frameworkId: string; position: string }>();
+  const { gap } = useCompetencyGap(target?.frameworkId, target?.position);
+  const saveTarget = useSaveTargetPosition(target?.frameworkId);
 
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const sections = useMemo(() => buildFrameworkSections(entries, vocabularies), [entries, vocabularies]);
   const heldCount = useMemo(() => entries.filter(isHeld).length, [entries]);
-  // Criticality is only worth a column when the framework actually varies it -
-  // a framework that declares none makes every requirement mandatory, and
-  // labelling them all "Mandatory" implies a distinction that does not exist.
-  const showCriticality = useMemo(() => {
-    const values = new Set((gap?.rows ?? []).map((r) => r.criticality).filter(Boolean));
-    return values.size > 1;
-  }, [gap]);
 
-  const choosePosition = (code: string) => {
-    setPosition(code);
-    saveTarget.mutate(code);
+  const choose = (frameworkId: string) => (position: string) => {
+    setTarget({ frameworkId, position });
+    saveTarget.mutate(position);
   };
 
   if (isLoading) return <PageLoader />;
   // An unreachable API and an empty passbook look identical unless the error is
   // surfaced, so this shows retry rather than "no competencies yet".
   if (isError) return <PageLoader error={t('somethingWentWrong')} onRetry={() => void refetch()} />;
+
+  const showFrameworkHeadings = sections.length > 1;
 
   return (
     <div className="flex-1 min-w-0 mx-auto max-w-[85rem] px-6 py-7">
@@ -75,48 +84,38 @@ const Passbook = () => {
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
-          <aside className="flex flex-col gap-4">
+          <aside>
             <PassbookHero
               heldCount={heldCount}
               totalCount={entries.length}
               {...(gap?.resolved ? { readiness: gap.readiness, outstanding: gap.mandatoryOutstanding } : {})}
-              {...(position ? { positionLabel: label(position) } : {})}
-            />
-            <PositionPicker
-              positions={meta?.positions ?? []}
-              {...(position ? { selected: position } : {})}
-              labelFor={label}
-              onSelect={choosePosition}
+              {...(target && gap?.resolved
+                ? { positionLabel: labelIn(vocabularies[target.frameworkId], target.position) }
+                : {})}
             />
           </aside>
 
-          <section className="flex flex-col gap-6">
-            {gap?.resolved && (
-              <div className="flex flex-col gap-3">
-                <h2 className="text-base font-semibold text-foreground">
-                  {t('passbook.readinessFor', { position: label(position ?? '') })}
-                </h2>
-                <GapTable rows={gap.rows} labelFor={label} showCriticality={showCriticality} />
-              </div>
-            )}
-
-            <div className="flex flex-col gap-3">
-              <h2 className="text-base font-semibold text-foreground">{t('passbook.competenciesHeld')}</h2>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {entries.map((entry) => (
-                  <CompetencyCard
-                    key={entry.competencyId}
-                    entry={entry}
-                    isExpanded={expanded === entry.competencyId}
-                    onToggle={() =>
-                      setExpanded(expanded === entry.competencyId ? null : entry.competencyId)
-                    }
-                    labelFor={label}
-                  />
-                ))}
-              </div>
-            </div>
-          </section>
+          <div className="flex flex-col gap-8">
+            {sections.map((section) => {
+              const vocab = vocabularies[section.frameworkId];
+              const isTargeted = target?.frameworkId === section.frameworkId;
+              return (
+                <FrameworkSectionView
+                  key={section.frameworkId}
+                  section={section}
+                  showFrameworkHeading={showFrameworkHeadings}
+                  frameworkLabel={labelIn(vocab, section.frameworkId)}
+                  positions={metas[section.frameworkId]?.positions ?? []}
+                  {...(isTargeted && target ? { selectedPosition: target.position } : {})}
+                  {...(isTargeted && gap ? { gap } : {})}
+                  onSelectPosition={choose(section.frameworkId)}
+                  expandedId={expandedId}
+                  onToggle={(id) => setExpandedId(expandedId === id ? null : id)}
+                  labelFor={(code) => labelIn(vocab, code)}
+                />
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

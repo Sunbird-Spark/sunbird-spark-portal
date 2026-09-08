@@ -43,8 +43,58 @@ describe('normalisePassbook', () => {
     expect(out.map((e) => e.competencyId)).toEqual(['team-leadership']);
   });
 
-  // The evidence ledger is append-only and the service writes a fresh row per
-  // re-projection (observed: 10 rows for 5 attainments, 60+ on a completion path).
+  // The real-world shape: the ledger writes a NEW evidenceId per re-projection
+  // (occurredOn is part of the id), so 12 rows described one course completion and
+  // rendered as twelve identical "Course - 08 Sept 2026" lines.
+  it('collapses many stored rows describing ONE fact into a single row', () => {
+    const dup = (n: number) => ({
+      evidenceId: `000000178885200${n}:3050`,
+      sourceType: 'COURSE',
+      sourceId: 'do_course_1',
+      level: 'l2',
+    });
+    const out = normalisePassbook({
+      competencies: [
+        {
+          competencyId: 'neonatal-resuscitation',
+          evidence: [dup(1), dup(2), dup(3), dup(4), dup(5)],
+        },
+      ],
+    });
+    expect(out[0]!.evidence).toHaveLength(1);
+    expect(out[0]!.evidence[0]!.sourceType).toBe('COURSE');
+  });
+
+  it('keeps genuinely different evidence apart - two attempts, different scores', () => {
+    const out = normalisePassbook({
+      competencies: [
+        {
+          competencyId: 'c1',
+          evidence: [
+            { evidenceId: 'a', sourceType: 'ASSESSMENT', sourceId: 'qs1', level: 'l3', score: 1, maxScore: 1 },
+            { evidenceId: 'b', sourceType: 'ASSESSMENT', sourceId: 'qs1', level: 'l3', score: 0, maxScore: 1 },
+          ],
+        },
+      ],
+    });
+    expect(out[0]!.evidence).toHaveLength(2);
+  });
+
+  it('keeps COURSE and ASSESSMENT evidence for the same competency apart', () => {
+    const out = normalisePassbook({
+      competencies: [
+        {
+          competencyId: 'c1',
+          evidence: [
+            { evidenceId: 'a', sourceType: 'COURSE', sourceId: 'crs', level: 'l2' },
+            { evidenceId: 'b', sourceType: 'ASSESSMENT', sourceId: 'qs1', level: 'l2', score: 0, maxScore: 1 },
+          ],
+        },
+      ],
+    });
+    expect(out[0]!.evidence.map((e) => e.sourceType)).toEqual(['COURSE', 'ASSESSMENT']);
+  });
+
   it('deduplicates evidence on evidenceId', () => {
     const out = normalisePassbook({
       result: {

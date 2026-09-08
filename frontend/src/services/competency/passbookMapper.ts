@@ -29,14 +29,37 @@ function normaliseEvidence(raw: EvidenceWire[] | undefined): Evidence[] {
 }
 
 /**
+ * One row per DISTINCT fact, not per stored row.
+ *
+ * The evidence ledger is append-only and `AttainmentRules.evidenceId` prefixes its stable
+ * `sourceType|sourceId|batchId` hash with `occurredOn` - which the caller passes as
+ * `System.currentTimeMillis()`. So re-projecting the same completion writes a NEW id every time,
+ * defeating the idempotency the hash was meant to give and leaving many rows describing one fact.
+ * Observed live: 12 identical `COURSE` rows for one course completion, rendered as twelve
+ * indistinguishable "Course - 08 Sept 2026" lines.
+ *
+ * Keying on the fact - source, level and score - collapses those to one row while keeping
+ * genuinely different evidence apart: two assessment attempts on the same set with different
+ * scores stay separate, because the score is part of the key.
+ */
+function collapseEvidence(evidence: Evidence[]): Evidence[] {
+  const seen = new Set<string>();
+  const out: Evidence[] = [];
+  evidence.forEach((ev) => {
+    const key = [ev.sourceType, ev.sourceId, ev.level, ev.score ?? '', ev.maxScore ?? ''].join('|');
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(ev);
+  });
+  return out;
+}
+
+/**
  * Wire -> view. Entries with no `competencyId` are dropped: without one there is
  * nothing to label, resolve a name for, or match against a requirement.
  *
- * Evidence is deduplicated on `evidenceId`. The ledger is append-only and the
- * service currently writes one row per re-projection, so the same underlying
- * fact can arrive many times over (observed: 10 rows for 5 attainments, and
- * 60-70 for a completion-driven path). Showing every duplicate would imply the
- * learner proved a competency far more often than they did.
+ * Evidence is collapsed per distinct fact by `collapseEvidence` - see the note there for why
+ * `evidenceId` is not a usable dedupe key.
  */
 export function normalisePassbook(response: PassbookReadResponse | undefined | null): PassbookEntry[] {
   // The adapter already unwraps `result`, so the unwrapped shape is the normal
@@ -45,12 +68,7 @@ export function normalisePassbook(response: PassbookReadResponse | undefined | n
   return raw
     .filter((e): e is PassbookEntryWire => Boolean(e?.competencyId))
     .map((e) => {
-      const seen = new Set<string>();
-      const evidence = normaliseEvidence(e.evidence).filter((ev) => {
-        if (seen.has(ev.evidenceId)) return false;
-        seen.add(ev.evidenceId);
-        return true;
-      });
+      const evidence = collapseEvidence(normaliseEvidence(e.evidence));
       return {
         competencyId: e.competencyId ?? '',
         frameworkId: e.frameworkId ?? '',

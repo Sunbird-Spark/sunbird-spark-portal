@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import { competencyService, normaliseGap, normaliseFrameworkMeta } from '@/services/competency';
 import { useUserId } from './useAuthInfo';
 import type { CompetencyFrameworkMeta, CompetencyGap } from '@/types/competencyServiceTypes';
@@ -18,6 +19,34 @@ export function useCompetencyFramework(frameworkId: string | undefined): {
     enabled: Boolean(frameworkId),
   });
   return { meta: query.data, isLoading: query.isLoading, isError: query.isError };
+}
+
+/**
+ * Resolved meta for EVERY framework the learner holds competencies in, fetched in
+ * parallel so each framework section can offer its own target roles. The number of
+ * frameworks is data-dependent, so a fixed set of `useQuery` calls cannot cover it.
+ */
+export function useCompetencyFrameworks(frameworkIds: string[]): {
+  metas: Record<string, CompetencyFrameworkMeta | undefined>;
+  isLoading: boolean;
+} {
+  const ids = useMemo(() => Array.from(new Set(frameworkIds.filter(Boolean))).sort(), [frameworkIds]);
+  const queries = useQueries({
+    queries: ids.map((id) => ({
+      queryKey: ['competencyFramework', id],
+      queryFn: async () => normaliseFrameworkMeta((await competencyService.frameworkRead(id)).data),
+      enabled: Boolean(id),
+    })),
+  });
+  const isLoading = queries.some((q) => q.isLoading);
+  const metas = useMemo(() => {
+    const out: Record<string, CompetencyFrameworkMeta | undefined> = {};
+    ids.forEach((id, i) => {
+      out[id] = queries[i]?.data;
+    });
+    return out;
+  }, [ids, queries]);
+  return { metas, isLoading };
 }
 
 /**
