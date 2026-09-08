@@ -24,6 +24,7 @@ import PageLayout from './components/layout/PageLayout';
 import Home from './pages/home/Home';
 import Profile from './pages/profile/Profile';
 import MySkills from './pages/mySkills/MySkills';
+import Passbook from './pages/passbook/Passbook';
 import DeleteAccountGate from './pages/profile/DeleteAccountGate';
 import WorkspacePage from './pages/workspace/WorkspacePage';
 import ReportsPage from './pages/reports/ReportsPage';
@@ -144,6 +145,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/my-learning" element={<MyLearning />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/skills" element={<MySkills />} />
+          <Route path="/profile/passbook" element={<Passbook />} />
           <Route path="/help-support" element={<HelpSupport />} />
           <Route path="/help-support/:categoryId" element={<HelpCategoryDetail />} />
           <Route path="/reports" element={<ReportsPage />} />

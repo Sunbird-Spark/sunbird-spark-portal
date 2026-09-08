@@ -921,8 +921,8 @@
     "issueCertificate": "إصدار شهادة",
     "batchType": "نوع المجموعة",
     "batchTypeOpen": "مفتوح",
-    "saving": "جارٍ الحفظ\u2026",
-    "creating": "جارٍ الإنشاء\u2026",
+    "saving": "جارٍ الحفظ…",
+    "creating": "جارٍ الإنشاء…",
     "saveChanges": "حفظ التغييرات",
     "create": "إنشاء مجموعة",
     "failedToUpdate": "فشل تحديث المجموعة. يرجى المحاولة مرة أخرى.",
@@ -930,7 +930,7 @@
   },
   "mentorSection": {
     "title": "المرشدون في المجموعة",
-    "searchPlaceholder": "ابحث عن المرشدين بالاسم أو البريد الإلكتروني\u2026",
+    "searchPlaceholder": "ابحث عن المرشدين بالاسم أو البريد الإلكتروني…",
     "noMentorsFound": "لم يتم العثور على مرشدين في مؤسستك.",
     "removeMentor": "إزالة {{name}}"
   },
@@ -940,11 +940,11 @@
     "forCreatingBatch": "لإنشاء هذه المجموعة."
   },
   "batchesTab": {
-    "loading": "جارٍ تحميل المجموعات\u2026",
+    "loading": "جارٍ تحميل المجموعات…",
     "failed": "فشل تحميل المجموعات.",
     "selectBatch": "اختر مجموعة",
     "noBatchesFound": "لم يتم العثور على مجموعات.",
-    "chooseToViewReport": "اختر مجموعة لعرض تقريرها\u2026",
+    "chooseToViewReport": "اختر مجموعة لعرض تقريرها…",
     "selectFromDropdown": "اختر مجموعة من القائمة المنسدلة أعلاه لعرض تقرير الدورة."
   },
   "resourceForm": {
@@ -1010,12 +1010,12 @@
     "reissue": "إعادة إصدار",
     "reissueCertificate": "إعادة إصدار الشهادة",
     "reissueConfirmation": "إعادة إصدار الشهادة لـ <strong>{{userName}}</strong> في الدفعة <strong>{{batchName}}</strong>؟",
-    "reissuing": "جارٍ إعادة الإصدار\u2026",
+    "reissuing": "جارٍ إعادة الإصدار…",
     "reissuedSuccessfully": "تمت إعادة إصدار الشهادة بنجاح.",
     "reissueFailed": "فشل إعادة إصدار الشهادة.",
     "createTemplateTitle": "إنشاء قالب شهادة",
     "certificateTitle": "الشهادة",
-    "back": "\u2190 رجوع",
+    "back": "← رجوع",
     "cancelButton": "إلغاء",
     "rules": "قواعد الشهادة",
     "issueTo": "إصدار الشهادة إلى",
@@ -1127,7 +1127,7 @@
     "title": "لوحة تحكم الدورة",
     "backToCoursePage": "العودة إلى صفحة الدورة",
     "backToPathPage": "العودة إلى صفحة المسار",
-    "checkingPermissions": "جارٍ التحقق من الصلاحيات\u2026",
+    "checkingPermissions": "جارٍ التحقق من الصلاحيات…",
     "failedToLoad": "فشل تحميل الدورة.",
     "manageDashboard": "إدارة لوحة التحكم لهذه الدورة"
   },
@@ -1221,7 +1221,7 @@
       "addNewRole": "إضافة دور جديد"
     },
     "consentTab": {
-      "loading": "جارٍ تحميل بيانات الموافقة\u2026",
+      "loading": "جارٍ تحميل بيانات الموافقة…",
       "loadFailed": "فشل تحميل بيانات الموافقة. يرجى المحاولة لاحقاً.",
       "totalUsers": "إجمالي المستخدمين",
       "consentGranted": "الموافقة ممنوحة",
@@ -1229,7 +1229,7 @@
       "filterLabel": "حالة الموافقة",
       "filterGranted": "ممنوحة",
       "filterRevoked": "مسحوبة",
-      "searchPlaceholder": "البحث بالاسم أو البريد الإلكتروني\u2026",
+      "searchPlaceholder": "البحث بالاسم أو البريد الإلكتروني…",
       "noUsersMatch": "لا يوجد مستخدمون يطابقون الفلاتر الحالية.",
       "revokeTitle": "سحب الموافقة",
       "reissueTitle": "إعادة إصدار الموافقة",
@@ -1399,17 +1399,17 @@
     "assessments": "التقييمات",
     "detailedLearnerProgress": "تفاصيل تقدم المتعلم",
     "detailedAssessments": "تفاصيل التقييمات",
-    "loadingLearners": "جارٍ تحميل بيانات المتعلمين\u2026",
-    "loadingAssessments": "جارٍ تحميل بيانات التقييمات\u2026",
+    "loadingLearners": "جارٍ تحميل بيانات المتعلمين…",
+    "loadingAssessments": "جارٍ تحميل بيانات التقييمات…",
     "somethingWentWrong": "حدث خطأ ما",
     "failedLearnerProgress": "فشل تحميل تقدم المتعلمين. يرجى المحاولة مرة أخرى.",
     "failedAssessmentData": "فشل تحميل بيانات التقييم. يرجى المحاولة مرة أخرى.",
     "tryAgain": "حاول مرة أخرى",
-    "searchLearners": "البحث عن متعلمين\u2026",
-    "progress025": "0\u201325%",
-    "progress2550": "25\u201350%",
-    "progress5075": "50\u201375%",
-    "progress75100": "75\u2013100%",
+    "searchLearners": "البحث عن متعلمين…",
+    "progress025": "0–25%",
+    "progress2550": "25–50%",
+    "progress5075": "50–75%",
+    "progress75100": "75–100%",
     "progressFilter": "التقدم",
     "colLearnerName": "اسم المتعلم",
     "colProgress": "التقدم",
@@ -1442,11 +1442,11 @@
     "colCertificates": "الشهادات",
     "failedUserGrowth": "فشل تحميل بيانات نمو المستخدمين. يرجى المحاولة مرة أخرى.",
     "failedCourseSummary": "فشل تحميل ملخص الدورات. يرجى المحاولة مرة أخرى.",
-    "searchCourses": "البحث عن دورات\u2026"
+    "searchCourses": "البحث عن دورات…"
   },
   "dataTable": {
     "noData": "لا توجد بيانات متاحة.",
-    "showing": "عرض {{from}}\u2013{{to}} من {{total}}",
+    "showing": "عرض {{from}}–{{to}} من {{total}}",
     "pageIndicator": "{{page}} / {{total}}",
     "firstPage": "الصفحة الأولى",
     "prevPage": "الصفحة السابقة",
@@ -1454,7 +1454,7 @@
     "lastPage": "الصفحة الأخيرة"
   },
   "filterPanel": {
-    "searchPlaceholder": "بحث\u2026",
+    "searchPlaceholder": "بحث…",
     "allOption": "الكل {{label}}"
   },
   "editors": {
@@ -1612,5 +1612,51 @@
     "dashboardTitle": "لوحة تحكم مسار التعلم",
     "manageDashboard": "إدارة لوحة التحكم لهذا المسار",
     "selectBatchHint": "اختر مجموعة من القائمة أعلاه لعرض تقرير المسار."
+  },
+  "passbook": {
+    "title": "My Competency Passbook",
+    "subtitle": "The competencies you hold, what proved them, and how ready you are for the role you're aiming at.",
+    "cardTitle": "Competency Passbook",
+    "cardDescription": "Competencies you hold and your readiness for a role",
+    "cardCta": "View passbook",
+    "competenciesHeld": "Competencies held",
+    "heldCount": "held",
+    "ready": "ready",
+    "readinessFor": "Readiness for {{position}}",
+    "fullyReady": "Fully ready for this role",
+    "outstanding": "Still to earn",
+    "targetPosition": "Target role",
+    "pickTargetHint": "Pick a target role to see how ready you are.",
+    "evidenceCount": "{{count}} evidence",
+    "noEvidence": "No supporting evidence recorded yet.",
+    "expiringSoon": "Due for revalidation soon",
+    "expiredNote": "This claim has lapsed",
+    "requiredVsHeld": "Needs {{required}} · you hold {{held}}",
+    "nothingHeld": "nothing yet",
+    "noRequirements": "This role declares no competency requirements.",
+    "emptyTitle": "Your passbook is empty for now",
+    "emptyBody": "Complete a Learning Path or an assessment and the competencies you prove will appear here.",
+    "status": {
+      "ATTAINED": "Attained",
+      "IN_PROGRESS": "In progress",
+      "EXPIRING": "Expiring",
+      "EXPIRED": "Expired"
+    },
+    "gapStatus": {
+      "MET": "Met",
+      "BELOW": "Below",
+      "MISSING": "Missing"
+    },
+    "source": {
+      "ASSESSMENT": "Assessment",
+      "COURSE": "Course",
+      "LEARNING_PATH": "Learning Path",
+      "EXTERNAL": "External",
+      "ENDORSEMENT": "Endorsement"
+    },
+    "criticality": {
+      "MANDATORY": "Mandatory",
+      "DESIRABLE": "Desirable"
+    }
   }
 }
