@@ -64,6 +64,18 @@ describe('normaliseGap', () => {
     expect(out.rows[0]!.status).toBe(GAP_STATUS.missing);
   });
 
+  it('reads the UNWRAPPED shape the http adapter delivers', () => {
+    const out = normaliseGap({
+      gap: [{ competencyId: 'c1', status: 'MET' }],
+      readiness: 100,
+      position: 'staff-nurse-icu',
+      mandatoryOutstanding: 0,
+    });
+    expect(out.resolved).toBe(true);
+    expect(out.readiness).toBe(100);
+    expect(out.rows).toHaveLength(1);
+  });
+
   it.each([undefined, null, {}])('returns an unresolved gap for %s', (input) => {
     const out = normaliseGap(input as never);
     expect(out.resolved).toBe(false);
@@ -112,6 +124,16 @@ describe('normaliseFrameworkMeta', () => {
 
   it('sorts levels by index', () => {
     expect(normaliseFrameworkMeta(response)?.levels.map((l) => l.code)).toEqual(['l1', 'l3']);
+  });
+
+  it('reads the UNWRAPPED framework shape too', () => {
+    const meta = normaliseFrameworkMeta({
+      frameworkId: 'fw_health_competency2',
+      levels: [{ code: 'l1', index: 1 }],
+      requirements: { 'staff-nurse-icu': [{ competencyId: 'c1' }] },
+    });
+    expect(meta?.frameworkId).toBe('fw_health_competency2');
+    expect(meta?.positions).toEqual(['staff-nurse-icu']);
   });
 
   it('is undefined without a frameworkId, so callers can tell it did not resolve', () => {

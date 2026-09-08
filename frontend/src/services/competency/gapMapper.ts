@@ -18,7 +18,10 @@ import {
  * "choose a position" state instead of a score.
  */
 export function normaliseGap(response: GapReadResponse | undefined | null): CompetencyGap {
-  const r = response?.result;
+  // The adapter already unwraps `result`; tolerate the raw envelope too.
+  const r = response?.gap !== undefined || response?.position !== undefined
+    ? response
+    : response?.result;
   const rows = (r?.gap ?? [])
     .filter((g): g is GapRowWire => Boolean(g?.competencyId))
     .map((g) => ({
@@ -62,7 +65,7 @@ export function sortGapRows(rows: GapRow[]): GapRow[] {
 export function normaliseFrameworkMeta(
   response: CompetencyFrameworkReadResponse | undefined | null
 ): CompetencyFrameworkMeta | undefined {
-  const r = response?.result;
+  const r = response?.frameworkId ? response : response?.result;
   if (!r?.frameworkId) return undefined;
   const requirements = r.requirements ?? {};
   const positions = Object.keys(requirements)

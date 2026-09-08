@@ -81,6 +81,18 @@ describe('normalisePassbook', () => {
     expect(out[0]!.attainedOn).toBeUndefined();
   });
 
+  // The live shape. AxiosAdapter.mapResponse unwraps `result` before a mapper
+  // sees it, so this - not the enveloped form - is what actually arrives.
+  // Reading `result.competencies` rendered an empty passbook against a good 200.
+  it('reads the UNWRAPPED shape the http adapter delivers', () => {
+    const out = normalisePassbook({
+      count: 5,
+      competencies: [{ competencyId: 'medication-administration', level: 'l4', levelIndex: 4, status: 'ATTAINED' }],
+    });
+    expect(out).toHaveLength(1);
+    expect(out[0]!.competencyId).toBe('medication-administration');
+  });
+
   it.each([undefined, null, {}, { result: {} }])('returns [] for %s', (input) => {
     expect(normalisePassbook(input as never)).toEqual([]);
   });

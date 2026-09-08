@@ -39,7 +39,9 @@ function normaliseEvidence(raw: EvidenceWire[] | undefined): Evidence[] {
  * learner proved a competency far more often than they did.
  */
 export function normalisePassbook(response: PassbookReadResponse | undefined | null): PassbookEntry[] {
-  const raw = response?.result?.competencies ?? [];
+  // The adapter already unwraps `result`, so the unwrapped shape is the normal
+  // one; `result` is tolerated in case a caller passes the raw envelope.
+  const raw = response?.competencies ?? response?.result?.competencies ?? [];
   return raw
     .filter((e): e is PassbookEntryWire => Boolean(e?.competencyId))
     .map((e) => {

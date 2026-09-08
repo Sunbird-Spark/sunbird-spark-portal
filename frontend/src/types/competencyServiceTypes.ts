@@ -38,11 +38,18 @@ export interface EvidenceWire {
   expiresOn?: string;
 }
 
+/**
+ * NOTE ON THE ENVELOPE: `AxiosAdapter.mapResponse` already unwraps `result`
+ * (`_.get(data, 'result')`, falling back to the whole body), so what reaches a
+ * mapper is the CONTENTS of `result`, not the Sunbird envelope. Declaring
+ * `result` here made the mappers look one level too deep and render an empty
+ * passbook against a perfectly good 200. Both shapes are accepted so the
+ * mappers survive either.
+ */
 export interface PassbookReadResponse {
-  result?: {
-    competencies?: PassbookEntryWire[];
-    count?: number;
-  };
+  competencies?: PassbookEntryWire[];
+  count?: number;
+  result?: { competencies?: PassbookEntryWire[]; count?: number };
 }
 
 /** `POST /competency/v1/gap/read` - required vs held, per requirement. */
@@ -57,14 +64,16 @@ export interface GapRowWire {
   status?: string;
 }
 
-export interface GapReadResponse {
-  result?: {
-    gap?: GapRowWire[];
-    readiness?: number;
-    position?: string;
-    frameworkId?: string;
-    mandatoryOutstanding?: number;
-  };
+export interface GapReadResponseBody {
+  gap?: GapRowWire[];
+  readiness?: number;
+  position?: string;
+  frameworkId?: string;
+  mandatoryOutstanding?: number;
+}
+
+export interface GapReadResponse extends GapReadResponseBody {
+  result?: GapReadResponseBody;
 }
 
 /** `GET /competency/v1/framework/read/:frameworkId` - the resolved framework. */
@@ -83,15 +92,17 @@ export interface RequirementWire {
   criticality?: string;
 }
 
-export interface CompetencyFrameworkReadResponse {
-  result?: {
-    frameworkId?: string;
-    levels?: FrameworkLevelWire[];
-    /** Keyed by position code. */
-    requirements?: Record<string, RequirementWire[]>;
-    defaultRequiredLevel?: string;
-    maxCompletionDerivedIndex?: number;
-  };
+export interface CompetencyFrameworkReadBody {
+  frameworkId?: string;
+  levels?: FrameworkLevelWire[];
+  /** Keyed by position code. */
+  requirements?: Record<string, RequirementWire[]>;
+  defaultRequiredLevel?: string;
+  maxCompletionDerivedIndex?: number;
+}
+
+export interface CompetencyFrameworkReadResponse extends CompetencyFrameworkReadBody {
+  result?: CompetencyFrameworkReadBody;
 }
 
 // ---- view types (what the components consume) -----------------------------------------------
