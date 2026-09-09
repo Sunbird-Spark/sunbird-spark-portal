@@ -105,7 +105,10 @@ const Passbook = () => {
                   section={section}
                   showFrameworkHeading={showFrameworkHeadings}
                   frameworkLabel={labelIn(vocab, section.frameworkId)}
-                  positions={metas[section.frameworkId]?.positions ?? []}
+                  // competency/v1/framework/read is a separate Kong route that may not be
+                  // provisioned; the taxonomy read (already fetched for labels/areas) carries
+                  // the same positions, so the role picker never depends on it alone.
+                  positions={metas[section.frameworkId]?.positions ?? vocab?.positions ?? []}
                   {...(isTargeted && target ? { selectedPosition: target.position } : {})}
                   {...(isTargeted && gap ? { gap } : {})}
                   onSelectPosition={choose(section.frameworkId)}

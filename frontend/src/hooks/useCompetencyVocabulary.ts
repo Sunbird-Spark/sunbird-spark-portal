@@ -3,6 +3,7 @@ import { useQueries } from '@tanstack/react-query';
 import { FrameworkService } from '@/services/FrameworkService';
 import {
   buildAreaIndex,
+  buildPositionList,
   frameworkCategories,
   type FrameworkVocabulary,
   type TaxonomyFrameworkResponse,
@@ -52,7 +53,13 @@ export function useCompetencyVocabulary(frameworkIds: string[]): {
       });
       const competencyTerms = categories.find((c) => c.code === 'competency')?.terms ?? [];
       const areaTerms = categories.find((c) => c.code === 'competencyarea')?.terms ?? [];
-      out[id] = { frameworkId: id, labels, areaOf: buildAreaIndex(competencyTerms, areaTerms) };
+      const positionTerms = categories.find((c) => c.code === 'position')?.terms ?? [];
+      out[id] = {
+        frameworkId: id,
+        labels,
+        areaOf: buildAreaIndex(competencyTerms, areaTerms),
+        positions: buildPositionList(positionTerms),
+      };
     });
     return out;
   }, [ids, queries]);

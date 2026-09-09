@@ -49,6 +49,7 @@ const vocab = (over: Partial<FrameworkVocabulary> = {}): FrameworkVocabulary => 
   frameworkId: 'fw2',
   labels: { med: 'Medication Administration', domain: 'Domain', l3: 'L3 Practitioner' },
   areaOf: {},
+  positions: [],
   ...over,
 });
 
@@ -151,6 +152,33 @@ describe('Passbook', () => {
     renderPage();
     expect(screen.getByTestId('position-option-nurse')).toBeInTheDocument();
     expect(screen.getByTestId('position-option-officer')).toBeInTheDocument();
+  });
+
+  // competency/v1/framework/read 404s on the test cluster; the picker must still work
+  // from the taxonomy read's positions.
+  it('falls back to the taxonomy positions when the competency framework read is unavailable', () => {
+    mockFrameworks.mockReturnValue({ metas: {}, isLoading: false });
+    mockVocab.mockReturnValue({
+      vocabularies: { fw2: vocab({ positions: ['staff-nurse-icu', 'nursing-officer'] }) },
+      isLoading: false,
+    });
+    renderPage();
+    expect(screen.getByTestId('position-option-staff-nurse-icu')).toBeInTheDocument();
+    expect(screen.getByTestId('position-option-nursing-officer')).toBeInTheDocument();
+  });
+
+  it('prefers the competency framework positions when both are available', () => {
+    mockFrameworks.mockReturnValue({
+      metas: { fw2: { frameworkId: 'fw2', levels: [], requirements: {}, positions: ['from-meta'] } },
+      isLoading: false,
+    });
+    mockVocab.mockReturnValue({
+      vocabularies: { fw2: vocab({ positions: ['from-taxonomy'] }) },
+      isLoading: false,
+    });
+    renderPage();
+    expect(screen.getByTestId('position-option-from-meta')).toBeInTheDocument();
+    expect(screen.queryByTestId('position-option-from-taxonomy')).not.toBeInTheDocument();
   });
 
   it('saves the chosen role as a target', () => {

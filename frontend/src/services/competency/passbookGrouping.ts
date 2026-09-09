@@ -7,6 +7,14 @@ export interface FrameworkVocabulary {
   labels: Record<string, string>;
   /** competency code -> competency-area code. */
   areaOf: Record<string, string>;
+  /**
+   * Position codes that declare at least one requirement, read from the TAXONOMY
+   * framework. `competency/v1/framework/read` gives the same list, but it is a
+   * separate Kong route that may not be provisioned - and the role picker is the
+   * only way into the gap, so it must not depend on an endpoint that might 404.
+   * The taxonomy read is already needed here for labels and areas.
+   */
+  positions: string[];
 }
 
 export interface AreaGroup {
@@ -124,6 +132,21 @@ export function frameworkCategories(
   body: TaxonomyFrameworkResponse | undefined | null
 ): FrameworkCategoryLike[] {
   return body?.framework?.categories ?? body?.result?.framework?.categories ?? [];
+}
+
+/**
+ * Positions worth offering as a target: those declaring at least one requirement.
+ *
+ * A requirement-less position would report 100% readiness for everyone, which on a
+ * mis-authored framework is exactly the misleading answer to avoid - so it is
+ * filtered out rather than trusted.
+ */
+export function buildPositionList(positionTerms: FrameworkTermLike[]): string[] {
+  return positionTerms
+    .filter((t) => Boolean(t.code))
+    .filter((t) => (t.associations ?? []).some((a) => a.category === 'competencyrequirement'))
+    .map((t) => t.code as string)
+    .sort((a, b) => a.localeCompare(b));
 }
 
 /**

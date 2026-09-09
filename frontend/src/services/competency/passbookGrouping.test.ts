@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   buildFrameworkSections,
   buildAreaIndex,
+  buildPositionList,
   frameworkCategories,
   type FrameworkVocabulary,
 } from './passbookGrouping';
@@ -22,6 +23,7 @@ const vocab = (over: Partial<FrameworkVocabulary> = {}): FrameworkVocabulary => 
   frameworkId: 'fw2',
   labels: {},
   areaOf: {},
+  positions: [],
   ...over,
 });
 
@@ -86,6 +88,37 @@ describe('frameworkCategories', () => {
     expect(frameworkCategories(null)).toEqual([]);
     expect(frameworkCategories({})).toEqual([]);
     expect(frameworkCategories({ framework: {} })).toEqual([]);
+  });
+});
+
+// The role picker is the only route into the gap, so it must not depend on
+// competency/v1/framework/read - a separate Kong route that may not be provisioned
+// (it 404s on the test cluster). The knowlg taxonomy read, already fetched here for
+// labels and areas, carries the same positions.
+describe('buildPositionList', () => {
+  it('lists positions that declare requirements, sorted', () => {
+    const positions = buildPositionList([
+      { code: 'staff-nurse-icu', associations: [{ category: 'competencyrequirement', code: 'r1' }] },
+      { code: 'deputy-secretary-health', associations: [{ category: 'competencyrequirement', code: 'r2' }] },
+    ]);
+    expect(positions).toEqual(['deputy-secretary-health', 'staff-nurse-icu']);
+  });
+
+  // A requirement-less role reports 100% ready for everyone - the misleading answer
+  // a mis-authored framework produces, so it must not be selectable.
+  it('excludes a position with no requirement associations', () => {
+    const positions = buildPositionList([
+      { code: 'real', associations: [{ category: 'competencyrequirement', code: 'r1' }] },
+      { code: 'empty', associations: [] },
+      { code: 'none' },
+    ]);
+    expect(positions).toEqual(['real']);
+  });
+
+  it('ignores associations of other categories and terms with no code', () => {
+    expect(buildPositionList([{ code: 'p', associations: [{ category: 'competency', code: 'c' }] }])).toEqual([]);
+    expect(buildPositionList([{ associations: [{ category: 'competencyrequirement', code: 'r' }] }])).toEqual([]);
+    expect(buildPositionList([])).toEqual([]);
   });
 });
 
