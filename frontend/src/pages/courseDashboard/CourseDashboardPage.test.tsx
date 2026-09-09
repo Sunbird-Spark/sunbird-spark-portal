@@ -22,9 +22,13 @@ vi.mock('@/hooks/useAppI18n', () => ({
       const map: Record<string, string> = {
         'courseDashboard.title': 'Course Dashboard',
         'courseDashboard.backToCoursePage': 'Back to Course Page',
+        'courseDashboard.backToPathPage': 'Back to Path Page',
         'courseDashboard.checkingPermissions': 'Checking permissions\u2026',
         'courseDashboard.failedToLoad': 'Failed to load course.',
         'courseDashboard.manageDashboard': 'Manage dashboard for this course',
+        'learningPath.dashboardTitle': 'Learning Path Dashboard',
+        'learningPath.manageDashboard': 'Manage dashboard for this path',
+        'learningPath.selectBatchHint': 'Select a batch to view its path report.',
         'tabs.batches': 'Batches',
         'tabs.reissueCertificate': 'Reissue Certificate',
       };
@@ -180,7 +184,51 @@ describe('CourseDashboardPage', () => {
     (vi.mocked(useBatchListForMentor) as Mock).mockReturnValue({ data: undefined, isLoading: true });
 
     render(<CourseDashboardPage />);
-    
+
     expect(screen.getByTestId('page-loader')).toBeInTheDocument();
+  });
+
+  describe('Learning Path route (learning-path/:pathId/dashboard/:tab)', () => {
+    beforeEach(() => {
+      (useParams as Mock).mockReturnValue({ pathId: 'lp_123', tab: 'batches' });
+      (useCollection as Mock).mockReturnValue({
+        data: { title: 'Test Learning Path', createdBy: 'user-abc' },
+        isLoading: false,
+        isError: false,
+      });
+      (useCurrentUserId as Mock).mockReturnValue({ data: 'user-abc' });
+      (vi.mocked(useBatchListForMentor) as Mock).mockReturnValue({ data: [], isLoading: false });
+    });
+
+    it('reads pathId instead of collectionId, and uses Learning Path labels', () => {
+      render(<CourseDashboardPage />);
+
+      expect(screen.getByTestId('dashboard-title')).toHaveTextContent('Test Learning Path');
+      expect(screen.getByText('Learning Path Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('Manage dashboard for this path')).toBeInTheDocument();
+      expect(screen.getByTestId('back-to-course-btn')).toHaveTextContent('Back to Path Page');
+    });
+
+    it('navigates within /learning-path/... when switching tabs', () => {
+      render(<CourseDashboardPage />);
+      fireEvent.click(screen.getByTestId('tab-certificates'));
+      expect(mockNavigate).toHaveBeenCalledWith('/learning-path/lp_123/dashboard/certificates');
+    });
+
+    it('redirects to the Learning Path page (not /collection/...) when unauthorized', () => {
+      (useCurrentUserId as Mock).mockReturnValue({ data: 'stranger-id' });
+
+      render(<CourseDashboardPage />);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/learning-path/lp_123', { replace: true });
+    });
+
+    it('redirects to /learning-path/:pathId/dashboard/batches on an invalid tab', () => {
+      (useParams as Mock).mockReturnValue({ pathId: 'lp_123', tab: 'invalid' });
+
+      render(<CourseDashboardPage />);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/learning-path/lp_123/dashboard/batches', { replace: true });
+    });
   });
 });

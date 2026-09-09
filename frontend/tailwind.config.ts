@@ -143,6 +143,10 @@ export default {
           "gray-ef": "hsl(var(--sunbird-gray-ef))",
           "success-message": "hsl(var(--sunbird-success-message))",
           "success-message-bg": "hsl(var(--sunbird-success-message-bg))",
+          "warning-bg": "hsl(var(--sunbird-warning-bg))",
+          "warning-border": "hsl(var(--sunbird-warning-border))",
+          "warning-text": "hsl(var(--sunbird-warning-text))",
+          "warning-icon": "hsl(var(--sunbird-warning-icon))",
         },
       },
       borderRadius: {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import dayjs from 'dayjs';
 import { BrowserRouter } from 'react-router-dom';
 import MyLearning from './MyLearning';
@@ -10,18 +10,32 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 vi.mock('@/hooks/useUserEnrolledCollections', () => ({
   useUserEnrolledCollections: vi.fn(),
 }));
+vi.mock('@/hooks/useMySkills', () => ({
+  useMySkills: vi.fn(() => ({
+    aggregate: { totalSkills: 0, gainedSkills: 0, pendingSkills: 0, pathsCompleted: 0, pathsOngoing: 0 },
+    totalCount: 0,
+  })),
+}));
 vi.mock('@/hooks/useAppI18n');
 
 vi.mock('@/components/common/PageLoader', () => ({
   default: ({ message }: { message: string }) => <div data-testid="page-loader">{message}</div>,
 }));
 
+const mockHomeRecommendedSection = vi.fn();
 vi.mock('@/components/home/HomeRecommendedSection', () => ({
-  default: () => <div data-testid="home-recommended">Recommended Section</div>,
+  default: (props: { primaryCategory?: string[] }) => {
+    mockHomeRecommendedSection(props);
+    return <div data-testid="home-recommended">Recommended Section</div>;
+  },
 }));
 
+const mockMyLearningCourses = vi.fn();
 vi.mock('@/components/myLearning/MyLearningCourses', () => ({
-  default: () => <div data-testid="my-learning-courses">My Learning Courses</div>,
+  default: (props: { courses: TrackableCollection[]; typeFilter: string; onTypeFilterChange: (t: string) => void }) => {
+    mockMyLearningCourses(props);
+    return <div data-testid="my-learning-courses">My Learning Courses</div>;
+  },
 }));
 vi.mock('@/components/myLearning/MyLearningProgress', () => ({
   default: () => <div data-testid="my-learning-hours">Hours Spent</div>,
@@ -84,6 +98,15 @@ describe('MyLearning Page', () => {
     },
   });
 
+  const createMockLearningPath = (id: string, name: string, percentage: number): TrackableCollection => ({
+    ...createMockCourse(id, name, percentage),
+    content: {
+      ...createMockCourse(id, name, percentage).content!,
+      primaryCategory: 'Learning Path',
+      contentType: 'LearningPath',
+    },
+  });
+
   const mockCourses: TrackableCollection[] = [
     createMockCourse('1', 'C1', 10),
     createMockCourse('2', 'C2', 100),
@@ -130,6 +153,69 @@ describe('MyLearning Page', () => {
     expect(screen.getByTestId('my-learning-hours')).toBeInTheDocument();
     expect(screen.getByTestId('my-learning-batches')).toBeInTheDocument();
     expect(screen.getByTestId('home-recommended')).toBeInTheDocument();
+  });
+
+  describe('type filter (Courses vs Learning Paths)', () => {
+    it('defaults to "course" and only passes Course enrolments to MyLearningCourses and Recommendations', () => {
+      const courses = [createMockCourse('1', 'Course 1', 10), createMockLearningPath('2', 'Path 1', 0)];
+      (useUserEnrolledCollections as any).mockReturnValue({
+        isLoading: false,
+        data: { data: { courses } },
+        error: null,
+      });
+
+      renderComponent();
+
+      const coursesProps = mockMyLearningCourses.mock.calls[0]![0];
+      expect(coursesProps.typeFilter).toBe('course');
+      expect(coursesProps.courses).toHaveLength(1);
+      expect(coursesProps.courses[0].courseName).toBe('Course 1');
+
+      const recommendedProps = mockHomeRecommendedSection.mock.calls[0]![0];
+      expect(recommendedProps.primaryCategory).toEqual(['Course']);
+    });
+
+    it('switches to Learning Paths and re-filters the list and Recommendations', () => {
+      const courses = [createMockCourse('1', 'Course 1', 10), createMockLearningPath('2', 'Path 1', 0)];
+      (useUserEnrolledCollections as any).mockReturnValue({
+        isLoading: false,
+        data: { data: { courses } },
+        error: null,
+      });
+
+      renderComponent();
+
+      // Simulate the dropdown selection by invoking the callback MyLearningCourses received.
+      const { onTypeFilterChange } = mockMyLearningCourses.mock.calls[0]![0];
+      act(() => onTypeFilterChange('learningPath'));
+
+      const lastCoursesProps = mockMyLearningCourses.mock.calls[mockMyLearningCourses.mock.calls.length - 1]![0];
+      expect(lastCoursesProps.typeFilter).toBe('learningPath');
+      expect(lastCoursesProps.courses).toHaveLength(1);
+      expect(lastCoursesProps.courses[0].courseName).toBe('Path 1');
+
+      const lastRecommendedProps = mockHomeRecommendedSection.mock.calls[mockHomeRecommendedSection.mock.calls.length - 1]![0];
+      expect(lastRecommendedProps.primaryCategory).toEqual(['Learning Path']);
+    });
+
+    it('strips the composite <lpBatchId>:<courseId> fan-out records before partitioning', () => {
+      const fannedOutCourse: TrackableCollection = {
+        ...createMockCourse('3', 'Fanned Out Course', 10),
+        batchId: 'lp_batch_1:3',
+      };
+      const courses = [createMockCourse('1', 'Course 1', 10), fannedOutCourse];
+      (useUserEnrolledCollections as any).mockReturnValue({
+        isLoading: false,
+        data: { data: { courses } },
+        error: null,
+      });
+
+      renderComponent();
+
+      const coursesProps = mockMyLearningCourses.mock.calls[0]![0];
+      expect(coursesProps.courses).toHaveLength(1);
+      expect(coursesProps.courses[0].courseName).toBe('Course 1');
+    });
   });
 
   describe('upcomingBatches filter passed to MyLearningUpcomingBatches', () => {

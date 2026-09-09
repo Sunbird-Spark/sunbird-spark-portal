@@ -1,12 +1,16 @@
 import dayjs from "dayjs";
+import { useMemo, useState } from "react";
 import PageLoader from "@/components/common/PageLoader";
 import HomeRecommendedSection from "@/components/home/HomeRecommendedSection";
-import MyLearningCourses from "@/components/myLearning/MyLearningCourses";
+import MyLearningCourses, { LearningTypeFilter } from "@/components/myLearning/MyLearningCourses";
 import MyLearningProgress from "@/components/myLearning/MyLearningProgress";
 import MyLearningUpcomingBatches from "@/components/myLearning/MyLearningUpcomingBatches";
 import { useUserEnrolledCollections } from "@/hooks/useUserEnrolledCollections";
+import { useMySkills } from "@/hooks/useMySkills";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import useImpression from "@/hooks/useImpression";
+import { parseCourseContextId } from "@/services/viewer/summaryMapper";
+import { isLearningPathCategory } from "@/utils/isLearningPath";
 
 import "./mylearning.css";
 
@@ -16,7 +20,21 @@ const MyLearning = () => {
   useImpression({ type: 'view', pageid: 'my-learning', env: 'learn' });
 
   const { data, isLoading, error } = useUserEnrolledCollections();
-  const courses = data?.data?.courses || [];
+  const { aggregate, totalCount: pathsTotal } = useMySkills();
+  const [typeFilter, setTypeFilter] = useState<LearningTypeFilter>('course');
+
+  const courses = useMemo(() => {
+    const allEnrolments = data?.data?.courses || [];
+    return (
+      allEnrolments
+        // Enrolling in a Learning Path fans out per-course records with a composite
+        // "<lpBatchId>:<courseId>" batchId - strip those ONCE here so the list, the
+        // progress donut and the upcoming batches all see the same de-duplicated set.
+        .filter((c) => !parseCourseContextId(c.batchId))
+        // Partition by the type the dropdown selected: Learning Paths vs everything else.
+        .filter((c) => isLearningPathCategory(c.content?.primaryCategory) === (typeFilter === 'learningPath'))
+    );
+  }, [data, typeFilter]);
 
   // Calculate metrics
   const totalCourses = courses.length;
@@ -60,26 +78,36 @@ const MyLearning = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 lg:h-[calc(100vh-8rem)]">
           {/* Left Column - Courses (2 cols) */}
           <div className="lg:col-span-2 h-full min-h-0">
-            <MyLearningCourses courses={courses} />
+            <MyLearningCourses
+              courses={courses}
+              typeFilter={typeFilter}
+              onTypeFilterChange={setTypeFilter}
+            />
           </div>
 
           {/* Right Column - Hours Spent + Upcoming Batches */}
           <div className="space-y-6 h-full min-h-0 overflow-y-auto">
             <MyLearningProgress
+              typeFilter={typeFilter}
               lessonsVisited={lessonsVisited}
               totalLessons={totalLessons}
               contentsCompleted={contentsCompleted}
               totalContents={totalCourses}
+              skillsGained={aggregate.gainedSkills}
+              skillsTotal={aggregate.totalSkills}
+              pathsCompleted={aggregate.pathsCompleted}
+              pathsTotal={pathsTotal}
             />
             {/* Upcoming Batches - New Design */}
             <MyLearningUpcomingBatches upcomingBatches={upcomingBatches} />
           </div>
         </div>
 
-        {/* Recommended Contents */}
+        {/* Recommended Contents - follows the selected type */}
         <HomeRecommendedSection
           creatorIds={Array.from(new Set(courses.map(c => c.batch?.createdBy).filter((id): id is string => !!id)))}
           enrolledCourseIds={courses.map(c => c.courseId)}
+          primaryCategory={typeFilter === 'learningPath' ? ['Learning Path'] : ['Course']}
         />
       </div>
     </main>

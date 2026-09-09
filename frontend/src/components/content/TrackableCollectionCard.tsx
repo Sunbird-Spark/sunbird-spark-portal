@@ -3,6 +3,7 @@ import { TrackableCollection } from "@/types/TrackableCollections";
 import { FiBookOpen } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { getPlaceholderImage } from "@/utils/getPlaceholderImage";
+import { getContentDetailPath } from "@/utils/getContentDetailPath";
 
 
 interface TrackableCollectionCardProps {
@@ -16,7 +17,7 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
 
   return (
     <Link
-      to={course.batchId ? `/collection/${course.courseId}/batch/${course.batchId}` : `/collection/${course.courseId}`}
+      to={getContentDetailPath(course.courseId, course.content?.primaryCategory, course.batchId)}
       state={{ from: location.pathname + location.search }}
       className="block"
       data-edataid="trackable-collection-card-click"

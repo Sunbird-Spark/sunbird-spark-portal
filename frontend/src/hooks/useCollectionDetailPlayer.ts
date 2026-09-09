@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useContentPlayer } from "./useContentPlayer";
 import { useContentStateUpdate } from "./useContentStateUpdate";
+import { useContentView } from "./useContentView";
 import { normalizeQumlPlayerEvent } from "../services/players/playerEventNormalizer";
 
 interface UseCollectionDetailPlayerParams {
@@ -13,11 +14,20 @@ interface UseCollectionDetailPlayerParams {
   mimeType: string | undefined;
   /** Current content status (0/1/2). When 2, no progress API calls are made for START/END. */
   currentContentStatus?: number;
-  /** When true (e.g. creator viewing own collection), no progress/state API calls are made. */
+  /** When true (e.g. creator viewing own collection), no progress/state update API calls are made. */
   skipContentStateUpdate?: boolean;
   contentType?: string;
   /** When true, attempts are exhausted: completion status still updates, but no score/assessment is persisted. */
   maxAttemptsExceeded?: boolean;
+  /**
+   * True when the course is opened from within a Learning Path (`?lp=`, see
+   * AppRoutes). Routes progress writes through the Viewer Service
+   * (`useContentView`) instead of the legacy `content/state/update`
+   * (`useContentStateUpdate`); `effectiveBatchId` is already the composite
+   * `<lpContextId>:<courseId>` context id in this case. Every other course
+   * entry point (this flag false/absent) is byte-identical to before.
+   */
+  isLearningPathContext?: boolean;
 }
 
 export function useCollectionDetailPlayer({
@@ -31,8 +41,9 @@ export function useCollectionDetailPlayer({
   skipContentStateUpdate,
   contentType,
   maxAttemptsExceeded,
+  isLearningPathContext = false,
 }: UseCollectionDetailPlayerParams) {
-  const handleContentStateFromTelemetry = useContentStateUpdate({
+  const handleContentStateUpdate = useContentStateUpdate({
     collectionId,
     contentId,
     effectiveBatchId,
@@ -44,6 +55,19 @@ export function useCollectionDetailPlayer({
     contentType,
     maxAttemptsExceeded,
   });
+  // Always called (rules of hooks) - only invoked below when isLearningPathContext is true.
+  const handleContentView = useContentView({
+    collectionId,
+    contentId,
+    contextId: effectiveBatchId,
+    isEnrolledInCurrentBatch,
+    isBatchEnded,
+    mimeType,
+    currentContentStatus,
+    skipContentStateUpdate,
+    contentType,
+  });
+  const handleContentStateFromTelemetry = isLearningPathContext ? handleContentView : handleContentStateUpdate;
 
   const onTelemetryEventStable = useCallback(
     (event: unknown) => {

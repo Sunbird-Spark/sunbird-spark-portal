@@ -3,7 +3,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import CollectionSidePanel from './CollectionSidePanel';
 
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', () => ({ useNavigate: () => mockNavigate }));
+let mockSearchParams = new URLSearchParams();
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => mockNavigate,
+  useSearchParams: () => [mockSearchParams],
+}));
 vi.mock('@/hooks/useAppI18n', () => ({ useAppI18n: () => ({ t: (k: string) => k }) }));
 vi.mock('@/components/collection/CollectionSidebar', () => ({ default: () => <div data-testid="collection-sidebar" /> }));
 vi.mock('@/components/collection/BatchCard', () => ({ default: () => <div data-testid="batch-card" /> }));
@@ -12,6 +16,9 @@ vi.mock('@/components/collection/LearnerBottomCards', () => ({
   default: ({ onCertificatePreviewClick }: any) => (
     <button data-testid="cert-preview-trigger" onClick={onCertificatePreviewClick}>Preview Cert</button>
   ),
+}));
+vi.mock('@/components/learningPath/LearningPathRailContainer', () => ({
+  LearningPathRailContainer: () => <div data-testid="learning-path-rail-container" />,
 }));
 
 const makeAccess = (overrides = {}) => ({
@@ -64,7 +71,49 @@ const defaultCollectionData = {
 };
 
 describe('CollectionSidePanel', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockSearchParams = new URLSearchParams();
+  });
+
+  it('does not render the Learning Path rail without ?lp=', () => {
+    render(
+      <CollectionSidePanel
+        contentId={undefined}
+        access={makeAccess()}
+        enrollment={makeEnrollment()}
+        sidebar={{ expandedModules: [], toggleModule: vi.fn(), collectionId: 'col_1', batchIdParam: undefined }}
+        creator={{ isCreatorViewingOwnCollection: false, contentCreatorPrivilege: false, userProfile: null, isMentorViewingCourse: false }}
+        collectionData={{ title: 'Course', children: [] }}
+        leftColHeight={undefined}
+        showCertificateCard={false}
+        showBottomSections={false}
+        showProfileDataSharingCard={false}
+        backTo="/explore"
+      />
+    );
+    expect(screen.queryByTestId('learning-path-rail-container')).not.toBeInTheDocument();
+  });
+
+  it('renders the Learning Path rail when ?lp= is present', () => {
+    mockSearchParams = new URLSearchParams('lp=do_lp_1');
+    render(
+      <CollectionSidePanel
+        contentId={undefined}
+        access={makeAccess()}
+        enrollment={makeEnrollment()}
+        sidebar={{ expandedModules: [], toggleModule: vi.fn(), collectionId: 'col_1', batchIdParam: 'lpbatch:col_1' }}
+        creator={{ isCreatorViewingOwnCollection: false, contentCreatorPrivilege: false, userProfile: null, isMentorViewingCourse: false }}
+        collectionData={{ title: 'Course', children: [] }}
+        leftColHeight={undefined}
+        showCertificateCard={false}
+        showBottomSections={false}
+        showProfileDataSharingCard={false}
+        backTo="/explore"
+      />
+    );
+    expect(screen.getByTestId('learning-path-rail-container')).toBeInTheDocument();
+  });
 
   it('renders CollectionSidebar', () => {
     render(

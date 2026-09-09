@@ -264,6 +264,43 @@ describe('HomeContinueLearning', () => {
         expect(screen.queryByText('Just Joined Course')).not.toBeInTheDocument();
     });
 
+    // Regression: a Learning Path enrolment fans out a per-course record whose
+    // batchId is the composite "<lpBatchId>:<courseId>" - if that outranks the
+    // path's own record here (most recent activity), it gets misread as a
+    // plain Course (its primaryCategory is "Course") and built a broken
+    // /collection/.../batch/<lpBatchId>:<courseId> URL (see bug: Continue
+    // Learning broken for the Learning Path tab).
+    it('ignores the composite <lpBatchId>:<courseId> fan-out record even when it is the most recent', () => {
+        mockUseUserEnrolledCollections.mockReturnValue({
+            data: {
+                data: {
+                    courses: [
+                        {
+                            courseId: 'lp-course-1',
+                            courseName: 'Fan-out Course',
+                            collectionId: 'col-lp-course-1',
+                            batchId: 'lp-batch-1:lp-course-1',
+                            completionPercentage: 10,
+                            lastContentAccessTime: 1800000000, // more recent than mockCourses[0]
+                            lastReadContentId: 'lp-content-1',
+                            courseLogoUrl: '',
+                            content: { primaryCategory: 'Course', name: 'Fan-out Course', appIcon: '' },
+                        },
+                        mockCourses[0],
+                    ],
+                },
+            },
+            isLoading: false,
+        });
+
+        renderComponent();
+
+        // The fan-out record must be ignored - React Fundamentals (the real
+        // most-recent, non-fan-out record) should still be shown.
+        expect(screen.getByText('React Fundamentals')).toBeInTheDocument();
+        expect(screen.queryByText('Fan-out Course')).not.toBeInTheDocument();
+    });
+
     it('renders a placeholder when no thumbnail is available', () => {
         mockUseUserEnrolledCollections.mockReturnValue({
             data: {

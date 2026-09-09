@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiLayout } from "react-icons/fi";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { Button } from "@/components/common/Button";
@@ -6,6 +6,7 @@ import CollectionSidebar from "@/components/collection/CollectionSidebar";
 import BatchCard from "@/components/collection/BatchCard";
 import LoginToUnlockCard from "@/components/collection/LoginToUnlockCard";
 import LearnerBottomCards from "@/components/collection/LearnerBottomCards";
+import { LearningPathRailContainer } from "@/components/learningPath/LearningPathRailContainer";
 import type { CollectionContentAreaAccessProps } from "@/types/collectionContentAreaTypes";
 import type { CollectionContentAreaEnrollmentProps } from "@/types/collectionContentAreaTypes";
 import type { CollectionContentAreaSidebarProps } from "@/types/collectionContentAreaTypes";
@@ -74,6 +75,8 @@ export default function CollectionSidePanel({
   } = creator;
   const navigate = useNavigate();
   const { t } = useAppI18n();
+  const [searchParams] = useSearchParams();
+  const isLearningPathContext = !!searchParams.get('lp');
 
   const certPreviewClick = () => {
     if (firstCertPreviewUrl) {
@@ -87,6 +90,12 @@ export default function CollectionSidePanel({
       className="flex flex-col overflow-hidden"
       style={leftColHeight != null ? { maxHeight: leftColHeight } : undefined}
     >
+      {isLearningPathContext && (
+        <div className="mb-4 flex-shrink-0">
+          <LearningPathRailContainer courseContextId={hasBatchInRoute ? batchIdParam ?? undefined : undefined} />
+        </div>
+      )}
+
       {isTrackable && isAuthenticated && (isCreatorViewingOwnCollection || isMentorViewingCourse) && collectionId && (
         <div className="flex flex-col gap-3 mb-4">
           <Button

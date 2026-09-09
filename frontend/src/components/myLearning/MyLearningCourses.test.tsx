@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import dayjs from 'dayjs';
@@ -20,13 +21,33 @@ vi.mock('react-icons/fi', () => ({
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
-    t: (key: string) => {
+    t: (key: string, opts?: Record<string, string>) => {
       const translations: Record<string, string> = {
         'profileLearning.viewMoreCourses': 'View More Courses',
+        'courses': 'Courses',
+        'myLearning.learningPaths': 'Learning Paths',
+        'status.active': 'status.active',
+        'status.completed': 'status.completed',
+        'status.upcoming': 'status.upcoming',
+        'myLearning.noItemsFound': `No ${opts?.type ?? ''} found in this category.`,
+        'myLearning.noMoreToShow': `No more ${opts?.type ?? ''} to show`,
       };
       return translations[key] ?? key;
     },
   }),
+}));
+
+// Mirrors the DropdownMenu mocking pattern used in WorkspaceContentFilters.test.tsx —
+// flatten Radix's portal/trigger wiring to plain DOM for jsdom.
+vi.mock('@/components/common/DropdownMenu', () => ({
+  DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DropdownMenuTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DropdownMenuItem: ({ children, onClick, ...props }: React.ComponentProps<'button'>) => (
+    <button type="button" onClick={onClick} {...props}>
+      {children}
+    </button>
+  ),
 }));
 
 const createMockCourse = (
@@ -86,44 +107,61 @@ const mockCourses: TrackableCollection[] = [
   createMockCourse('3', 'Completed Course 1', 100),
 ];
 
+const noop = () => undefined;
+
 describe('MyLearningCourses', () => {
   it('renders "Courses" title and tabs', () => {
-    render(<MyLearningCourses courses={mockCourses} />);
-    expect(screen.getByText('courses')).toBeInTheDocument();
-    expect(screen.getByText('status.active courses')).toBeInTheDocument();
+    render(<MyLearningCourses courses={mockCourses} typeFilter="course" onTypeFilterChange={noop} />);
+    expect(screen.getByTestId('learning-type-trigger')).toHaveTextContent('Courses');
+    expect(screen.getByText('status.active Courses')).toBeInTheDocument();
     expect(screen.getByText('status.completed')).toBeInTheDocument();
     expect(screen.getByText('status.upcoming')).toBeInTheDocument();
   });
 
+  it('renders "Learning Paths" title and tab label when typeFilter is learningPath', () => {
+    render(<MyLearningCourses courses={[]} typeFilter="learningPath" onTypeFilterChange={noop} />);
+    expect(screen.getByTestId('learning-type-trigger')).toHaveTextContent('Learning Paths');
+    expect(screen.getByText('status.active Learning Paths')).toBeInTheDocument();
+  });
+
+  it('calls onTypeFilterChange when a dropdown option is selected', () => {
+    const onTypeFilterChange = vi.fn();
+    render(<MyLearningCourses courses={mockCourses} typeFilter="course" onTypeFilterChange={onTypeFilterChange} />);
+
+    fireEvent.click(screen.getByTestId('learning-type-option-learningPath'));
+
+    expect(onTypeFilterChange).toHaveBeenCalledWith('learningPath');
+  });
+
   it('displays active courses by default', () => {
-    render(<MyLearningCourses courses={mockCourses} />);
-    
+    render(<MyLearningCourses courses={mockCourses} typeFilter="course" onTypeFilterChange={noop} />);
+
     // Should show Active Course 1 and 2
     expect(screen.getByText(/Active Course 1/)).toBeInTheDocument();
     expect(screen.getByText(/Active Course 2/)).toBeInTheDocument();
-    
+
     // Should NOT show Completed Course 1
     expect(screen.queryByText(/Completed Course 1/)).not.toBeInTheDocument();
   });
 
   it('switches to "Completed" tab and shows completed courses', () => {
-    render(<MyLearningCourses courses={mockCourses} />);
-    
+    render(<MyLearningCourses courses={mockCourses} typeFilter="course" onTypeFilterChange={noop} />);
+
     const completedTab = screen.getByText('status.completed');
     fireEvent.click(completedTab);
-    
+
     // Should show Completed Course 1
     expect(screen.getByText(/Completed Course 1/)).toBeInTheDocument();
-    
+
     // Should NOT show Active Course 1
     expect(screen.queryByText(/Active Course 1/)).not.toBeInTheDocument();
   });
 
   it('filters empty list correctly', () => {
-    render(<MyLearningCourses courses={[]} />);
-    expect(screen.getByText('No courses found in this category.')).toBeInTheDocument();
+    render(<MyLearningCourses courses={[]} typeFilter="course" onTypeFilterChange={noop} />);
+    expect(screen.getByText('No Courses found in this category.')).toBeInTheDocument();
   });
-  
+
   describe('Upcoming tab categorization', () => {
     const FIXED_DATE = new Date('2025-06-15T12:00:00');
     beforeEach(() => {
@@ -136,7 +174,7 @@ describe('MyLearningCourses', () => {
 
     it('shows a course in Upcoming when startDate is in the future and progress is 0%', () => {
       const courses = [createMockCourse('u1', 'Future Course', 0, '2099-12-31')];
-      render(<MyLearningCourses courses={courses} />);
+      render(<MyLearningCourses courses={courses} typeFilter="course" onTypeFilterChange={noop} />);
       fireEvent.click(screen.getByText('status.upcoming'));
       expect(screen.getByText(/Future Course/)).toBeInTheDocument();
     });
@@ -144,7 +182,7 @@ describe('MyLearningCourses', () => {
     it('does not show a course in Upcoming when startDate is today', () => {
       const today = dayjs().format('YYYY-MM-DD');
       const courses = [createMockCourse('u2', 'Today Course', 0, today)];
-      render(<MyLearningCourses courses={courses} />);
+      render(<MyLearningCourses courses={courses} typeFilter="course" onTypeFilterChange={noop} />);
       fireEvent.click(screen.getByText('status.upcoming'));
       expect(screen.queryByText(/Today Course/)).not.toBeInTheDocument();
     });
@@ -152,27 +190,27 @@ describe('MyLearningCourses', () => {
     it('shows a course starting today in Active tab instead of Upcoming', () => {
       const today = dayjs().format('YYYY-MM-DD');
       const courses = [createMockCourse('u3', 'Today Active Course', 0, today)];
-      render(<MyLearningCourses courses={courses} />);
+      render(<MyLearningCourses courses={courses} typeFilter="course" onTypeFilterChange={noop} />);
       expect(screen.getByText(/Today Active Course/)).toBeInTheDocument();
     });
 
     it('does not show a course in Upcoming when progress is greater than 0', () => {
       const courses = [createMockCourse('u4', 'Partial Future Course', 10, '2099-12-31')];
-      render(<MyLearningCourses courses={courses} />);
+      render(<MyLearningCourses courses={courses} typeFilter="course" onTypeFilterChange={noop} />);
       fireEvent.click(screen.getByText('status.upcoming'));
       expect(screen.queryByText(/Partial Future Course/)).not.toBeInTheDocument();
     });
 
     it('does not show a completed course in Upcoming even when startDate is in the future', () => {
       const courses = [createMockCourse('u5', 'Completed Future Course', 100, '2099-12-31')];
-      render(<MyLearningCourses courses={courses} />);
+      render(<MyLearningCourses courses={courses} typeFilter="course" onTypeFilterChange={noop} />);
       fireEvent.click(screen.getByText('status.upcoming'));
       expect(screen.queryByText(/Completed Future Course/)).not.toBeInTheDocument();
     });
 
     it('does not show a future-batch course with 0% progress in Active tab', () => {
       const courses = [createMockCourse('u6', 'Not Started Future Course', 0, '2099-12-31')];
-      render(<MyLearningCourses courses={courses} />);
+      render(<MyLearningCourses courses={courses} typeFilter="course" onTypeFilterChange={noop} />);
       expect(screen.queryByText(/Not Started Future Course/)).not.toBeInTheDocument();
     });
 
@@ -180,14 +218,14 @@ describe('MyLearningCourses', () => {
       const today = dayjs().format('YYYY-MM-DD');
       const todayUTCMidnight = today + 'T00:00:00.000Z';
       const courses = [createMockCourse('u7', 'UTC Today Course', 0, todayUTCMidnight)];
-      render(<MyLearningCourses courses={courses} />);
+      render(<MyLearningCourses courses={courses} typeFilter="course" onTypeFilterChange={noop} />);
       fireEvent.click(screen.getByText('status.upcoming'));
       expect(screen.queryByText(/UTC Today Course/)).not.toBeInTheDocument();
     });
 
     it('correctly handles UTC datetime startDate for a future date in Upcoming', () => {
       const courses = [createMockCourse('u8', 'UTC Future Course', 0, '2099-12-31T00:00:00.000Z')];
-      render(<MyLearningCourses courses={courses} />);
+      render(<MyLearningCourses courses={courses} typeFilter="course" onTypeFilterChange={noop} />);
       fireEvent.click(screen.getByText('status.upcoming'));
       expect(screen.getByText(/UTC Future Course/)).toBeInTheDocument();
     });
@@ -213,23 +251,23 @@ describe('MyLearningCourses', () => {
         name: `Batch for Course ${i}`
       }
     }));
-    
-    render(<MyLearningCourses courses={manyCourses} />);
-    
+
+    render(<MyLearningCourses courses={manyCourses} typeFilter="course" onTypeFilterChange={noop} />);
+
     // Should show the button
     expect(screen.getByText('View More Courses')).toBeInTheDocument();
-    
+
     // Only 9 should be visible initially
     const cards = screen.getAllByTestId('course-card');
     expect(cards.length).toBe(9);
-    
+
     // Click view more
     fireEvent.click(screen.getByText('View More Courses'));
-    
+
     // Now all 12 should be visible
     const allCards = screen.getAllByTestId('course-card');
     expect(allCards.length).toBe(12);
-    
+
     // Button should disappear if no more courses
     expect(screen.queryByText('View More Courses')).not.toBeInTheDocument();
   });

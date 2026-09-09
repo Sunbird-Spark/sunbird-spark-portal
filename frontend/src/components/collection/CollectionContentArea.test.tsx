@@ -4,7 +4,8 @@ import CollectionContentArea from './CollectionContentArea';
 import type { BatchListItem } from '@/types/collectionTypes';
 
 vi.mock('react-router-dom', () => ({
-  useNavigate: () => vi.fn()
+  useNavigate: () => vi.fn(),
+  useSearchParams: () => [new URLSearchParams()]
 }));
 
 // Mock child components to verify conditional rendering

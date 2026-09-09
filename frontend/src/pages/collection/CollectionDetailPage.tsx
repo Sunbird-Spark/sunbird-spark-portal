@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollectionPageData } from "@/hooks/useCollectionPageData";
 import { useContentRead, useContentSearch } from "@/hooks/useContent";
@@ -22,6 +22,11 @@ const CollectionDetailPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { collectionId, batchId: batchIdParam, contentId } = useParams<{ collectionId: string; batchId?: string; contentId?: string }>();
+  const [searchParams] = useSearchParams();
+  // Present when this course was opened from within a Learning Path (see AppRoutes /learning-path/*
+  // and LearningPathPage.openCourse) - routes progress writes through the Viewer Service instead
+  // of the legacy content/state/update, and shows the Learning Path rail in the side panel.
+  const isLearningPathContext = !!searchParams.get('lp');
   useImpression({ type: 'view', pageid: 'collection-detail', env: 'course', object: { id: collectionId || '', type: 'Course' } });
   const backTo = useCollectionBackNavigation(collectionId);
   const { isAuthenticated } = usePermissions();
@@ -146,6 +151,7 @@ const CollectionDetailPage = () => {
     skipContentStateUpdate: contentCreatorPrivilege,
     contentType: currentContentNode?.contentType,
     maxAttemptsExceeded,
+    isLearningPathContext,
   });
 
   const collectionCdata = useMemo(
