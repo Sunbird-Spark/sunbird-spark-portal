@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalisePassbook, isHeld, primaryFrameworkId, humaniseCode } from './passbookMapper';
+import { normalisePassbook, normalisePosition, isHeld, primaryFrameworkId, humaniseCode } from './passbookMapper';
 import { PASSBOOK_STATUS, type PassbookEntry } from '../../types/competencyServiceTypes';
 
 const entry = (over: Partial<PassbookEntry> = {}): PassbookEntry => ({
@@ -181,5 +181,51 @@ describe('humaniseCode', () => {
   it('returns the input for an empty or separator-only code', () => {
     expect(humaniseCode('')).toBe('');
     expect(humaniseCode('--')).toBe('--');
+  });
+});
+
+// The role assignment travels with passbook/read: no other operation echoes it, so
+// without this the UI cannot show the learner's current role or which target is saved.
+describe('normalisePosition', () => {
+  it('reads the assignment from the unwrapped body', () => {
+    const p = normalisePosition({
+      competencies: [],
+      position: {
+        frameworkId: 'fw_health_competency2',
+        currentPosition: 'staff-nurse-icu',
+        targetPositions: ['nursing-officer'],
+        source: 'ADMIN',
+      },
+    });
+    expect(p?.currentPosition).toBe('staff-nurse-icu');
+    expect(p?.targetPositions).toEqual(['nursing-officer']);
+    expect(p?.source).toBe('ADMIN');
+  });
+
+  it('reads it from the enveloped body too', () => {
+    const p = normalisePosition({ result: { position: { frameworkId: 'fw', targetPositions: ['a'] } } });
+    expect(p?.frameworkId).toBe('fw');
+  });
+
+  // currentPosition is absent for every learner an HR feed has not touched, because
+  // the self-service route strips it. That must read as "not set", not as a role.
+  it('leaves currentPosition undefined when the service omits or blanks it', () => {
+    expect(normalisePosition({ position: { frameworkId: 'fw', targetPositions: [] } })?.currentPosition)
+      .toBeUndefined();
+    expect(normalisePosition({ position: { frameworkId: 'fw', currentPosition: '   ' } })?.currentPosition)
+      .toBeUndefined();
+  });
+
+  it('drops blank target entries', () => {
+    const p = normalisePosition({ position: { frameworkId: 'fw', targetPositions: ['a', '', '  '] } });
+    expect(p?.targetPositions).toEqual(['a']);
+  });
+
+  // An older service build returns no block at all - "unknown", which is distinct
+  // from a block whose currentPosition is simply unset.
+  it('is undefined when the response carries no position block', () => {
+    expect(normalisePosition({ competencies: [] })).toBeUndefined();
+    expect(normalisePosition(undefined)).toBeUndefined();
+    expect(normalisePosition(null)).toBeUndefined();
   });
 });

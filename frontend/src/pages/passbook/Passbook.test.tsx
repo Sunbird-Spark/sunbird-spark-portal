@@ -56,6 +56,7 @@ const vocab = (over: Partial<FrameworkVocabulary> = {}): FrameworkVocabulary => 
 function setPassbook(over: Partial<ReturnType<typeof usePassbook>> = {}) {
   mockPassbook.mockReturnValue({
     entries: [entry('med')],
+    position: undefined,
     frameworkId: 'fw2',
     isLoading: false,
     isError: false,
@@ -179,6 +180,54 @@ describe('Passbook', () => {
     renderPage();
     expect(screen.getByTestId('position-option-from-meta')).toBeInTheDocument();
     expect(screen.queryByTestId('position-option-from-taxonomy')).not.toBeInTheDocument();
+  });
+
+  // Current role is READ-ONLY: position/update strips currentPosition on the
+  // self-service route, so showing it as editable would promise what the API refuses.
+  it('shows the current role when an HR feed has set one', () => {
+    setPassbook({
+      position: { frameworkId: 'fw2', currentPosition: 'staff-nurse-icu', targetPositions: [], source: 'ADMIN' },
+    });
+    mockVocab.mockReturnValue({
+      vocabularies: { fw2: vocab({ labels: { 'staff-nurse-icu': 'Staff Nurse (ICU)', med: 'Medication' } }) },
+      isLoading: false,
+    });
+    renderPage();
+    expect(screen.getByTestId('current-role')).toHaveTextContent('Staff Nurse (ICU)');
+    expect(screen.queryByTestId('current-role-unset')).not.toBeInTheDocument();
+  });
+
+  it('says the current role is unset rather than hiding the row', () => {
+    setPassbook({ position: { frameworkId: 'fw2', targetPositions: [], source: 'SELF' } });
+    renderPage();
+    expect(screen.getByTestId('current-role-unset')).toBeInTheDocument();
+    expect(screen.queryByTestId('current-role')).not.toBeInTheDocument();
+  });
+
+  it('pre-selects a target saved on a previous visit', () => {
+    setPassbook({ position: { frameworkId: 'fw2', targetPositions: ['staff-nurse-icu'], source: 'SELF' } });
+    mockVocab.mockReturnValue({
+      vocabularies: { fw2: vocab({ positions: ['staff-nurse-icu', 'nursing-officer'] }) },
+      isLoading: false,
+    });
+    renderPage();
+    expect(screen.getByTestId('position-option-staff-nurse-icu')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId('position-option-nursing-officer')).toHaveAttribute('aria-selected', 'false');
+  });
+
+  it('only shows a position block on the framework it belongs to', () => {
+    setPassbook({
+      entries: [entry('med', 'fwA'), entry('old', 'fwB')],
+      position: { frameworkId: 'fwA', currentPosition: 'nurse', targetPositions: [], source: 'ADMIN' },
+    });
+    mockVocab.mockReturnValue({
+      vocabularies: { fwA: vocab({ frameworkId: 'fwA' }), fwB: vocab({ frameworkId: 'fwB' }) },
+      isLoading: false,
+    });
+    renderPage();
+    // one current-role row, in fwA's section only
+    expect(screen.getAllByTestId('current-role')).toHaveLength(1);
+    expect(screen.getAllByTestId('current-role-unset')).toHaveLength(1);
   });
 
   it('saves the chosen role as a target', () => {

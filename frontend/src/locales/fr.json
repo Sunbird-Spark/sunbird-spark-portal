@@ -1659,6 +1659,8 @@
     },
     "otherArea": "Other competencies",
     "areaHeldOf": "{{held}} of {{total}} held",
-    "frameworkCount": "{{count}} competencies"
+    "frameworkCount": "{{count}} competencies",
+    "currentRole": "Current role",
+    "currentRoleUnset": "Not set — assigned by your organisation"
   }
 }

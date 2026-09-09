@@ -1,5 +1,6 @@
 import {
   PASSBOOK_STATUS,
+  type PositionAssignment,
   type Evidence,
   type EvidenceWire,
   type PassbookEntry,
@@ -108,4 +109,29 @@ export function humaniseCode(code: string): string {
   const words = code.replace(/[_-]+/g, ' ').trim();
   if (!words) return code;
   return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/**
+ * The learner's role assignment, from the same passbook response.
+ *
+ * It rides along with `passbook/read` rather than having its own endpoint: no other
+ * operation echoes it (gap/read, recommend and position/update all read it server-side
+ * and never return it), so without this the UI could not show the learner's current
+ * role or which target is already saved.
+ *
+ * Undefined when the service returns no block at all - an older build - which callers
+ * must treat as "unknown", distinct from a block whose currentPosition is simply unset.
+ */
+export function normalisePosition(
+  response: PassbookReadResponse | undefined | null
+): PositionAssignment | undefined {
+  const raw = response?.position ?? response?.result?.position;
+  if (!raw) return undefined;
+  const current = raw.currentPosition?.trim();
+  return {
+    frameworkId: raw.frameworkId ?? '',
+    ...(current ? { currentPosition: current } : {}),
+    targetPositions: (raw.targetPositions ?? []).filter((p): p is string => Boolean(p && p.trim())),
+    source: raw.source ?? '',
+  };
 }

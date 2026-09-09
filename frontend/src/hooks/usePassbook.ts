@@ -1,6 +1,12 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { competencyService, normalisePassbook, primaryFrameworkId, humaniseCode } from '@/services/competency';
+import {
+  competencyService,
+  normalisePassbook,
+  normalisePosition,
+  primaryFrameworkId,
+  humaniseCode,
+} from '@/services/competency';
 import { frameworkCategories, type TaxonomyFrameworkResponse } from '@/services/competency/passbookGrouping';
 import { FrameworkService } from '@/services/FrameworkService';
 import { useUserId } from './useAuthInfo';
@@ -21,13 +27,18 @@ export function usePassbook() {
   const userId = useUserId();
   const query = useQuery({
     queryKey: ['competencyPassbook', userId],
-    queryFn: async () => normalisePassbook((await competencyService.passbookRead({ evidence: true })).data),
+    queryFn: async () => {
+      const body = (await competencyService.passbookRead({ evidence: true })).data;
+      // The role assignment rides along with the passbook - see normalisePosition.
+      return { entries: normalisePassbook(body), position: normalisePosition(body) };
+    },
     enabled: Boolean(userId),
   });
 
-  const entries: PassbookEntry[] = query.data ?? [];
+  const entries: PassbookEntry[] = query.data?.entries ?? [];
   return {
     entries,
+    position: query.data?.position,
     frameworkId: primaryFrameworkId(entries),
     isLoading: query.isLoading,
     isError: query.isError,

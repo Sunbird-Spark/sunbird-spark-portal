@@ -46,10 +46,23 @@ export interface EvidenceWire {
  * passbook against a perfectly good 200. Both shapes are accepted so the
  * mappers survive either.
  */
-export interface PassbookReadResponse {
+export interface PositionAssignmentWire {
+  frameworkId?: string;
+  /** Absent for any learner an HR feed has not touched - it is an assignment, not a preference. */
+  currentPosition?: string;
+  targetPositions?: string[];
+  source?: string;
+  assignedOn?: string;
+}
+
+export interface PassbookReadBody {
   competencies?: PassbookEntryWire[];
   count?: number;
-  result?: { competencies?: PassbookEntryWire[]; count?: number };
+  position?: PositionAssignmentWire;
+}
+
+export interface PassbookReadResponse extends PassbookReadBody {
+  result?: PassbookReadBody;
 }
 
 /** `POST /competency/v1/gap/read` - required vs held, per requirement. */
@@ -172,4 +185,18 @@ export interface CompetencyFrameworkMeta {
   requirements: Record<string, RequirementWire[]>;
   /** Position codes that declare at least one requirement. */
   positions: string[];
+}
+
+/**
+ * The learner's role assignment.
+ *
+ * `currentPosition` is undefined until a privileged writer (an HR feed) sets it - the
+ * self-service route strips it by design, since who a learner reports as is an
+ * assignment rather than something they choose. Only `targetPositions` is self-settable.
+ */
+export interface PositionAssignment {
+  frameworkId: string;
+  currentPosition?: string;
+  targetPositions: string[];
+  source: string;
 }

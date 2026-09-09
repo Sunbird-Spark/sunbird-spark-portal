@@ -31,7 +31,7 @@ const Passbook = () => {
   const { t } = useAppI18n();
   useImpression({ type: 'view', pageid: 'competency-passbook', env: 'profile' });
 
-  const { entries, isLoading, isError, refetch } = usePassbook();
+  const { entries, position, isLoading, isError, refetch } = usePassbook();
 
   const frameworkIds = useMemo(
     () => Array.from(new Set(entries.map((e) => e.frameworkId).filter(Boolean))),
@@ -110,6 +110,7 @@ const Passbook = () => {
                   // the same positions, so the role picker never depends on it alone.
                   positions={metas[section.frameworkId]?.positions ?? vocab?.positions ?? []}
                   {...(isTargeted && target ? { selectedPosition: target.position } : {})}
+                  {...(position && position.frameworkId === section.frameworkId ? { position } : {})}
                   {...(isTargeted && gap ? { gap } : {})}
                   onSelectPosition={choose(section.frameworkId)}
                   expandedId={expandedId}

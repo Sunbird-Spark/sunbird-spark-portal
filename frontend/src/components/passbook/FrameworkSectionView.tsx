@@ -1,9 +1,9 @@
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { CompetencyAreaGroup } from './CompetencyAreaGroup';
 import { GapTable } from './GapTable';
-import { PositionPicker } from './PositionPicker';
+import { RoleCard } from './RoleCard';
 import type { FrameworkSection } from '@/services/competency/passbookGrouping';
-import type { CompetencyGap } from '@/types/competencyServiceTypes';
+import type { CompetencyGap, PositionAssignment } from '@/types/competencyServiceTypes';
 
 interface FrameworkSectionViewProps {
   section: FrameworkSection;
@@ -12,6 +12,8 @@ interface FrameworkSectionViewProps {
   frameworkLabel: string;
   positions: string[];
   selectedPosition?: string;
+  /** The learner's role assignment, shown read-only above the target picker. */
+  position?: PositionAssignment;
   gap?: CompetencyGap;
   onSelectPosition: (code: string) => void;
   expandedId: string | null;
@@ -33,6 +35,7 @@ export function FrameworkSectionView({
   frameworkLabel,
   positions,
   selectedPosition,
+  position,
   gap,
   onSelectPosition,
   expandedId,
@@ -52,14 +55,13 @@ export function FrameworkSectionView({
         </div>
       )}
 
-      {positions.length > 0 && (
-        <PositionPicker
-          positions={positions}
-          {...(selectedPosition ? { selected: selectedPosition } : {})}
-          labelFor={labelFor}
-          onSelect={onSelectPosition}
-        />
-      )}
+      <RoleCard
+        {...(position ? { position } : {})}
+        positions={positions}
+        {...(selectedPosition ? { selectedPosition } : {})}
+        labelFor={labelFor}
+        onSelectPosition={onSelectPosition}
+      />
 
       {gap?.resolved && (
         <div className="flex flex-col gap-2">
