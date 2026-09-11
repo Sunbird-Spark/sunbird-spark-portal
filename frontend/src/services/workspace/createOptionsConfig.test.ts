@@ -10,29 +10,29 @@ describe('createOptionsConfig', () => {
       expect(categories.length).toBeGreaterThan(0);
     });
 
-    it('should include story option with correct title "Story & Game"', () => {
+    it('should include story option with correct titleKey', () => {
       const categories = getEditorCategories();
-      
-      const storyCategory = categories.find(category => 
+
+      const storyCategory = categories.find(category =>
         category.options.some(option => option.id === 'story')
       );
-      
+
       expect(storyCategory).toBeDefined();
-      
+
       const storyOption = storyCategory?.options.find(option => option.id === 'story');
       expect(storyOption).toBeDefined();
-      expect(storyOption?.title).toBe('Story & Game');
+      expect(storyOption?.titleKey).toBe('workspace.editorOptions.story');
     });
 
     it('should include quiz option', () => {
       const categories = getEditorCategories();
-      
+
       const quizOption = categories
         .flatMap(category => category.options)
         .find(option => option.id === 'quiz');
-      
+
       expect(quizOption).toBeDefined();
-      expect(quizOption?.title).toBe('Quiz & Assessment');
+      expect(quizOption?.titleKey).toBe('workspace.editorOptions.quiz');
     });
 
     it('should have all required properties for each category', () => {
@@ -40,14 +40,14 @@ describe('createOptionsConfig', () => {
       
       categories.forEach(category => {
         expect(category).toHaveProperty('id');
-        expect(category).toHaveProperty('title');
+        expect(category).toHaveProperty('titleKey');
         expect(category).toHaveProperty('options');
         expect(Array.isArray(category.options)).toBe(true);
-        
+
         category.options.forEach(option => {
           expect(option).toHaveProperty('id');
-          expect(option).toHaveProperty('title');
-          expect(option).toHaveProperty('description');
+          expect(option).toHaveProperty('titleKey');
+          expect(option).toHaveProperty('descriptionKey');
           expect(option).toHaveProperty('icon');
           expect(option).toHaveProperty('iconBg');
           expect(option).toHaveProperty('iconColor');
@@ -65,15 +65,15 @@ describe('createOptionsConfig', () => {
       expect(uniqueIds.size).toBe(allOptionIds.length);
     });
 
-    it('should have non-empty titles and descriptions', () => {
+    it('should have non-empty title/description keys', () => {
       const categories = getEditorCategories();
-      
+
       categories.forEach(category => {
-        expect(category.title.trim()).not.toBe('');
-        
+        expect(category.titleKey.trim()).not.toBe('');
+
         category.options.forEach(option => {
-          expect(option.title.trim()).not.toBe('');
-          expect(option.description.trim()).not.toBe('');
+          expect(option.titleKey.trim()).not.toBe('');
+          expect(option.descriptionKey.trim()).not.toBe('');
         });
       });
     });
@@ -92,14 +92,14 @@ describe('createOptionsConfig', () => {
       });
     });
 
-    it('should maintain story option description consistency', () => {
+    it('should maintain story option descriptionKey consistency', () => {
       const categories = getEditorCategories();
-      
+
       const storyOption = categories
         .flatMap(category => category.options)
         .find(option => option.id === 'story');
-      
-      expect(storyOption?.description).toBe('Design interactive stories and gamified learning experiences.');
+
+      expect(storyOption?.descriptionKey).toBe('workspace.editorDescriptions.story');
     });
   });
 });

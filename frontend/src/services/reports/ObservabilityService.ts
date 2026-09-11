@@ -118,10 +118,10 @@ export class ObservabilityService {
    * Fetch monthly user creation counts.
    * POST /observability/v1/reports
    */
-  public getUserCreationCount(orgId: string): Promise<UserCreationCountResult> {
+  public getUserCreationCount(): Promise<UserCreationCountResult> {
     return getClient()
       .post<unknown>('/observability/v1/reports', {
-        request: { reportId: 'user-creation-count', filters: { createdFor: orgId } },
+        request: { reportId: 'user-creation-count', filters: { } },
       })
       .then((response) => parseObservabilityResponse<UserCreationCountApiItem>(response.data));
   }

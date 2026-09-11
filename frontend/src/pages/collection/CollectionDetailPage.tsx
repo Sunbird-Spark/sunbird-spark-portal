@@ -97,8 +97,10 @@ const CollectionDetailPage = () => {
     request: { limit: 20, offset: 0 },
     enabled: hierarchySuccess,
   });
-  // Fetch selected content when contentId is in the URL
-  const { data: contentReadData, isLoading: contentIsLoading, error: contentError } = useContentRead(contentId ?? '');
+  // Fetch selected content when contentId is in the URL. enrichTranscripts is safe here
+  // (unlike ContentPlayerPage) since this is the only read for this content - no
+  // second phased read exists to swap metadata identity out from under the player.
+  const { data: contentReadData, isLoading: contentIsLoading, error: contentError } = useContentRead(contentId ?? '', { enrichTranscripts: true });
   const selectedContentData = contentReadData?.data?.content;
   const isQumlContent = selectedContentData?.mimeType === 'application/vnd.sunbird.questionset' ||
     selectedContentData?.mimeType === 'application/vnd.sunbird.question';
@@ -143,6 +145,7 @@ const CollectionDetailPage = () => {
     currentContentStatus,
     skipContentStateUpdate: contentCreatorPrivilege,
     contentType: currentContentNode?.contentType,
+    maxAttemptsExceeded,
   });
 
   const collectionCdata = useMemo(

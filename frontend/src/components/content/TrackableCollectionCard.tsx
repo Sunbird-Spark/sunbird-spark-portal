@@ -16,11 +16,11 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
 
   return (
     <Link
-      to={course.batchId ? `/collection/${course.collectionId}/batch/${course.batchId}` : `/collection/${course.collectionId}`}
+      to={course.batchId ? `/collection/${course.courseId}/batch/${course.batchId}` : `/collection/${course.courseId}`}
       state={{ from: location.pathname + location.search }}
       className="block"
       data-edataid="trackable-collection-card-click"
-      data-objectid={course.collectionId}
+      data-objectid={course.courseId}
       data-objecttype="Collection"
     >
       <div
@@ -28,7 +28,7 @@ const TrackableCollectionCard = ({ course, index }: TrackableCollectionCardProps
       >
         {/* Thumbnail */}
         <img
-          src={course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl || getPlaceholderImage(course.collectionId)}
+          src={course.content?.posterImage || course.content?.appIcon || course.courseLogoUrl || getPlaceholderImage(course.courseId)}
           alt={course.courseName}
           className="w-[7.5rem] h-[7.5rem] rounded-2xl object-cover flex-shrink-0 shadow-sm"
         />

@@ -326,13 +326,13 @@ describe('ProfileLearningList', () => {
         expect(downloadButton).toBeDisabled();
     });
 
-    it('renders each course card as a link to /collection/:collectionId', () => {
+    it('renders each course card as a link to /collection/:courseId', () => {
         render(<MemoryRouter><ProfileLearningList /></MemoryRouter>);
 
         const links = screen.getAllByRole('link');
         const hrefs = links.map((l) => l.getAttribute('href'));
-        expect(hrefs).toContain('/collection/col1');
-        expect(hrefs).toContain('/collection/col2');
+        expect(hrefs).toContain('/collection/c1');
+        expect(hrefs).toContain('/collection/c2');
     });
 
     it('clicking download button does not navigate away from page', () => {

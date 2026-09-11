@@ -6,6 +6,8 @@ import { useContentLock } from '@/hooks/useContentLock';
 export interface UseEditorLockOptions {
   contentId: string | undefined;
   metadata: Record<string, any> | null;
+  /** True when the editor was opened via the workspace "View" action rather than "Edit". */
+  viewIntent?: boolean;
 }
 
 export interface UseEditorLockReturn {
@@ -23,13 +25,14 @@ export interface UseEditorLockReturn {
 export const useEditorLock = ({
   contentId,
   metadata,
+  viewIntent = false,
 }: UseEditorLockOptions): UseEditorLockReturn => {
   const { data: userData } = useUserRead();
   const userRole = useMemo(() => getUserRole(userData), [userData]);
 
   const editorMode = useMemo(
-    () => getEditorMode(metadata?.status, userRole),
-    [metadata?.status, userRole],
+    () => getEditorMode(metadata?.status, userRole, viewIntent),
+    [metadata?.status, userRole, viewIntent],
   );
 
   const isEditMode = editorMode === 'edit';

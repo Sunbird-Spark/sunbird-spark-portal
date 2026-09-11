@@ -31,7 +31,7 @@ const AuthenticatedHeader = ({ isSidebarOpen, onToggleSidebar }: AuthenticatedHe
         <header className={`profile-header ${isMobile ? 'mobile' : ''}`}>
             <div className="profile-header-container">
                 {/* Left: Sunbird Logo + Sidebar Toggle */}
-                <div className={`profile-logo-container ${!isMobile && isSidebarOpen ? 'w-[13.25rem]' : 'w-auto'} ${isMobile ? 'pl-0' : 'pl-[1.875rem]'} transition-all duration-300`}>
+                <div className={`profile-logo-container ${!isMobile && isSidebarOpen ? 'w-[13.25rem]' : 'w-auto'} ${isMobile ? 'ps-0' : 'ps-[1.875rem]'} transition-all duration-300`}>
                     {!isMobile && (
                         <div className="w-full h-full flex items-center">
                             <Link to="/home">

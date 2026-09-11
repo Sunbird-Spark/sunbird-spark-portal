@@ -8,6 +8,14 @@ import {
 } from "../services/collection/contentProgressCalculator";
 import type { ConsumptionSummary } from "../services/collection/contentProgressCalculator";
 import { useUserId } from "./useAuthInfo";
+import { eventHasScore, extractSummary, normalizeScormAssessEvent } from "./contentStateTelemetryEvent";
+import type { TelemetryEvent } from "./contentStateTelemetryEvent";
+
+const ContentStatus = {
+  NotStarted: 0,
+  InProgress: 1,
+  Completed: 2,
+} as const;
 
 interface UseContentStateUpdateParams {
   collectionId: string | undefined;
@@ -22,48 +30,8 @@ interface UseContentStateUpdateParams {
   /** When true (e.g. creator viewing own collection), no progress/state API calls are made. */
   skipContentStateUpdate?: boolean;
   contentType?: string;
-}
-
-/** Telemetry callback receives the raw player detail (e.g. { eid, edata }), not { type, data }. */
-type TelemetryEvent = {
-  eid?: string;
-  type?: string;
-  actor?: { id?: string };
-  ets?: number;
-  edata?: { summary?: ConsumptionSummary[]; score?: number; endpageseen?: boolean; [key: string]: unknown };
-  summary?: ConsumptionSummary | ConsumptionSummary[];
-  data?: string | {
-    eid?: string;
-    actor?: { id?: string };
-    ets?: number;
-    edata?: { summary?: ConsumptionSummary[]; score?: number; [key: string]: unknown };
-    summary?: ConsumptionSummary | ConsumptionSummary[];
-    score?: number;
-    [key: string]: unknown;
-  };
-};
-
-/** True when the event carries a score (submit), e.g. ASSESS with edata.score or summary score. */
-function eventHasScore(event: TelemetryEvent | undefined): boolean {
-  if (!event) return false;
-  const raw = event?.data ?? event;
-  if (typeof raw === "string") return false;
-  const rawData = raw as Record<string, unknown>;
-  if (typeof (rawData?.edata as { score?: number } | undefined)?.score === "number") return true;
-  if (typeof (rawData as { score?: number })?.score === "number") return true;
-  const summary = (rawData?.edata as any)?.summary ?? (rawData as any)?.summary;
-  const arr = Array.isArray(summary) ? summary : summary ? [summary] : [];
-  return arr.some(
-    (s) => typeof (s as ConsumptionSummary & { score?: number })?.score === "number"
-  );
-}
-
-function extractSummary(event: TelemetryEvent): ConsumptionSummary[] {
-  const raw = event?.data ?? event;
-  if (typeof raw === "string") return [];
-  const rawData = raw as any;
-  const rawSummary = rawData?.edata?.summary ?? rawData?.summary;
-  return Array.isArray(rawSummary) ? rawSummary : rawSummary ? [rawSummary] : [];
+  /** When true, attempts are exhausted: completion status still updates, but no score/assessment is persisted. */
+  maxAttemptsExceeded?: boolean;
 }
 
 export function useContentStateUpdate({
@@ -76,6 +44,7 @@ export function useContentStateUpdate({
   currentContentStatus,
   skipContentStateUpdate = false,
   contentType,
+  maxAttemptsExceeded = false,
 }: UseContentStateUpdateParams): (event: TelemetryEvent) => void {
   const queryClient = useQueryClient();
   const { mutateAsync: contentStateUpdate } = useContentStateUpdateMutation();
@@ -86,6 +55,8 @@ export function useContentStateUpdate({
   const assessmentTsRef = useRef<number | null>(null);
   const assessEventsRef = useRef<unknown[]>([]);
   const sendingAssessmentRef = useRef(false);
+  const pendingResendRef = useRef(false);
+  const attemptIdRef = useRef<string | null>(null);
 
   // Use refs for values that change after content state updates to keep the
   // returned telemetry callback identity stable and avoid re-initialising players.
@@ -93,6 +64,8 @@ export function useContentStateUpdate({
   useEffect(() => { currentContentStatusRef.current = currentContentStatus; }, [currentContentStatus]);
   const contentTypeRef = useRef(contentType);
   useEffect(() => { contentTypeRef.current = contentType; }, [contentType]);
+  const maxAttemptsExceededRef = useRef(maxAttemptsExceeded);
+  useEffect(() => { maxAttemptsExceededRef.current = maxAttemptsExceeded; }, [maxAttemptsExceeded]);
 
   useEffect(() => {
     lastSentStatusRef.current = null;
@@ -100,6 +73,8 @@ export function useContentStateUpdate({
     assessmentTsRef.current = null;
     assessEventsRef.current = [];
     sendingAssessmentRef.current = false;
+    pendingResendRef.current = false;
+    attemptIdRef.current = null;
   }, [contentId]);
 
   const handleContentStateUpdate = useCallback(
@@ -130,9 +105,12 @@ export function useContentStateUpdate({
     const ts = assessmentTsRef.current;
     if (ts == null) return;
     const events = assessEventsRef.current;
-    const attemptId = typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `${collectionId}-${effectiveBatchId}-${contentId}-${userId}-${Date.now()}`;
+    if (attemptIdRef.current == null) {
+      attemptIdRef.current = typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${collectionId}-${effectiveBatchId}-${contentId}-${userId}-${Date.now()}`;
+    }
+    const attemptId = attemptIdRef.current;
     try {
       await contentStateUpdate({
         userId,
@@ -140,7 +118,7 @@ export function useContentStateUpdate({
         batchId: effectiveBatchId,
         contents: [{
           contentId,
-          status: 2,
+          status: ContentStatus.Completed,
           lastAccessTime: dayjs(new Date()).format("YYYY-MM-DD HH:mm:ss:SSSZZ"),
         }],
         assessments: [{
@@ -157,9 +135,13 @@ export function useContentStateUpdate({
     } catch (err) {
       console.error("Assessment state update failed:", err);
     } finally {
-      assessmentTsRef.current = null;
-      assessEventsRef.current = [];
-      sendingAssessmentRef.current = false;
+      if (pendingResendRef.current) {
+        pendingResendRef.current = false;
+        void sendAssessmentAndInvalidate();
+      } else {
+        assessEventsRef.current = [];
+        sendingAssessmentRef.current = false;
+      }
     }
   }, [collectionId, contentId, effectiveBatchId, userId, queryClient, contentStateUpdate]);
 
@@ -170,7 +152,8 @@ export function useContentStateUpdate({
       if (isBatchEnded) return;
       const isSelfAssess = (contentTypeRef.current ?? "").toLowerCase() === "selfassess";
       const isQuestionSet = (mimeType ?? "").toLowerCase() === "application/vnd.sunbird.questionset";
-      if (!isSelfAssess && !isQuestionSet && currentContentStatusRef.current === 2) return;
+      const isScorm = (mimeType ?? "").toLowerCase() === "application/vnd.ekstep.scorm-archive";
+      if (!isSelfAssess && !isQuestionSet && !isScorm && currentContentStatusRef.current === ContentStatus.Completed) return;
 
       const rawEvent = event?.data ?? event;
       const eid = typeof rawEvent === "string" ? "" : (event?.eid ?? (event?.data as any)?.eid ?? event?.type ?? "") as string;
@@ -178,7 +161,7 @@ export function useContentStateUpdate({
 
       // Support renderer:question:submitscore for SelfAssess content (aligned with old portal)
       if (isSelfAssess && event?.data === "renderer:question:submitscore") {
-        if (assessmentTsRef.current != null && !sendingAssessmentRef.current) {
+        if (assessmentTsRef.current != null && !sendingAssessmentRef.current && !maxAttemptsExceededRef.current) {
           sendingAssessmentRef.current = true;
           void sendAssessmentAndInvalidate();
           lastSentStatusRef.current = null;
@@ -190,11 +173,12 @@ export function useContentStateUpdate({
         const ets = (rawEvent as any)?.ets ?? event?.ets;
         if (ets != null) assessmentTsRef.current = ets;
         assessEventsRef.current = [];
-        if (currentContentStatusRef.current !== 2 && lastSentStatusRef.current !== 1 && !startUpdateInFlightRef.current) {
+        attemptIdRef.current = null;
+        if (currentContentStatusRef.current !== ContentStatus.Completed && lastSentStatusRef.current !== ContentStatus.InProgress && !startUpdateInFlightRef.current) {
           startUpdateInFlightRef.current = true;
-          handleContentStateUpdate(1, true)
+          handleContentStateUpdate(ContentStatus.InProgress, true)
             .then(() => {
-              lastSentStatusRef.current = 1;
+              lastSentStatusRef.current = ContentStatus.InProgress;
             })
             .catch(() => {
               /* Already logged in handleContentStateUpdate; ref left null so next START retries */
@@ -208,7 +192,22 @@ export function useContentStateUpdate({
 
       if (eidUpper === "ASSESS") {
         const rawEventData = event?.data ?? event;
-        assessEventsRef.current = [...assessEventsRef.current, rawEventData ?? event];
+        const accumulatedEvent = isScorm
+          ? normalizeScormAssessEvent(rawEventData ?? event)
+          : (rawEventData ?? event);
+        assessEventsRef.current = [...assessEventsRef.current, accumulatedEvent];
+        // SCORM's plugin only fires a scored ASSESS once lesson_status is already
+        // completed/passed - so this is itself a completion signal, independent of
+        // whether END has fired yet (player build ordering isn't reliable).
+        if (isScorm && eventHasScore(event, isScorm) && assessmentTsRef.current != null && !maxAttemptsExceededRef.current) {
+          if (sendingAssessmentRef.current) {
+            pendingResendRef.current = true;
+          } else {
+            sendingAssessmentRef.current = true;
+            void sendAssessmentAndInvalidate();
+            lastSentStatusRef.current = null;
+          }
+        }
         return;
       }
 
@@ -218,7 +217,7 @@ export function useContentStateUpdate({
         const edataQ = (rawEvent as any)?.edata;
         // edata.starttime (surfaced as ets) is a fallback if START telemetry was missed.
         if ((rawEvent as any)?.ets != null && assessmentTsRef.current == null) assessmentTsRef.current = (rawEvent as any).ets as number;
-        if (typeof edataQ?.score === "number" && Boolean(edataQ?.endpageseen) && assessmentTsRef.current != null && !sendingAssessmentRef.current) {
+        if (typeof edataQ?.score === "number" && Boolean(edataQ?.endpageseen) && assessmentTsRef.current != null && !sendingAssessmentRef.current && !maxAttemptsExceededRef.current) {
           sendingAssessmentRef.current = true;
           void sendAssessmentAndInvalidate();
           lastSentStatusRef.current = null;
@@ -228,33 +227,41 @@ export function useContentStateUpdate({
 
       if (eidUpper === "END") {
         const summary = extractSummary(event);
-        if (isSelfAssess) {
-
+        if (isSelfAssess || isScorm) {
+          // An assessment send may already be in flight (e.g. SCORM's ASSESS-triggered
+          // completion above, which can fire before END on some player builds) -
+          // nothing left for END to do once that's underway.
+          if (sendingAssessmentRef.current) return;
+          
           const mergedSummary = (summary as ConsumptionSummary[]).reduce<ConsumptionSummary>((acc, s) => ({ ...acc, ...s }), {});
           const endPageSeen = Boolean(mergedSummary.endpageseen || mergedSummary.visitedcontentend);
 
           const hasScore =
-            eventHasScore(event) ||
-            assessEventsRef.current.some((e) => eventHasScore(e as TelemetryEvent));
+            eventHasScore(event, isScorm) ||
+            assessEventsRef.current.some((e) => eventHasScore(e as TelemetryEvent, isScorm));
 
-          if (
-            hasScore &&
-            endPageSeen &&
-            assessmentTsRef.current != null &&
-            !sendingAssessmentRef.current
-          ) {
+          if (hasScore && endPageSeen && assessmentTsRef.current != null && !maxAttemptsExceededRef.current) {
             sendingAssessmentRef.current = true;
             void sendAssessmentAndInvalidate();
             lastSentStatusRef.current = null;
             return;
           }
+          // SCORM completion (lesson_status completed/passed) is independent of score -
+          // many SCORM packages have no quiz at all. Complete directly off endpageseen,
+          // without going through the assessments path (avoids consuming a maxAttempts
+          // slot for content that was never actually scored).
+          if (isScorm && endPageSeen && currentContentStatusRef.current !== ContentStatus.Completed) {
+            lastSentStatusRef.current = null;
+            void handleContentStateUpdate(ContentStatus.Completed, true);
+            return;
+          }
           // Completion criteria not met; do not regress an already-completed content.
-          if (currentContentStatusRef.current === 2) return;
+          if (currentContentStatusRef.current === ContentStatus.Completed) return;
           const effectiveProgress = calculateContentProgress(summary as ConsumptionSummary[], mimeType ?? "");
           const statusFromProgress = progressToStatus(effectiveProgress);
-          const status = Math.min(statusFromProgress, 1);
-          if (status === 0 && lastSentStatusRef.current === 1) {
-            void handleContentStateUpdate(1, true);
+          const status = Math.min(statusFromProgress, ContentStatus.InProgress);
+          if (status === ContentStatus.NotStarted && lastSentStatusRef.current === ContentStatus.InProgress) {
+            void handleContentStateUpdate(ContentStatus.InProgress, true);
           } else {
             lastSentStatusRef.current = null;
             void handleContentStateUpdate(status, true);
@@ -263,7 +270,7 @@ export function useContentStateUpdate({
         }
         const effectiveProgress = calculateContentProgress(summary as ConsumptionSummary[], mimeType ?? "");
         let status = progressToStatus(effectiveProgress);
-        if (status === 0 && lastSentStatusRef.current === 1) status = 1;
+        if (status === ContentStatus.NotStarted && lastSentStatusRef.current === ContentStatus.InProgress) status = ContentStatus.InProgress;
         lastSentStatusRef.current = null;
         void handleContentStateUpdate(status, true);
       }

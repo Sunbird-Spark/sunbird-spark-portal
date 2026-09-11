@@ -40,8 +40,8 @@ const HomeInProgressGrid = () => {
                         key={course.courseId || course.contentId}
                         to={
                             course.lastReadContentId
-                                ? `/collection/${course.collectionId}/batch/${course.batchId}/content/${course.lastReadContentId}`
-                                : `/collection/${course.collectionId}/batch/${course.batchId}`
+                                ? `/collection/${course.courseId}/batch/${course.batchId}/content/${course.lastReadContentId}`
+                                : `/collection/${course.courseId}/batch/${course.batchId}`
                         }
                         state={{ from: '/home' }}
                         className="home-inprogress-card no-underline"
@@ -74,7 +74,7 @@ const HomeInProgressGrid = () => {
                         {/* Thumbnail */}
                         <div className="home-inprogress-thumbnail">
                             <img
-                                src={course.content?.posterImage || course.courseLogoUrl || course.content?.appIcon || getPlaceholderImage(course.collectionId || course.courseId || course.contentId || '')}
+                                src={course.content?.posterImage || course.courseLogoUrl || course.content?.appIcon || getPlaceholderImage(course.courseId || course.contentId || '')}
                                 alt={course.courseName || "Untitled Course"}
                                 className="home-inprogress-thumbnail-img"
                             />

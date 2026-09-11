@@ -212,6 +212,19 @@ describe('ContentViewPage - Layout', () => {
   });
 });
 
+describe('ContentViewPage - transcript enrichment', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseContentRead.mockReturnValue(defaultContentResponse);
+  });
+  afterEach(() => cleanup());
+
+  it('requests enrichTranscripts so video captions load in the workspace view/review pages', () => {
+    renderPage();
+    expect(mockUseContentRead).toHaveBeenCalledWith('test-content-id', { mode: 'edit', enrichTranscripts: true });
+  });
+});
+
 describe('ContentReviewPage - Button Functionality', () => {
   beforeEach(() => {
     vi.clearAllMocks();

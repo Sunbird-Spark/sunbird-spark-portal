@@ -11,6 +11,7 @@ import { useEditorLock } from '@/hooks/useEditorLock';
 import useImpression from '@/hooks/useImpression';
 import useInteract from '@/hooks/useInteract';
 import { useEditorBackNavigation } from '@/pages/workspace/editors/useEditorBackNavigation';
+import { useEditorViewIntent } from '@/pages/workspace/editors/useEditorViewIntent';
 
 const COLLECTION_EDITOR_READ_FIELDS = [
   'identifier',
@@ -65,9 +66,12 @@ const CollectionEditorPage = () => {
       .finally(() => setLoading(false));
   }, [contentId]);
 
+  const viewIntent = useEditorViewIntent();
+
   const { editorMode, lockError, isLocking, retireLock } = useEditorLock({
     contentId,
     metadata,
+    viewIntent,
   });
 
   const backTo = useEditorBackNavigation();

@@ -22,8 +22,8 @@ export type ContentTypeFilter = 'all' | 'course' | 'content' | 'quiz' | 'collect
 
 export interface EditorOption {
   id: string;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   icon: IconType;
   iconBg: string;
   iconColor: string;
@@ -31,8 +31,8 @@ export interface EditorOption {
 
 export interface EditorCategory {
   id: string;
-  title: string;
-  subtitle: string;
+  titleKey: string;
+  subtitleKey: string;
   options: EditorOption[];
   accentColor: string;
   borderColor: string;
@@ -99,6 +99,8 @@ export interface ContentSearchRequest {
   fields?: string[];
   search_mode?: 'semantic';
   semantic?: { k: number; min_score: number };
+  /** Field names required to be present on the content (e.g. ['enrichment']). */
+  exists?: string[];
 }
 
 export interface ContentSearchItem {

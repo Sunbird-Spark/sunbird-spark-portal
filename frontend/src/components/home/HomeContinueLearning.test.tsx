@@ -122,7 +122,7 @@ describe('HomeContinueLearning', () => {
         fireEvent.click(button);
 
         expect(mockNavigate).toHaveBeenCalledWith(
-            '/collection/col-1/batch/batch-1/content/last-read-1',
+            '/collection/course-1/batch/batch-1/content/last-read-1',
             { state: { from: '/home' } }
         );
     });
@@ -179,7 +179,7 @@ describe('HomeContinueLearning', () => {
         fireEvent.click(button);
 
         expect(mockNavigate).toHaveBeenCalledWith(
-            '/collection/col-1/batch/batch-1/content/lesson-1',
+            '/collection/course-1/batch/batch-1/content/lesson-1',
             { state: { from: '/home' } }
         );
     });
@@ -227,7 +227,7 @@ describe('HomeContinueLearning', () => {
 
         // Falls back to the first lesson of the first module
         expect(mockNavigate).toHaveBeenCalledWith(
-            '/collection/col-new/batch/batch-new/content/first-lesson',
+            '/collection/course-new/batch/batch-new/content/first-lesson',
             { state: { from: '/home' } }
         );
     });

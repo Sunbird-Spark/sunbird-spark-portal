@@ -37,6 +37,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'workspace.typeFilters.content': 'Content',
         'workspace.typeFilters.quiz': 'Quiz',
         'workspace.typeFilters.collection': 'Collection',
+        'workspace.hasTranscripts': 'Transcripts',
       };
       return translations[key] || key;
     },
@@ -88,12 +89,14 @@ const renderToolbar = (overrides?: Partial<{
   counts: typeof baseCounts;
   hasCreatorRole: boolean;
   hasReviewerRole: boolean;
+  transcriptFilter: boolean;
 }>) => {
   const onViewChange = vi.fn();
   const onSecondaryActionChange = vi.fn();
   const onRoleChange = vi.fn();
   const onViewModeChange = vi.fn();
   const onTypeFilterChange = vi.fn();
+  const onTranscriptFilterChange = vi.fn();
   const onCreateClick = vi.fn();
 
   const props = {
@@ -103,6 +106,7 @@ const renderToolbar = (overrides?: Partial<{
     counts: baseCounts,
     viewMode: 'grid' as ViewMode,
     typeFilter: 'all' as ContentTypeFilter,
+    transcriptFilter: false,
     contentCount: 5,
     hasCreatorRole: true,
     hasReviewerRole: true,
@@ -111,6 +115,7 @@ const renderToolbar = (overrides?: Partial<{
     onRoleChange,
     onViewModeChange,
     onTypeFilterChange,
+    onTranscriptFilterChange,
     onCreateClick,
     searchQuery: '',
     onSearchChange: vi.fn(),
@@ -118,7 +123,10 @@ const renderToolbar = (overrides?: Partial<{
   };
 
   render(<WorkspaceToolbar {...props} />);
-  return { ...props, onViewChange, onSecondaryActionChange, onRoleChange, onViewModeChange, onTypeFilterChange, onCreateClick };
+  return {
+    ...props, onViewChange, onSecondaryActionChange, onRoleChange, onViewModeChange,
+    onTypeFilterChange, onTranscriptFilterChange, onCreateClick,
+  };
 };
 
 describe('WorkspaceToolbar', () => {
@@ -197,6 +205,23 @@ describe('WorkspaceToolbar', () => {
   it('hides filters when activeView is create', () => {
     renderToolbar({ activeView: 'create' });
     expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
+  });
+
+  it('toggles the Has Transcripts filter on click', () => {
+    const { onTranscriptFilterChange } = renderToolbar({ transcriptFilter: false });
+    fireEvent.click(screen.getByRole('button', { name: 'Transcripts' }));
+    expect(onTranscriptFilterChange).toHaveBeenCalledWith(true);
+  });
+
+  it('toggles the Has Transcripts filter off when already active', () => {
+    const { onTranscriptFilterChange } = renderToolbar({ transcriptFilter: true });
+    fireEvent.click(screen.getByRole('button', { name: 'Transcripts' }));
+    expect(onTranscriptFilterChange).toHaveBeenCalledWith(false);
+  });
+
+  it('hides the Has Transcripts filter when activeView is create (negative)', () => {
+    renderToolbar({ activeView: 'create' });
+    expect(screen.queryByRole('button', { name: 'Transcripts' })).not.toBeInTheDocument();
   });
 
   it('shows stats row only for creator with content filters and displays counts', () => {

@@ -268,6 +268,36 @@ describe('useContentStateUpdate', () => {
       });
     });
 
+    it('generates a new attemptId on retry (new START) without unmounting', async () => {
+      const { result } = renderHook(() =>
+        useContentStateUpdate({ ...selfAssessParams, currentContentStatus: 2 })
+      );
+      result.current({ eid: 'START', ets: 1700000000000 });
+      result.current({ eid: 'ASSESS', edata: { score: 75 } } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
+      result.current({ eid: 'END', edata: { summary: [{ endpageseen: true }] } });
+      await vi.waitFor(() => {
+        expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+      });
+      const firstAttemptId = (
+        mockMutateAsync.mock.calls[0]?.[0] as { assessments: { attemptId: string }[] }
+      ).assessments[0]?.attemptId;
+      await Promise.resolve();
+      await Promise.resolve();
+
+      result.current({ eid: 'START', ets: 1700000100000 });
+      result.current({ eid: 'ASSESS', edata: { score: 90 } } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
+      result.current({ eid: 'END', edata: { summary: [{ endpageseen: true }] } });
+      await vi.waitFor(() => {
+        expect(mockMutateAsync).toHaveBeenCalledTimes(2);
+      });
+      const secondAttemptId = (
+        mockMutateAsync.mock.calls[1]?.[0] as { assessments: { attemptId: string }[] }
+      ).assessments[0]?.attemptId;
+
+      expect(secondAttemptId).toBeDefined();
+      expect(secondAttemptId).not.toBe(firstAttemptId);
+    });
+
     it('on END after START without ASSESS score does NOT send a progress PATCH when currentContentStatus is 2 (no regression)', async () => {
       const { result } = renderHook(() =>
         useContentStateUpdate({ ...selfAssessParams, currentContentStatus: 2 })
@@ -462,5 +492,30 @@ describe('useContentStateUpdate', () => {
     });
 
 
+  });
+
+  describe('eventHasScore string-coercion is SCORM-only', () => {
+    const selfAssessParams = { ...defaultParams, contentType: 'SelfAssess', currentContentStatus: 2 };
+    const scormParams = { ...defaultParams, mimeType: 'application/vnd.ekstep.scorm-archive', currentContentStatus: 1 };
+
+    it('does not treat a string score as scored for non-SCORM content (strict number required)', async () => {
+      const { result } = renderHook(() => useContentStateUpdate(selfAssessParams));
+      result.current({ eid: 'START', ets: 1700000000000 });
+      result.current({ eid: 'ASSESS', edata: { score: '75' } } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
+      result.current({ eid: 'END', edata: { summary: [{ endpageseen: true }] } });
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockMutateAsync.mock.calls.every((call) => !call[0]?.assessments)).toBe(true);
+    });
+
+    it('treats a string score as scored for SCORM content (coerced per API spec)', async () => {
+      const { result } = renderHook(() => useContentStateUpdate(scormParams));
+      result.current({ eid: 'START', ets: 1700000000000 });
+      result.current({ eid: 'ASSESS', edata: { score: '75' } } as Parameters<ReturnType<typeof useContentStateUpdate>>[0]);
+      await vi.waitFor(() => {
+        expect(mockMutateAsync).toHaveBeenCalledWith(
+          expect.objectContaining({ assessments: expect.any(Array) })
+        );
+      });
+    });
   });
 });

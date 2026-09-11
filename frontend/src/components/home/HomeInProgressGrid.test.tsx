@@ -110,14 +110,14 @@ describe('HomeInProgressGrid', () => {
         renderComponent();
 
         const firstCard = document.querySelectorAll('.home-inprogress-card')[0];
-        expect(firstCard).toHaveAttribute('href', '/collection/col-1/batch/batch-1/content/last-read-1');
+        expect(firstCard).toHaveAttribute('href', '/collection/course-1/batch/batch-1/content/last-read-1');
     });
 
     it('links to collection/batch URL when lastReadContentId is missing', () => {
         renderComponent();
 
         const secondCard = document.querySelectorAll('.home-inprogress-card')[1];
-        expect(secondCard).toHaveAttribute('href', '/collection/col-2/batch/batch-2');
+        expect(secondCard).toHaveAttribute('href', '/collection/course-2/batch/batch-2');
     });
 
     it('renders thumbnails with correct alt text', () => {

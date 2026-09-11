@@ -205,4 +205,47 @@ describe('ContentRow', () => {
       expect(mockToast).not.toHaveBeenCalled();
     });
   });
+
+  describe('SCORM attempt limits (content stays accessible)', () => {
+    const scormNode: HierarchyContentNode = {
+      identifier: 'scorm-1',
+      name: 'Scorm Lesson',
+      mimeType: 'application/vnd.ekstep.scorm-archive',
+      maxAttempts: 3,
+    };
+
+    it('renders as a clickable link (not disabled) when attempts exceeded', () => {
+      renderContentRow({
+        ...defaultProps,
+        node: scormNode,
+        href: '/collection/col-1/content/scorm-1',
+        contentAttemptInfoMap: { 'scorm-1': { attemptCount: 4 } },
+      });
+      const link = screen.getByRole('link', { name: /Scorm Lesson/i });
+      expect(link).toHaveAttribute('href', '/collection/col-1/content/scorm-1');
+      expect(mockToast).not.toHaveBeenCalled();
+    });
+
+    it('still shows the attempt badge (e.g. 4/3) when exceeded', () => {
+      renderContentRow({
+        ...defaultProps,
+        node: scormNode,
+        href: '/collection/col-1/content/scorm-1',
+        contentAttemptInfoMap: { 'scorm-1': { attemptCount: 4 } },
+      });
+      expect(screen.getByText('4/3')).toBeInTheDocument();
+    });
+
+    it('does not block navigation on click when attempts exceeded', () => {
+      renderContentRow({
+        ...defaultProps,
+        node: scormNode,
+        href: '/collection/col-1/content/scorm-1',
+        contentAttemptInfoMap: { 'scorm-1': { attemptCount: 4 } },
+      });
+      const link = screen.getByRole('link', { name: /Scorm Lesson/i });
+      fireEvent.click(link);
+      expect(mockToast).not.toHaveBeenCalled();
+    });
+  });
 });

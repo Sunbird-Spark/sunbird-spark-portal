@@ -15,7 +15,7 @@ vi.mock('@/hooks/useUserRead', () => ({
 
 vi.mock('@/services/editors/editorModeService', () => ({
   getUserRole: (userData: any) => mockGetUserRole(userData),
-  getEditorMode: (status: any, userRole: any) => mockGetEditorMode(status, userRole),
+  getEditorMode: (status: any, userRole: any, viewIntent: any) => mockGetEditorMode(status, userRole, viewIntent),
 }));
 
 vi.mock('@/hooks/useContentLock', () => ({
@@ -296,6 +296,37 @@ describe('useEditorLock', () => {
     rerender({ metadata: { status: 'Review', identifier: 'do_123' } });
 
     expect(result.current.editorMode).toBe('review');
+  });
+
+  it('should forward viewIntent to getEditorMode', () => {
+    mockGetEditorMode.mockReturnValue('read');
+
+    renderHook(
+      () =>
+        useEditorLock({
+          contentId: 'do_123',
+          metadata: { status: 'Live', identifier: 'do_123' },
+          viewIntent: true,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    expect(mockGetEditorMode).toHaveBeenCalledWith('Live', 'creator', true);
+  });
+
+  it('should default viewIntent to false when not provided', () => {
+    mockGetEditorMode.mockReturnValue('edit');
+
+    renderHook(
+      () =>
+        useEditorLock({
+          contentId: 'do_123',
+          metadata: { status: 'Live', identifier: 'do_123' },
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    expect(mockGetEditorMode).toHaveBeenCalledWith('Live', 'creator', false);
   });
 
   it('should recalculate user role when userData changes', () => {

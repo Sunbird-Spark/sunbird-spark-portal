@@ -1,7 +1,12 @@
 import React from 'react';
+import dayjs from 'dayjs';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import BatchCard from './BatchCard';
+
+// Certificate actions lock once a batch's endDate is in the past (see BatchRow.tsx),
+// so fixtures must stay relative to "now" rather than a hardcoded date.
+const FUTURE_END_DATE = dayjs().add(1, 'year').format('YYYY-MM-DD');
 
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({
@@ -150,7 +155,7 @@ describe('BatchCard - Modals', () => {
 
   it('opens the certificate modal when certificate button is clicked', () => {
     mockUseBatchList.mockReturnValue({
-      data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2026-05-01', endDate: '2026-08-01' }],
+      data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2026-05-01', endDate: FUTURE_END_DATE }],
       isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
@@ -160,7 +165,7 @@ describe('BatchCard - Modals', () => {
 
   it('passes the correct courseId and batchId to the certificate modal', () => {
     mockUseBatchList.mockReturnValue({
-      data: [{ id: 'batch-xyz', name: 'Test Batch', status: '1', startDate: '2026-05-01', endDate: '2026-08-01' }],
+      data: [{ id: 'batch-xyz', name: 'Test Batch', status: '1', startDate: '2026-05-01', endDate: FUTURE_END_DATE }],
       isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,
     });
     render(<BatchCard collectionId="collection-abc" />);
@@ -172,7 +177,7 @@ describe('BatchCard - Modals', () => {
 
   it('closes the certificate modal when onOpenChange(false) is called', () => {
     mockUseBatchList.mockReturnValue({
-      data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2026-05-01', endDate: '2026-08-01' }],
+      data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2026-05-01', endDate: FUTURE_END_DATE }],
       isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,
     });
     render(<BatchCard {...defaultProps} />);
@@ -183,7 +188,7 @@ describe('BatchCard - Modals', () => {
 
   it('passes collectionName to the certificate modal', () => {
     mockUseBatchList.mockReturnValue({
-      data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2026-05-01', endDate: '2026-08-01' }],
+      data: [{ id: 'b1', name: 'Test Batch', status: '1', startDate: '2026-05-01', endDate: FUTURE_END_DATE }],
       isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,
     });
     render(<BatchCard collectionId="collection-abc" collectionName="Test Collection" />);
@@ -194,7 +199,7 @@ describe('BatchCard - Modals', () => {
   it('passes existing cert templates to the certificate modal', () => {
     mockUseBatchList.mockReturnValue({
       data: [{
-        id: 'b1', name: 'Test Batch', status: '1', startDate: '2026-05-01', endDate: '2026-08-01',
+        id: 'b1', name: 'Test Batch', status: '1', startDate: '2026-05-01', endDate: FUTURE_END_DATE,
         certTemplates: { 'template-1': { name: 'Template 1' } },
       }],
       isLoading: false, isError: false, refetch: mockRefetch, isFetching: false,

@@ -38,12 +38,17 @@ const COLLECTION_FORM_OPTIONS = ['textbook', 'collection'];
 /** QuML editor option IDs */
 const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
 
+// Option IDs that use the simple name+description dialog and map directly to a
+// COLLECTION_CONTENT_CONFIG entry keyed by the option id itself
+const SIMPLE_COLLECTION_OPTIONS = ['course', 'learning-path'];
+
 const EDITOR_OPTION_LABELS: Record<string, string> = {
   'quiz': 'workspace.editorOptions.quiz',
   'story': 'workspace.editorOptions.story',
   'course': 'workspace.editorOptions.course',
   'collection': 'workspace.editorOptions.collection',
   'textbook': 'workspace.editorOptions.textbook',
+  'learning-path': 'workspace.editorOptions.learningPath',
   'question-set': 'workspace.editorOptions.questionSet',
   'question-editor': 'workspace.editorOptions.questionSet',
 };
@@ -82,6 +87,13 @@ const COLLECTION_CONTENT_CONFIG: Record<string, {
     primaryCategory: 'Question paper',
     resourceType: 'Collection',
     descriptionKey: 'workspace.collectionDescriptions.questionPaper'
+  },
+  'learning-path': {
+    mimeType: 'application/vnd.ekstep.content-collection',
+    contentType: 'LearningPath',
+    primaryCategory: 'Learning Path',
+    resourceType: 'Collection',
+    descriptionKey: 'workspace.collectionDescriptions.learningPath'
   },
 };
 
@@ -198,6 +210,7 @@ const WorkspacePage = () => {
       ? (type as ContentTypeFilter)
       : 'all';
   });
+  const [transcriptFilter, setTranscriptFilter] = useState(() => searchParams.get('transcripts') === '1');
 
   // Local state for responsive typing; debounced value drives API + URL.
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
@@ -224,7 +237,7 @@ const WorkspacePage = () => {
     }, { replace: true });
   }, [debouncedSearch, setSearchParams]);
 
-  // Sync typeFilter, activeView, secondaryView from URL on back/forward
+  // Sync typeFilter, activeView, secondaryView, transcriptFilter from URL on back/forward
   useEffect(() => {
     const urlType = searchParams.get('type');
     if (urlType && ['all', 'course', 'content', 'quiz', 'collection'].includes(urlType)) {
@@ -236,9 +249,10 @@ const WorkspacePage = () => {
     }
     const urlMore = searchParams.get('more');
     setSecondaryView(urlMore === 'uploads' || urlMore === 'collaborations' ? (urlMore as WorkspaceView) : null);
+    setTranscriptFilter(searchParams.get('transcripts') === '1');
   }, [searchParams]);
 
-  // Sync typeFilter, activeView, secondaryView to URL
+  // Sync typeFilter, activeView, secondaryView, transcriptFilter to URL
   useEffect(() => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -253,9 +267,12 @@ const WorkspacePage = () => {
       const newMore = secondaryView || '';
       if (next.get('more') !== newMore) { changed = true; if (newMore) next.set('more', newMore); else next.delete('more'); }
 
+      const newTranscripts = transcriptFilter ? '1' : '';
+      if (next.get('transcripts') !== newTranscripts) { changed = true; if (newTranscripts) next.set('transcripts', newTranscripts); else next.delete('transcripts'); }
+
       return changed ? next : prev;
     }, { replace: true });
-  }, [typeFilter, activeView, secondaryView, setSearchParams]);
+  }, [typeFilter, activeView, secondaryView, transcriptFilter, setSearchParams]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [showDynamicFormDialog, setShowDynamicFormDialog] = useState(false);
@@ -291,6 +308,7 @@ const WorkspacePage = () => {
     enabled: showContent,
     isBookCreatorOnly,
     isBookReviewerOnly,
+    transcriptFilter,
   });
 
   const visibleContents = useMemo(
@@ -362,8 +380,8 @@ const WorkspacePage = () => {
       setShowDynamicFormDialog(true);
       return;
     }
-    // Course and question-set use the simple name dialog
-    if (optionId === 'course' || QUML_EDITOR_OPTIONS.includes(optionId)) {
+    // Course, Learning Path, and question-set use the simple name dialog
+    if (SIMPLE_COLLECTION_OPTIONS.includes(optionId) || QUML_EDITOR_OPTIONS.includes(optionId)) {
       setSelectedOption(optionId);
       setShowNameDialog(true);
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
@@ -480,10 +498,10 @@ const WorkspacePage = () => {
   const handleContentNameSubmit = async (name: string, extra?: { description?: string }) => {
     setIsCreating(true);
     try {
-      if (selectedOption === 'course') {
-        // Course creation: inline collection creation logic
+      if (selectedOption && SIMPLE_COLLECTION_OPTIONS.includes(selectedOption)) {
+        // Course / Learning Path creation: inline collection creation logic
         const { creator, createdBy, organisation, createdFor } = getCreatorMeta();
-        const config = COLLECTION_CONTENT_CONFIG['course']!;
+        const config = COLLECTION_CONTENT_CONFIG[selectedOption]!;
         const { descriptionKey, ...apiConfig } = config;
         const targetFWIds: string[] = orgFramework ? [orgFramework] : [];
 
@@ -498,7 +516,7 @@ const WorkspacePage = () => {
         });
         const contentId = response.data?.identifier || response.data?.content_id;
         if (!contentId) {
-          console.error("Course creation response missing identifier:", response);
+          console.error("Collection creation response missing identifier:", response);
           throw new Error(t("workspace.errors.unexpectedResponse"));
         }
         navigate(`/edit/collection-editor/${contentId}`, { state: { from: location.pathname + location.search } });
@@ -516,11 +534,11 @@ const WorkspacePage = () => {
   };
 
   // Determines the editor route from the cached WorkspaceItem type from search API.
-  // Only Course, TextBook, and Collection go to collection editor; everything else goes to content editor.
+  // Only Course, TextBook, Collection, and LearningPath go to collection editor; everything else goes to content editor.
   const getEditorRoute = (id: string): string | null => {
     const item = visibleContents.find((c) => c.id === id);
     if (!item) return null;
-    if (["Course", "TextBook", "Collection"].includes(item.contentType)) {
+    if (["Course", "TextBook", "Collection", "LearningPath"].includes(item.contentType)) {
       return `/edit/collection-editor/${id}`;
     }
     if (item.primaryCategory === 'Practice Question Set') {
@@ -548,7 +566,7 @@ const WorkspacePage = () => {
       return;
     }
     const route = getEditorRoute(id);
-    if (route) navigate(route, { state: { from: location.pathname + location.search } });
+    if (route) navigate(route, { state: { from: location.pathname + location.search, intent: 'view' } });
   };
 
   const handleEdit = (id: string) => {
@@ -609,6 +627,11 @@ const WorkspacePage = () => {
     setTypeFilter(type);
   };
 
+  const handleTranscriptFilterChange = (value: boolean) => {
+    interact({ id: 'workspace-transcript-filter', type: 'CLICK', pageid: 'workspace', cdata: [{ id: String(value), type: 'TranscriptFilter' }] });
+    setTranscriptFilter(value);
+  };
+
   const handleViewChange = (view: WorkspaceView) => {
     setActiveView(view);
     setSecondaryView(null);
@@ -634,6 +657,8 @@ const WorkspacePage = () => {
     onViewModeChange: handleViewModeChange,
     typeFilter,
     onTypeFilterChange: handleTypeFilterChange,
+    transcriptFilter,
+    onTranscriptFilterChange: handleTranscriptFilterChange,
     contentCount: showContent ? visibleContents.length : undefined,
     totalCount: showContent ? totalCount : undefined,
     onCreateClick: handleCreateClick,
