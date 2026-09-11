@@ -922,8 +922,8 @@
     "issueCertificate": "Issue Certificate",
     "batchType": "Batch Type",
     "batchTypeOpen": "Open",
-    "saving": "Saving\u2026",
-    "creating": "Creating\u2026",
+    "saving": "Saving…",
+    "creating": "Creating…",
     "saveChanges": "Save Changes",
     "create": "Create Batch",
     "failedToUpdate": "Failed to update batch. Please try again.",
@@ -931,7 +931,7 @@
   },
   "mentorSection": {
     "title": "Mentors in the Batch",
-    "searchPlaceholder": "Search mentors by name or email\u2026",
+    "searchPlaceholder": "Search mentors by name or email…",
     "noMentorsFound": "No mentors found in your organisation.",
     "removeMentor": "Remove {{name}}"
   },
@@ -941,11 +941,11 @@
     "forCreatingBatch": "for creating this batch."
   },
   "batchesTab": {
-    "loading": "Loading batches\u2026",
+    "loading": "Loading batches…",
     "failed": "Failed to load batches.",
     "selectBatch": "Select Batch",
     "noBatchesFound": "No batches found.",
-    "chooseToViewReport": "Choose a batch to view its report\u2026",
+    "chooseToViewReport": "Choose a batch to view its report…",
     "selectFromDropdown": "Select a batch from the dropdown above to view its course report."
   },
   "resourceForm": {
@@ -1026,12 +1026,12 @@
     "reissue": "Re-issue",
     "reissueCertificate": "Re-issue Certificate",
     "reissueConfirmation": "Re-issue the certificate for <strong>{{userName}}</strong> in batch <strong>{{batchName}}</strong>?",
-    "reissuing": "Re-issuing\u2026",
+    "reissuing": "Re-issuing…",
     "reissuedSuccessfully": "Certificate re-issued successfully.",
     "reissueFailed": "Failed to re-issue certificate.",
     "createTemplateTitle": "Create Certificate Template",
     "certificateTitle": "Certificate",
-    "back": "\u2190 Back",
+    "back": "← Back",
     "cancelButton": "Cancel",
     "rules": "Certificate Rules",
     "issueTo": "Issue Certificate To",
@@ -1143,7 +1143,7 @@
     "title": "Course Dashboard",
     "backToCoursePage": "Back to Course Page",
     "backToPathPage": "Back to Path Page",
-    "checkingPermissions": "Checking permissions\u2026",
+    "checkingPermissions": "Checking permissions…",
     "failedToLoad": "Failed to load course.",
     "manageDashboard": "Manage dashboard for this course"
   },
@@ -1237,7 +1237,7 @@
       "addNewRole": "Add a new role"
     },
     "consentTab": {
-      "loading": "Loading consent data\u2026",
+      "loading": "Loading consent data…",
       "loadFailed": "Failed to load consent data. Please try again later.",
       "totalUsers": "Total Users",
       "consentGranted": "Consent Granted",
@@ -1245,7 +1245,7 @@
       "filterLabel": "Consent Status",
       "filterGranted": "Granted",
       "filterRevoked": "Revoked",
-      "searchPlaceholder": "Search by name or email\u2026",
+      "searchPlaceholder": "Search by name or email…",
       "noUsersMatch": "No users match the current filters.",
       "revokeTitle": "Revoke Consent",
       "reissueTitle": "Reissue Consent",
@@ -1400,17 +1400,17 @@
     "assessments": "Assessments",
     "detailedLearnerProgress": "Detailed Learner Progress",
     "detailedAssessments": "Detailed Assessments",
-    "loadingLearners": "Loading learner data\u2026",
-    "loadingAssessments": "Loading assessment data\u2026",
+    "loadingLearners": "Loading learner data…",
+    "loadingAssessments": "Loading assessment data…",
     "somethingWentWrong": "Something went wrong",
     "failedLearnerProgress": "Failed to load learner progress. Please try again.",
     "failedAssessmentData": "Failed to load assessment data. Please try again.",
     "tryAgain": "Try Again",
-    "searchLearners": "Search learners\u2026",
-    "progress025": "0\u201325%",
-    "progress2550": "25\u201350%",
-    "progress5075": "50\u201375%",
-    "progress75100": "75\u2013100%",
+    "searchLearners": "Search learners…",
+    "progress025": "0–25%",
+    "progress2550": "25–50%",
+    "progress5075": "50–75%",
+    "progress75100": "75–100%",
     "progressFilter": "Progress",
     "colLearnerName": "Learner Name",
     "colProgress": "Progress",
@@ -1443,11 +1443,11 @@
     "colCertificates": "Certificates",
     "failedUserGrowth": "Failed to load user growth data. Please try again later.",
     "failedCourseSummary": "Failed to load course summary. Please try again later.",
-    "searchCourses": "Search courses\u2026"
+    "searchCourses": "Search courses…"
   },
   "dataTable": {
     "noData": "No data available.",
-    "showing": "Showing {{from}}\u2013{{to}} of {{total}}",
+    "showing": "Showing {{from}}–{{to}} of {{total}}",
     "pageIndicator": "{{page}} / {{total}}",
     "firstPage": "First page",
     "prevPage": "Previous page",
@@ -1455,7 +1455,7 @@
     "lastPage": "Last page"
   },
   "filterPanel": {
-    "searchPlaceholder": "Search\u2026",
+    "searchPlaceholder": "Search…",
     "allOption": "All {{label}}"
   },
   "editors": {
@@ -1613,5 +1613,36 @@
     "dashboardTitle": "Learning Path Dashboard",
     "manageDashboard": "Manage dashboard for this path",
     "selectBatchHint": "Select a batch from the dropdown above to view its path report."
+  },
+  "skillProfile": {
+    "title": "My Competency Profile",
+    "subtitle": "The skills you hold, how ready you are for your role, and what to do next.",
+    "cardTitle": "Competency Profile",
+    "cardDescription": "Skills you hold and your readiness for a role",
+    "cardCta": "View profile",
+    "skillsHeld": "Skills held",
+    "tierCount": "{{count}} skills",
+    "otherTier": "Other skills",
+    "currentRole": "Current role",
+    "currentRoleUnset": "Not set — assigned by your organisation",
+    "targetRole": "Target role",
+    "targetRoleUnset": "Choose a target role to see how ready you are",
+    "chooseTarget": "Aiming at",
+    "metOf": "{{met}} of {{required}} skills",
+    "stillNeeded": "Still needed",
+    "nextSteps": "What to do next",
+    "nextStepsFor": "to reach {{role}}",
+    "covers": "Covers {{covered}} of {{total}} skills",
+    "alreadyHeld": "{{count}} already held",
+    "evidenceCount": "{{count}} evidence",
+    "noEvidence": "No supporting evidence recorded yet.",
+    "emptyTitle": "No skills recorded yet",
+    "emptyBody": "Complete a tagged course or assessment and the skills you prove will appear here.",
+    "source": {
+      "COURSE": "Course",
+      "ASSESSMENT": "Assessment",
+      "LEARNING_PATH": "Learning Path",
+      "EXTERNAL": "External credential"
+    }
   }
 }

@@ -4,6 +4,7 @@ import { useCollection } from '@/hooks/useCollection';
 import { useContentRead } from '@/hooks/useContent';
 import { useQumlContent } from '@/hooks/useQumlContent';
 import { useContentView } from '@/hooks/useContentView';
+import { useAutoAdvanceContent } from '@/hooks/useAutoAdvanceContent';
 import { getLeafContentIdsFromHierarchy } from '@/services/collection/hierarchyTree';
 import { normalizeQumlPlayerEvent } from '@/services/players/playerEventNormalizer';
 import { LearningPathPlayerCard } from '@/components/learningPath/LearningPathPlayerCard';
@@ -90,6 +91,17 @@ export function LearningPathPlayerView({
     isEnrolledInCurrentBatch: enrollment.isEnrolled,
     mimeType: (playerMetadata as { mimeType?: string } | undefined)?.mimeType,
     currentContentStatus,
+  });
+
+  // Finishing a content item moves the learner on, rather than leaving them parked
+  // on something already completed. Fires only on the not-complete -> complete
+  // transition, so re-opening a finished leaf to review it does not bounce forward.
+  useAutoAdvanceContent({
+    contentId,
+    status: currentContentStatus,
+    nextContentId: currentIndex >= 0 ? leafIds[currentIndex + 1] : undefined,
+    onAdvance: (next) => onNavigateContent(courseId, next),
+    enabled: enrollment.isEnrolled,
   });
 
   // Standard telemetry (START/ASSESS/END) arrives via onTelemetryEvent unchanged.

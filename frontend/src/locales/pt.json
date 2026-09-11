@@ -921,8 +921,8 @@
     "issueCertificate": "Emitir certificado",
     "batchType": "Tipo de lote",
     "batchTypeOpen": "Aberto",
-    "saving": "Salvando\u2026",
-    "creating": "Criando\u2026",
+    "saving": "Salvando…",
+    "creating": "Criando…",
     "saveChanges": "Salvar alterações",
     "create": "Criar lote",
     "failedToUpdate": "Falha ao atualizar lote. Por favor, tente novamente.",
@@ -930,7 +930,7 @@
   },
   "mentorSection": {
     "title": "Mentores no lote",
-    "searchPlaceholder": "Pesquisar mentores por nome ou e-mail\u2026",
+    "searchPlaceholder": "Pesquisar mentores por nome ou e-mail…",
     "noMentorsFound": "Nenhum mentor encontrado na sua organização.",
     "removeMentor": "Remover {{name}}"
   },
@@ -940,11 +940,11 @@
     "forCreatingBatch": "para criar este lote."
   },
   "batchesTab": {
-    "loading": "Carregando lotes\u2026",
+    "loading": "Carregando lotes…",
     "failed": "Falha ao carregar lotes.",
     "selectBatch": "Selecionar lote",
     "noBatchesFound": "Nenhum lote encontrado.",
-    "chooseToViewReport": "Escolha um lote para ver seu relatório\u2026",
+    "chooseToViewReport": "Escolha um lote para ver seu relatório…",
     "selectFromDropdown": "Selecione um lote no menu suspenso acima para ver o relatório do curso."
   },
   "resourceForm": {
@@ -1010,12 +1010,12 @@
     "reissue": "Reemitir",
     "reissueCertificate": "Reemitir certificado",
     "reissueConfirmation": "Reemitir o certificado para <strong>{{userName}}</strong> no lote <strong>{{batchName}}</strong>?",
-    "reissuing": "Reemitindo\u2026",
+    "reissuing": "Reemitindo…",
     "reissuedSuccessfully": "Certificado reemitido com sucesso.",
     "reissueFailed": "Falha ao reemitir certificado.",
     "createTemplateTitle": "Criar modelo de certificado",
     "certificateTitle": "Certificado",
-    "back": "\u2190 Voltar",
+    "back": "← Voltar",
     "cancelButton": "Cancelar",
     "rules": "Regras do certificado",
     "issueTo": "Emitir certificado para",
@@ -1127,7 +1127,7 @@
     "title": "Painel do curso",
     "backToCoursePage": "Voltar à página do curso",
     "backToPathPage": "Voltar à página da trilha",
-    "checkingPermissions": "Verificando permissões\u2026",
+    "checkingPermissions": "Verificando permissões…",
     "failedToLoad": "Falha ao carregar o curso.",
     "manageDashboard": "Gerenciar painel deste curso"
   },
@@ -1221,7 +1221,7 @@
       "addNewRole": "Adicionar nova função"
     },
     "consentTab": {
-      "loading": "Carregando dados de consentimento\u2026",
+      "loading": "Carregando dados de consentimento…",
       "loadFailed": "Falha ao carregar dados de consentimento. Tente novamente mais tarde.",
       "totalUsers": "Total de usuários",
       "consentGranted": "Consentimento concedido",
@@ -1229,7 +1229,7 @@
       "filterLabel": "Status do consentimento",
       "filterGranted": "Concedido",
       "filterRevoked": "Revogado",
-      "searchPlaceholder": "Pesquisar por nome ou email\u2026",
+      "searchPlaceholder": "Pesquisar por nome ou email…",
       "noUsersMatch": "Nenhum usuário corresponde aos filtros atuais.",
       "revokeTitle": "Revogar consentimento",
       "reissueTitle": "Reemitir consentimento",
@@ -1398,17 +1398,17 @@
     "assessments": "Avaliações",
     "detailedLearnerProgress": "Progresso Detalhado do Aprendiz",
     "detailedAssessments": "Avaliações Detalhadas",
-    "loadingLearners": "Carregando dados dos aprendizes\u2026",
-    "loadingAssessments": "Carregando dados de avaliação\u2026",
+    "loadingLearners": "Carregando dados dos aprendizes…",
+    "loadingAssessments": "Carregando dados de avaliação…",
     "somethingWentWrong": "Algo deu errado",
     "failedLearnerProgress": "Falha ao carregar o progresso. Por favor, tente novamente.",
     "failedAssessmentData": "Falha ao carregar avaliações. Por favor, tente novamente.",
     "tryAgain": "Tentar novamente",
-    "searchLearners": "Pesquisar aprendizes\u2026",
-    "progress025": "0\u201325%",
-    "progress2550": "25\u201350%",
-    "progress5075": "50\u201375%",
-    "progress75100": "75\u2013100%",
+    "searchLearners": "Pesquisar aprendizes…",
+    "progress025": "0–25%",
+    "progress2550": "25–50%",
+    "progress5075": "50–75%",
+    "progress75100": "75–100%",
     "progressFilter": "Progresso",
     "colLearnerName": "Nome do aprendiz",
     "colProgress": "Progresso",
@@ -1441,11 +1441,11 @@
     "colCertificates": "Certificados",
     "failedUserGrowth": "Falha ao carregar dados de crescimento. Por favor, tente novamente.",
     "failedCourseSummary": "Falha ao carregar resumo dos cursos. Por favor, tente novamente.",
-    "searchCourses": "Pesquisar cursos\u2026"
+    "searchCourses": "Pesquisar cursos…"
   },
   "dataTable": {
     "noData": "Nenhum dado disponível.",
-    "showing": "Exibindo {{from}}\u2013{{to}} de {{total}}",
+    "showing": "Exibindo {{from}}–{{to}} de {{total}}",
     "pageIndicator": "{{page}} / {{total}}",
     "firstPage": "Primeira página",
     "prevPage": "Página anterior",
@@ -1453,7 +1453,7 @@
     "lastPage": "Última página"
   },
   "filterPanel": {
-    "searchPlaceholder": "Pesquisar\u2026",
+    "searchPlaceholder": "Pesquisar…",
     "allOption": "Todos {{label}}"
   },
   "editors": {
@@ -1611,5 +1611,36 @@
     "dashboardTitle": "Painel da Trilha de Aprendizagem",
     "manageDashboard": "Gerenciar painel desta trilha",
     "selectBatchHint": "Selecione uma turma no menu acima para ver o relatório da trilha."
+  },
+  "skillProfile": {
+    "title": "My Competency Profile",
+    "subtitle": "The skills you hold, how ready you are for your role, and what to do next.",
+    "cardTitle": "Competency Profile",
+    "cardDescription": "Skills you hold and your readiness for a role",
+    "cardCta": "View profile",
+    "skillsHeld": "Skills held",
+    "tierCount": "{{count}} skills",
+    "otherTier": "Other skills",
+    "currentRole": "Current role",
+    "currentRoleUnset": "Not set — assigned by your organisation",
+    "targetRole": "Target role",
+    "targetRoleUnset": "Choose a target role to see how ready you are",
+    "chooseTarget": "Aiming at",
+    "metOf": "{{met}} of {{required}} skills",
+    "stillNeeded": "Still needed",
+    "nextSteps": "What to do next",
+    "nextStepsFor": "to reach {{role}}",
+    "covers": "Covers {{covered}} of {{total}} skills",
+    "alreadyHeld": "{{count}} already held",
+    "evidenceCount": "{{count}} evidence",
+    "noEvidence": "No supporting evidence recorded yet.",
+    "emptyTitle": "No skills recorded yet",
+    "emptyBody": "Complete a tagged course or assessment and the skills you prove will appear here.",
+    "source": {
+      "COURSE": "Course",
+      "ASSESSMENT": "Assessment",
+      "LEARNING_PATH": "Learning Path",
+      "EXTERNAL": "External credential"
+    }
   }
 }
