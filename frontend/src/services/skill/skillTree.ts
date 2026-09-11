@@ -14,7 +14,7 @@ export interface FrameworkCategoryLike {
 
 /** A taxonomy framework read, in either the enveloped or the adapter-unwrapped shape. */
 export interface TaxonomyFrameworkBody {
-  framework?: { categories?: FrameworkCategoryLike[]; tierLabels?: string[] };
+  framework?: { categories?: FrameworkCategoryLike[] };
 }
 export interface TaxonomyFrameworkResponse extends TaxonomyFrameworkBody {
   result?: TaxonomyFrameworkBody;
@@ -55,11 +55,6 @@ export function frameworkCategories(
   body: TaxonomyFrameworkResponse | undefined | null
 ): FrameworkCategoryLike[] {
   return body?.framework?.categories ?? body?.result?.framework?.categories ?? [];
-}
-
-/** `tierLabels` sits on the framework itself, not on a category. */
-export function frameworkTierLabels(body: TaxonomyFrameworkResponse | undefined | null): string[] {
-  return body?.framework?.tierLabels ?? body?.result?.framework?.tierLabels ?? [];
 }
 
 /**

@@ -14,11 +14,9 @@ export {
   buildSkillVocabulary,
   groupSkillsByTier,
   frameworkCategories,
-  frameworkTierLabels,
   skillName,
   isGrouped,
   type SkillVocabulary,
   type TierGroup,
-  type LeafSkill,
   type TaxonomyFrameworkResponse,
 } from './skillTree';

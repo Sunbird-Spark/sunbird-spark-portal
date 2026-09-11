@@ -42,7 +42,6 @@ const held = (skillId: string, frameworkId = 'fw'): HeldSkill => ({
 
 const vocab = buildSkillVocabulary('fw', {
   framework: {
-    tierLabels: ['Competency area', 'Competency', 'Skill'],
     categories: [
       {
         code: 'competency',

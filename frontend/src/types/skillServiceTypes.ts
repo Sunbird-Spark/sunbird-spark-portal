@@ -116,13 +116,6 @@ export interface CompetencyFrameworkResponse extends CompetencyFrameworkBody {
 
 export const GAP_STATUS = { met: 'MET', missing: 'MISSING' } as const;
 
-export const SOURCE_TYPE = {
-  course: 'COURSE',
-  assessment: 'ASSESSMENT',
-  learningPath: 'LEARNING_PATH',
-  external: 'EXTERNAL',
-} as const;
-
 export interface SkillEvidence {
   evidenceId: string;
   sourceType: string;

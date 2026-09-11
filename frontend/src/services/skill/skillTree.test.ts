@@ -3,7 +3,6 @@ import {
   buildSkillVocabulary,
   groupSkillsByTier,
   frameworkCategories,
-  frameworkTierLabels,
   skillName,
   isGrouped,
 } from './skillTree';
@@ -19,7 +18,6 @@ const held = (skillId: string, frameworkId = 'fw'): HeldSkill => ({
 /** Three tiers: area -> competency -> leaf, as the health framework is authored. */
 const threeTier = {
   framework: {
-    tierLabels: ['Competency area', 'Competency', 'Skill'],
     categories: [
       {
         code: 'competency',
@@ -55,24 +53,21 @@ const threeTier = {
   },
 };
 
-describe('frameworkCategories / frameworkTierLabels', () => {
+describe('frameworkCategories', () => {
   // AxiosAdapter.mapResponse strips `result`, so the unwrapped form is what arrives.
   // Reading `result.framework` silently emptied every label twice during the v1 work.
   it('reads the unwrapped shape the adapter delivers', () => {
     expect(frameworkCategories(threeTier)).toHaveLength(1);
-    expect(frameworkTierLabels(threeTier)[0]).toBe('Competency area');
   });
 
   it('still reads the enveloped shape', () => {
     expect(frameworkCategories({ result: threeTier })).toHaveLength(1);
-    expect(frameworkTierLabels({ result: threeTier })).toHaveLength(3);
   });
 
   it('returns [] rather than throwing on an unexpected body', () => {
     expect(frameworkCategories(undefined)).toEqual([]);
     expect(frameworkCategories(null)).toEqual([]);
     expect(frameworkCategories({})).toEqual([]);
-    expect(frameworkTierLabels({})).toEqual([]);
   });
 });
 
