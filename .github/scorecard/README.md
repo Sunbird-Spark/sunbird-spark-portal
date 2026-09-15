@@ -1,6 +1,9 @@
 # OpenSSF Scorecard
 
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Sunbird-Spark/sunbird-spark-portal/badge)](https://scorecard.dev/viewer/?uri=github.com/Sunbird-Spark/sunbird-spark-portal)
+
 This repo runs [OpenSSF Scorecard](https://github.com/ossf/scorecard) to assess its supply-chain security posture — branch protection, dependency pinning, SAST usage, token permissions, and related checks. Full list of checks: https://github.com/ossf/scorecard/blob/main/docs/checks.md
+
 
 ## Running the scan
 
