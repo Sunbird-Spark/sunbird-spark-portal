@@ -24,8 +24,10 @@ on:
       - "v*"
   workflow_dispatch:
 
-# Default to read-only; the job grants only what it needs.
-permissions: read-all
+# Default to least privilege; the job below grants only what it needs.
+# Naming only contents implicitly sets every other scope to none.
+permissions:
+  contents: read
 
 jobs:
   analysis:

@@ -5,8 +5,10 @@ on:
     tags:
       - '*'
 
-# Default to read-only; the build job grants packages: write explicitly.
-permissions: read-all
+# Default to least privilege; the build job grants packages: write explicitly.
+# Naming only contents implicitly sets every other scope to none.
+permissions:
+  contents: read
 
 env:
   BUILD_DOCKER_IMAGE: ${{ vars.BUILD_DOCKER_IMAGE || 'true' }}
