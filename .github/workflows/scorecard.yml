@@ -1,0 +1,66 @@
+# OpenSSF Scorecard — supply-chain security posture of this repository.
+# Results are uploaded to the Security > Code scanning tab on every run.
+#
+# ossf/scorecard-action only runs (a) on the default branch, for any event, or
+# (b) on pull_request events, for any target branch. A push to a v* branch is
+# rejected outright ("Only the default branch main is supported"), regardless of
+# publish_results. So: push/schedule cover main; pull_request covers main and the
+# v* development branches. Publishing (badge / api.scorecard.dev) happens from main.
+name: OpenSSF Scorecard
+
+on:
+  # Re-score when branch protection / rulesets change (default branch).
+  branch_protection_rule:
+  # Weekly, Monday 03:30 UTC (default branch).
+  schedule:
+    - cron: '30 3 * * 1'
+  push:
+    branches:
+      - main
+  # Every PR into main or a v* development branch gets an analysis + SARIF (no publish).
+  pull_request:
+    branches:
+      - main
+      - "v*"
+  workflow_dispatch:
+
+# Default to read-only; the job grants only what it needs.
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    permissions:
+      # Upload SARIF to GitHub code scanning.
+      security-events: write
+      # OIDC token, required for publish_results.
+      id-token: write
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc # v2.4.4
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          # Publish only from the default branch on non-PR events.
+          publish_results: ${{ github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch }}
+
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: SARIF file
+          path: results.sarif
+          retention-days: 5
+
+      - name: Upload to code scanning
+        uses: github/codeql-action/upload-sarif@faaca9a8f6edddba5725ffe5adefdab6669a2eca # v3.38.0
+        with:
+          sarif_file: results.sarif
