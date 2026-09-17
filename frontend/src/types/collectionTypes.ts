@@ -66,11 +66,22 @@ export interface HierarchyContentNode {
   policy?: string;
   /** Sort order among siblings (Levels, framework categories). */
   index?: number;
-  /** Framework "skill" category terms (USF) — used for Learning Path skill scoping. */
+  /**
+   * THREE SIMILAR NAMES, TWO DIFFERENT AXES. Do not merge them blindly.
+   *
+   * `skill` and `se_skills` are TAXONOMY discovery facets: human-readable labels such as
+   * "Data literacy", used for browse and search scoping.
+   *
+   * `skills` is the COMPETENCY framework field added in v2: leaf term CODES such as
+   * "dosage-calculation", which is what evidence, roles and the gap are all keyed on. It
+   * replaced `competencies`, which held labels rather than codes.
+   *
+   * Codes are not display strings. Anything rendering `skills` to a learner must resolve or
+   * de-slug it first, or the page shows raw slugs.
+   */
   skill?: string[];
   se_skills?: string[];
-  /** Level/Course skill tags persisted on the unit node (Learning Path authoring). */
-  competencies?: string[];
+  skills?: string[];
 }
 
 export interface CourseHierarchyResponse {

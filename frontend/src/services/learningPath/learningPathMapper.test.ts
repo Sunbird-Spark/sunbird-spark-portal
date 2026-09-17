@@ -66,9 +66,22 @@ describe('parseLearningPath', () => {
     expect(assessCourse?.isAssessmentCourse).toBe(true);
   });
 
-  it('reads level skills from the Level node competencies field when present', () => {
+  // v2 renamed the content field `competencies` -> `skills`, and its values became leaf CODES
+  // rather than the labels v1 stored. These strings are rendered straight to the learner as chips,
+  // so a raw code would surface as a slug.
+  it('reads level skills from the Level node skills field, de-slugged for display', () => {
     const model = parseLearningPath(LP_HIERARCHY_WITH_ASSESSMENTS);
     expect(model.levels[0]!.skills).toEqual(['Data literacy', 'Spreadsheet basics']);
+  });
+
+  it('never surfaces a raw competency code to the learner', () => {
+    const model = parseLearningPath({
+      ...LP_HIERARCHY_WITH_ASSESSMENTS,
+      children: [{ identifier: 'lvl_x', name: 'L', primaryCategory: 'Level', index: 1,
+        skills: ['iv-administration', 'hmis_reporting'], children: [] }],
+    } as never);
+    expect(model.levels[0]!.skills).toEqual(['Iv administration', 'Hmis reporting']);
+    model.levels[0]!.skills.forEach((s) => expect(s).not.toMatch(/[-_]/));
   });
 
   it('resolves policy from the root node, defaulting to Fixed for an unknown value', () => {

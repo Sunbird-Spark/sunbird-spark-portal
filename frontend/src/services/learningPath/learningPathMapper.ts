@@ -7,6 +7,7 @@ import type {
   LPUnitNode,
 } from '../../types/learningPathTypes';
 import { getLeafContentIdsFromHierarchy } from '../collection/hierarchyTree';
+import { skillName } from '../skill/skillTree';
 
 const QUESTIONSET_MIME_TYPES = ['application/vnd.sunbird.questionset', 'application/vnd.sunbird.question'];
 
@@ -84,9 +85,24 @@ function unionSkills(...lists: Array<string[] | undefined>): string[] {
   return Array.from(set);
 }
 
+/**
+ * Competency codes for display.
+ *
+ * The v2 `skills` field carries leaf CODES ("dosage-calculation"); these lists are rendered
+ * straight to the learner as chips, so a raw code would surface as a slug. `skillName` with no
+ * vocabulary de-slugs it to "Dosage calculation" and leaves an already-readable taxonomy label
+ * untouched, which is why the taxonomy facets can pass through the same call safely.
+ *
+ * A proper label needs the framework, which this mapper has no access to - the competency page
+ * resolves names there instead. This only has to stop the Learning Path page showing slugs.
+ */
+function displayable(codes: string[] | undefined): string[] {
+  return (codes ?? []).map((c) => skillName(undefined, c));
+}
+
 function mapCourseNode(courseNode: HierarchyContentNode): LPCourseNode {
   const leafIds = getLeafContentIdsFromHierarchy(courseNode);
-  const skills = unionSkills(courseNode.competencies, courseNode.skill, courseNode.se_skills);
+  const skills = unionSkills(displayable(courseNode.skills), courseNode.skill, courseNode.se_skills);
   const isAssessment = isAssessmentCourse(courseNode, leafIds);
   return {
     identifier: courseNode.identifier,
@@ -104,7 +120,7 @@ function mapCourseNode(courseNode: HierarchyContentNode): LPCourseNode {
 
 function mapLevelNode(levelNode: HierarchyContentNode): LPLevelNode {
   const courses = (levelNode.children ?? []).map(mapCourseNode);
-  const ownSkills = unionSkills(levelNode.competencies, levelNode.skill, levelNode.se_skills);
+  const ownSkills = unionSkills(displayable(levelNode.skills), levelNode.skill, levelNode.se_skills);
   const skills = ownSkills.length > 0 ? ownSkills : unionSkills(...courses.map((c) => c.skills));
   return {
     identifier: levelNode.identifier,

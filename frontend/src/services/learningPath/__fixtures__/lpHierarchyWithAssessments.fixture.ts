@@ -51,7 +51,7 @@ export const LP_HIERARCHY_WITH_ASSESSMENTS: HierarchyContentNode = {
       mimeType: 'application/vnd.ekstep.content-collection',
       objectType: 'Content',
       index: 1,
-      competencies: ['Data literacy', 'Spreadsheet basics'],
+      skills: ['data-literacy', 'spreadsheet-basics'],
       children: [
         {
           identifier: 'course_1a',
