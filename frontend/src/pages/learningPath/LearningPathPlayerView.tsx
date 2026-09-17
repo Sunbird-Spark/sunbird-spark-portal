@@ -6,6 +6,7 @@ import { useQumlContent } from '@/hooks/useQumlContent';
 import { useContentView } from '@/hooks/useContentView';
 import { useAutoAdvanceContent } from '@/hooks/useAutoAdvanceContent';
 import { getLeafContentIdsFromHierarchy } from '@/services/collection/hierarchyTree';
+import { computeCourseProgress } from '@/services/learningPath/learningPathProgress';
 import { normalizeQumlPlayerEvent } from '@/services/players/playerEventNormalizer';
 import { LearningPathPlayerCard } from '@/components/learningPath/LearningPathPlayerCard';
 import { LearningPathRail } from '@/components/learningPath/LearningPathRail';
@@ -96,11 +97,33 @@ export function LearningPathPlayerView({
   // Finishing a content item moves the learner on, rather than leaving them parked
   // on something already completed. Fires only on the not-complete -> complete
   // transition, so re-opening a finished leaf to review it does not bounce forward.
+  // The whole path in reading order, so finishing a course's last leaf carries on into the next
+  // course rather than parking the learner at a dead end. `leafIds` above is the CURRENT course
+  // only, which is why advancing used to stop at every course boundary.
+  //
+  // Waived courses are skipped: a course the entry assessment marked optional should not be the
+  // thing a learner is dropped into next.
+  const pathLeaves = useMemo(
+    () =>
+      model.levels.flatMap((level) =>
+        level.courses.flatMap((course) =>
+          computeCourseProgress(course, summaryByCollectionId, pathSummary).optional
+            ? []
+            : course.leafIds.map((leaf) => ({ courseId: course.identifier, contentId: leaf }))
+        )
+      ),
+    [model, summaryByCollectionId, pathSummary]
+  );
+  const nextInPath = useMemo(() => {
+    const at = pathLeaves.findIndex((l) => l.contentId === contentId && l.courseId === courseId);
+    return at >= 0 ? pathLeaves[at + 1] : undefined;
+  }, [pathLeaves, contentId, courseId]);
+
   useAutoAdvanceContent({
     contentId,
     status: currentContentStatus,
-    nextContentId: currentIndex >= 0 ? leafIds[currentIndex + 1] : undefined,
-    onAdvance: (next) => onNavigateContent(courseId, next),
+    nextContentId: nextInPath?.contentId,
+    onAdvance: (next) => onNavigateContent(nextInPath?.courseId ?? courseId, next),
     enabled: enrollment.isEnrolled,
   });
 

@@ -39,6 +39,17 @@ export function useAutoAdvanceContent({
   // contentId the ref's `seen` value belongs to, so a leaf change resets it
   const seenFor = useRef<string | undefined>(undefined);
   const seen = useRef<number | undefined>(undefined);
+  // Set once per leaf, so a re-render cannot schedule a second advance.
+  const armed = useRef(false);
+
+  // onAdvance is typically an inline arrow at the call site, so it has a new identity on every
+  // render. Holding it in a ref keeps it OUT of the effect's dependencies: with it in, the effect
+  // re-ran on every render, and its cleanup cancelled the pending timer before the delay elapsed.
+  // Completing a leaf triggers a summary refetch, so a re-render within 1200ms is the normal case -
+  // the advance was therefore cancelled essentially every time, and could not re-arm because
+  // `seen` had already been moved to 2, making `justCompleted` false thereafter.
+  const advanceRef = useRef(onAdvance);
+  advanceRef.current = onAdvance;
 
   useEffect(() => {
     if (!enabled || !contentId) return;
@@ -47,16 +58,20 @@ export function useAutoAdvanceContent({
       // first observation for this leaf - baseline only, never advance
       seenFor.current = contentId;
       seen.current = status;
+      armed.current = false;
       return;
     }
 
     const previous = seen.current;
     seen.current = status;
 
+    if (armed.current) return;
     const justCompleted = previous !== COMPLETE_STATUS && status === COMPLETE_STATUS;
     if (!justCompleted || !nextContentId) return;
 
-    const timer = setTimeout(() => onAdvance(nextContentId), delayMs);
+    armed.current = true;
+    const next = nextContentId;
+    const timer = setTimeout(() => advanceRef.current(next), delayMs);
     return () => clearTimeout(timer);
-  }, [contentId, status, nextContentId, onAdvance, enabled, delayMs]);
+  }, [contentId, status, nextContentId, enabled, delayMs]);
 }

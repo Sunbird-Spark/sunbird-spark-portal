@@ -80,4 +80,37 @@ describe('useAutoAdvanceContent', () => {
     vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS * 3);
     expect(onAdvance).not.toHaveBeenCalled();
   });
+
+  // REGRESSION: onAdvance is an inline arrow at the call site, so it changes identity on every
+  // render. It used to sit in the effect's dependency array, so any re-render between completion
+  // and the timer firing ran the cleanup and cancelled the advance - and it could not re-arm,
+  // because `seen` had already moved to 2. Completing a leaf triggers a summary refetch, so a
+  // re-render inside the 1200ms delay is the normal case, not an edge case.
+  it('still advances when the component re-renders before the delay elapses', () => {
+    const onAdvance = vi.fn();
+    const base: Args = { contentId: 'c1', status: 0, nextContentId: 'c2', onAdvance };
+    const { rerender } = render(base);
+
+    rerender({ ...base, status: 2, onAdvance: (n) => onAdvance(n) });
+    // a fresh onAdvance identity on each re-render, as the real call site produces
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS / 3);
+    rerender({ ...base, status: 2, onAdvance: (n) => onAdvance(n) });
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS / 3);
+    rerender({ ...base, status: 2, onAdvance: (n) => onAdvance(n) });
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+
+    expect(onAdvance).toHaveBeenCalledTimes(1);
+    expect(onAdvance).toHaveBeenCalledWith('c2');
+  });
+
+  it('advances only once however many re-renders follow', () => {
+    const onAdvance = vi.fn();
+    const base: Args = { contentId: 'c1', status: 0, nextContentId: 'c2', onAdvance };
+    const { rerender } = render(base);
+    rerender({ ...base, status: 2 });
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS * 2);
+    rerender({ ...base, status: 2 });
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS * 2);
+    expect(onAdvance).toHaveBeenCalledTimes(1);
+  });
 });
