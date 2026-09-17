@@ -164,4 +164,39 @@ describe('parseLearningPath', () => {
     expect(parseLearningPath(null)).toMatchObject({ identifier: '', levels: [], policy: 'Fixed' });
     expect(parseLearningPath(undefined)).toMatchObject({ identifier: '', levels: [], policy: 'Fixed' });
   });
+
+  // REGRESSION: the search indexer mirrors `skill` into `se_skills`, so a course tagged
+  // `dosage-calculation` comes back carrying both. Unioning a de-slugged `skill` with a RAW
+  // `se_skills` listed each competency twice - the V3 path reported 16 skills for the 8 it teaches.
+  it('does not list a skill twice when se_skills mirrors the raw code', () => {
+    const model = parseLearningPath({
+      ...LP_HIERARCHY_WITH_ASSESSMENTS,
+      children: [{ identifier: 'lvl_d', name: 'L', primaryCategory: 'Level', index: 1,
+        skill: ['dosage-calculation', 'iv-administration'],
+        se_skills: ['dosage-calculation', 'iv-administration'],
+        children: [] }],
+    } as never);
+    expect(model.levels[0]!.skills).toEqual(['Dosage calculation', 'Iv administration']);
+  });
+
+  // se_skills is the platform's search-enriched COPY of skill, verified identical on live V3
+  // content, so `skill` wins outright when present.
+  it('ignores se_skills when skill is present', () => {
+    const model = parseLearningPath({
+      ...LP_HIERARCHY_WITH_ASSESSMENTS,
+      children: [{ identifier: 'lvl_e', name: 'L', primaryCategory: 'Level', index: 1,
+        skill: ['hand-hygiene'], se_skills: ['hand-hygiene', 'something-else'], children: [] }],
+    } as never);
+    expect(model.levels[0]!.skills).toEqual(['Hand hygiene']);
+  });
+
+  // Older content carries se_skills with no `skill`, holding real taxonomy labels.
+  it('falls back to se_skills when the node has no skill field', () => {
+    const model = parseLearningPath({
+      ...LP_HIERARCHY_WITH_ASSESSMENTS,
+      children: [{ identifier: 'lvl_f', name: 'L', primaryCategory: 'Level', index: 1,
+        se_skills: ['Data literacy'], children: [] }],
+    } as never);
+    expect(model.levels[0]!.skills).toEqual(['Data literacy']);
+  });
 });

@@ -100,10 +100,29 @@ function displayable(codes: string[] | undefined): string[] {
   return (codes ?? []).map((c) => skillName(undefined, c));
 }
 
+/**
+ * `skill` wins; `se_skills` is only a fallback.
+ *
+ * NOT A UNION. Verified against live V3 content, `se_skills` is the platform's search-enriched
+ * COPY of `skill` - byte for byte the same codes:
+ *   skill     ['dosage-calculation', 'iv-administration']
+ *   se_skills ['dosage-calculation', 'iv-administration']
+ * Unioning them listed every competency twice in different casing ("Dosage calculation" AND
+ * "dosage-calculation"), so the V3 path reported 16 skills for the 8 it teaches.
+ *
+ * The fallback is kept because older content exists that carries `se_skills` with no `skill` at
+ * all, holding genuine taxonomy labels rather than competency codes. Preferring `skill` covers the
+ * competency case without dropping those.
+ */
+function skillSource(node: { skill?: string[]; se_skills?: string[] }): string[] {
+  const own = (node.skill ?? []).filter(Boolean);
+  return own.length > 0 ? own : (node.se_skills ?? []).filter(Boolean);
+}
+
 function mapCourseNode(courseNode: HierarchyContentNode): LPCourseNode {
   const leafIds = getLeafContentIdsFromHierarchy(courseNode);
   const skillCodes = (courseNode.skill ?? []).filter(Boolean);
-  const skills = unionSkills(displayable(courseNode.skill), courseNode.se_skills);
+  const skills = displayable(skillSource(courseNode));
   const isAssessment = isAssessmentCourse(courseNode, leafIds);
   return {
     identifier: courseNode.identifier,
@@ -123,7 +142,7 @@ function mapCourseNode(courseNode: HierarchyContentNode): LPCourseNode {
 function mapLevelNode(levelNode: HierarchyContentNode): LPLevelNode {
   const courses = (levelNode.children ?? []).map(mapCourseNode);
   const ownCodes = (levelNode.skill ?? []).filter(Boolean);
-  const ownSkills = unionSkills(displayable(levelNode.skill), levelNode.se_skills);
+  const ownSkills = displayable(skillSource(levelNode));
   const skills = ownSkills.length > 0 ? ownSkills : unionSkills(...courses.map((c) => c.skills));
   return {
     identifier: levelNode.identifier,
