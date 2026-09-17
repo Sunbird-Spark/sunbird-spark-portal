@@ -57,7 +57,7 @@ const course1: LPCourseNode = {
   name: 'Reading data honestly',
   leafNodesCount: 2,
   leafIds: ['res_1', 'res_2'],
-  skills: [],
+  skills: [], skillCodes: [],
   isAssessmentCourse: false,
 };
 
@@ -65,7 +65,7 @@ const level1: LPLevelNode = {
   identifier: 'level_1',
   name: 'Foundations',
   index: 1,
-  skills: [],
+  skills: [], skillCodes: [],
   courses: [course1],
 };
 
@@ -78,7 +78,7 @@ function buildLp(overrides: Record<string, unknown> = {}) {
       levels: [level1],
       priorAssessment: undefined,
       outcomeAssessment: undefined,
-      allSkills: [],
+      allSkills: [], allSkillCodes: [],
       courseTotal: 1,
       leafTotal: 2,
     },
@@ -284,10 +284,10 @@ describe('LearningPathPlayerView', () => {
               name: 'LP-PostAssess-Course',
               leafNodesCount: 1,
               leafIds: ['leaf_outcome'],
-              skills: [],
+              skills: [], skillCodes: [],
               isAssessmentCourse: true,
             },
-            allSkills: [],
+            allSkills: [], allSkillCodes: [],
             courseTotal: 2,
             leafTotal: 3,
           },

@@ -78,10 +78,12 @@ describe('parseLearningPath', () => {
     const model = parseLearningPath({
       ...LP_HIERARCHY_WITH_ASSESSMENTS,
       children: [{ identifier: 'lvl_x', name: 'L', primaryCategory: 'Level', index: 1,
-        skills: ['iv-administration', 'hmis_reporting'], children: [] }],
+        skill: ['iv-administration', 'hmis_reporting'], children: [] }],
     } as never);
     expect(model.levels[0]!.skills).toEqual(['Iv administration', 'Hmis reporting']);
     model.levels[0]!.skills.forEach((s) => expect(s).not.toMatch(/[-_]/));
+    // the raw codes survive alongside, for matching against held skills
+    expect(model.levels[0]!.skillCodes).toEqual(['iv-administration', 'hmis_reporting']);
   });
 
   it('resolves policy from the root node, defaulting to Fixed for an unknown value', () => {

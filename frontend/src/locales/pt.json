@@ -1610,7 +1610,12 @@
     "manageBatches": "Gerenciar turmas desta trilha",
     "dashboardTitle": "Painel da Trilha de Aprendizagem",
     "manageDashboard": "Gerenciar painel desta trilha",
-    "selectBatchHint": "Selecione uma turma no menu acima para ver o relatório da trilha."
+    "selectBatchHint": "Selecione uma turma no menu acima para ver o relatório da trilha.",
+    "progressTowardRole": "Your progress toward {{role}}",
+    "skillsFromThisPath": "Skills from this path",
+    "skillsHeldOf": "{{held}} of {{total}} skills",
+    "notOnThisPath": "not on this path",
+    "viewFullProfile": "View full profile"
   },
   "skillProfile": {
     "title": "My Competency Profile",

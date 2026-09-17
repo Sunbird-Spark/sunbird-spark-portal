@@ -1610,7 +1610,12 @@
     "manageBatches": "Gérer les cohortes de ce parcours",
     "dashboardTitle": "Tableau de bord du parcours d'apprentissage",
     "manageDashboard": "Gérer le tableau de bord de ce parcours",
-    "selectBatchHint": "Sélectionnez une cohorte dans la liste ci-dessus pour voir son rapport de parcours."
+    "selectBatchHint": "Sélectionnez une cohorte dans la liste ci-dessus pour voir son rapport de parcours.",
+    "progressTowardRole": "Your progress toward {{role}}",
+    "skillsFromThisPath": "Skills from this path",
+    "skillsHeldOf": "{{held}} of {{total}} skills",
+    "notOnThisPath": "not on this path",
+    "viewFullProfile": "View full profile"
   },
   "skillProfile": {
     "title": "My Competency Profile",

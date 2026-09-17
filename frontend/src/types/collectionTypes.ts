@@ -72,16 +72,21 @@ export interface HierarchyContentNode {
    * `skill` and `se_skills` are TAXONOMY discovery facets: human-readable labels such as
    * "Data literacy", used for browse and search scoping.
    *
-   * `skills` is the COMPETENCY framework field added in v2: leaf term CODES such as
-   * "dosage-calculation", which is what evidence, roles and the gap are all keyed on. It
-   * replaced `competencies`, which held labels rather than codes.
+   * `skill` is the COMPETENCY field: leaf term CODES such as "dosage-calculation", which is what
+   * evidence, roles and the gap are keyed on. It replaced `competencies`, which held labels.
+   * NOTE it is `skill`, singular - the plural `skills` is a DIFFERENT, pre-existing taxonomy field
+   * locked to [Listening, Speaking, Reading, Writing, Touch, Gestures, Draw]; Knowlg rejects a
+   * competency code written there. Content carries framework terms under the category's own name,
+   * and the leaf category is `skill`.
    *
    * Codes are not display strings. Anything rendering `skills` to a learner must resolve or
    * de-slug it first, or the page shows raw slugs.
    */
   skill?: string[];
   se_skills?: string[];
-  skills?: string[];
+  /** The Learning Path root only: the role the programme is built for. */
+  targetRole?: string;
+  competencyFramework?: string;
 }
 
 export interface CourseHierarchyResponse {

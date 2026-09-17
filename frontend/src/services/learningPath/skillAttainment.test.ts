@@ -3,7 +3,7 @@ import { getAttainedLevels, getGainedSkills } from './skillAttainment';
 import type { LevelProgressInfo, LPLevelNode } from '../../types/learningPathTypes';
 
 function level(overrides: Partial<LPLevelNode>): LPLevelNode {
-  return { identifier: 'lvl', name: 'Level', index: 0, skills: [], courses: [], ...overrides };
+  return { identifier: 'lvl', name: 'Level', index: 0, skills: [], skillCodes: [], courses: [], ...overrides };
 }
 
 function progress(pct: number): LevelProgressInfo {

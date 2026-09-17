@@ -1611,7 +1611,12 @@
     "manageBatches": "إدارة مجموعات هذا المسار",
     "dashboardTitle": "لوحة تحكم مسار التعلم",
     "manageDashboard": "إدارة لوحة التحكم لهذا المسار",
-    "selectBatchHint": "اختر مجموعة من القائمة أعلاه لعرض تقرير المسار."
+    "selectBatchHint": "اختر مجموعة من القائمة أعلاه لعرض تقرير المسار.",
+    "progressTowardRole": "Your progress toward {{role}}",
+    "skillsFromThisPath": "Skills from this path",
+    "skillsHeldOf": "{{held}} of {{total}} skills",
+    "notOnThisPath": "not on this path",
+    "viewFullProfile": "View full profile"
   },
   "skillProfile": {
     "title": "My Competency Profile",

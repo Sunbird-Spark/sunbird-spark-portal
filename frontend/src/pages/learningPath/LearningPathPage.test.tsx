@@ -4,6 +4,11 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import LearningPathPage from './LearningPathPage';
 import type { LPCourseNode, LPLevelNode } from '@/types/learningPathTypes';
 
+vi.mock('@/hooks/usePathSkills', () => ({
+  // The overview now surfaces skill progress, which reaches the competency APIs. These tests are
+  // about layout and the creator/enrol panels, so the hook is stubbed to "nothing to show".
+  usePathSkills: () => ({ summary: undefined, name: (c: string) => c, roleName: '', isLoading: false }),
+}));
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({ t: (key: string) => key }),
 }));
@@ -29,7 +34,7 @@ const priorCourse: LPCourseNode = {
   name: 'Prior check',
   leafNodesCount: 1,
   leafIds: ['qs_prior'],
-  skills: ['Data literacy'],
+  skills: ['Data literacy'], skillCodes: [],
   isAssessmentCourse: true,
   questionCount: 10,
 };
@@ -39,7 +44,7 @@ const outcomeCourse: LPCourseNode = {
   name: 'Outcome check',
   leafNodesCount: 1,
   leafIds: ['qs_outcome'],
-  skills: ['Data literacy'],
+  skills: ['Data literacy'], skillCodes: [],
   isAssessmentCourse: true,
 };
 
@@ -47,14 +52,14 @@ const level1: LPLevelNode = {
   identifier: 'level_1',
   name: 'Foundations',
   index: 1,
-  skills: ['Data literacy'],
+  skills: ['Data literacy'], skillCodes: [],
   courses: [
     {
       identifier: 'course_1',
       name: 'Course 1',
       leafNodesCount: 1,
       leafIds: ['res_1'],
-      skills: [],
+      skills: [], skillCodes: [],
       isAssessmentCourse: false,
     },
   ],

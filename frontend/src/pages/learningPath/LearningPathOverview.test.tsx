@@ -3,6 +3,11 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { LearningPathOverview } from './LearningPathOverview';
 
+vi.mock('@/hooks/usePathSkills', () => ({
+  // The overview now surfaces skill progress, which reaches the competency APIs. These tests are
+  // about layout and the creator/enrol panels, so the hook is stubbed to "nothing to show".
+  usePathSkills: () => ({ summary: undefined, name: (c: string) => c, roleName: '', isLoading: false }),
+}));
 vi.mock('@/hooks/useAppI18n', () => ({
   useAppI18n: () => ({ t: (key: string) => key }),
 }));

@@ -1612,7 +1612,12 @@
     "manageBatches": "Manage batches for this path",
     "dashboardTitle": "Learning Path Dashboard",
     "manageDashboard": "Manage dashboard for this path",
-    "selectBatchHint": "Select a batch from the dropdown above to view its path report."
+    "selectBatchHint": "Select a batch from the dropdown above to view its path report.",
+    "progressTowardRole": "Your progress toward {{role}}",
+    "skillsFromThisPath": "Skills from this path",
+    "skillsHeldOf": "{{held}} of {{total}} skills",
+    "notOnThisPath": "not on this path",
+    "viewFullProfile": "View full profile"
   },
   "skillProfile": {
     "title": "My Competency Profile",

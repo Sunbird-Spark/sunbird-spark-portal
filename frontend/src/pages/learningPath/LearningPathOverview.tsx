@@ -1,5 +1,7 @@
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { PathProgressCard } from '@/components/learningPath/PathProgressCard';
+import { PathSkillProgressCard } from '@/components/learningPath/PathSkillProgressCard';
+import { usePathSkills } from '@/hooks/usePathSkills';
 import { CertificateLockCard } from '@/components/learningPath/CertificateLockCard';
 import { EnrolCard } from '@/components/learningPath/EnrolCard';
 import { LearningPathCreatorPanel } from '@/components/learningPath/LearningPathCreatorPanel';
@@ -45,6 +47,8 @@ export function LearningPathOverview({
     isMentorViewingPath,
   } = lp;
   const isCreatorOrMentor = isTrackable && isAuthenticated && (isCreatorViewingOwnPath || isMentorViewingPath);
+  // Only meaningful to someone actually walking the path: a creator previewing it holds no skills.
+  const pathSkills = usePathSkills(model, summaryByCollectionId, pathSummary);
 
   return (
     <div className="flex-1 min-w-0 mx-auto max-w-[85rem] px-6 py-7">
@@ -62,6 +66,17 @@ export function LearningPathOverview({
           batchEndDate={enrollment.batchEndDate}
         />
       </div>
+
+      {enrollment.isEnrolled && pathSkills.summary && (
+        <div className="mb-4">
+          <PathSkillProgressCard
+            summary={pathSkills.summary}
+            name={pathSkills.name}
+            roleName={pathSkills.roleName}
+            hasRole={Boolean(pathSkills.targetRole)}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_18.75rem] lg:items-start">
         <div>

@@ -18,7 +18,7 @@ function buildModel(): LearningPathModel {
         identifier: 'level_1',
         name: 'Level-1',
         index: 0,
-        skills: [],
+        skills: [], skillCodes: [],
         courses: [
           {
             identifier: 'course_1',
@@ -45,7 +45,7 @@ function buildModel(): LearningPathModel {
                 ],
               },
             ],
-            skills: [],
+            skills: [], skillCodes: [],
             isAssessmentCourse: false,
           },
         ],
@@ -54,20 +54,20 @@ function buildModel(): LearningPathModel {
         identifier: 'level_2',
         name: 'Level-2',
         index: 1,
-        skills: [],
+        skills: [], skillCodes: [],
         courses: [
           {
             identifier: 'course_2',
             name: 'LP-Course-2',
             leafNodesCount: 1,
             leafIds: ['leaf_3'],
-            skills: [],
+            skills: [], skillCodes: [],
             isAssessmentCourse: false,
           },
         ],
       },
     ],
-    allSkills: [],
+    allSkills: [], allSkillCodes: [],
     courseTotal: 2,
     leafTotal: 3,
   };
@@ -109,7 +109,7 @@ function buildModelWithPrior(): LearningPathModel {
       name: 'LP-PriorAssess-Course',
       leafNodesCount: 1,
       leafIds: ['leaf_prior'],
-      skills: [],
+      skills: [], skillCodes: [],
       isAssessmentCourse: true,
     },
   };

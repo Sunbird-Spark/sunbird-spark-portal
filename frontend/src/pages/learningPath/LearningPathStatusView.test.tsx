@@ -12,9 +12,9 @@ const level1: LPLevelNode = {
   identifier: 'level_1',
   name: 'Foundations',
   index: 1,
-  skills: ['SQL'],
+  skills: ['SQL'], skillCodes: [],
   courses: [
-    { identifier: 'course_1', name: 'Intro to SQL', leafNodesCount: 1, leafIds: ['res_1'], skills: [], isAssessmentCourse: false },
+    { identifier: 'course_1', name: 'Intro to SQL', leafNodesCount: 1, leafIds: ['res_1'], skills: [], skillCodes: [], isAssessmentCourse: false },
   ],
 };
 
@@ -22,7 +22,7 @@ const level2: LPLevelNode = {
   identifier: 'level_2',
   name: 'Advanced',
   index: 2,
-  skills: ['Python'],
+  skills: ['Python'], skillCodes: [],
   courses: [],
 };
 
@@ -33,7 +33,7 @@ function buildLp(overrides: Partial<Record<string, unknown>> = {}) {
       name: 'Data Foundations',
       policy: 'Fixed',
       levels: [level1, level2],
-      allSkills: ['SQL', 'Python'],
+      allSkills: ['SQL', 'Python'], allSkillCodes: [],
       courseTotal: 1,
       leafTotal: 1,
     },

@@ -102,7 +102,8 @@ function displayable(codes: string[] | undefined): string[] {
 
 function mapCourseNode(courseNode: HierarchyContentNode): LPCourseNode {
   const leafIds = getLeafContentIdsFromHierarchy(courseNode);
-  const skills = unionSkills(displayable(courseNode.skills), courseNode.skill, courseNode.se_skills);
+  const skillCodes = (courseNode.skill ?? []).filter(Boolean);
+  const skills = unionSkills(displayable(courseNode.skill), courseNode.se_skills);
   const isAssessment = isAssessmentCourse(courseNode, leafIds);
   return {
     identifier: courseNode.identifier,
@@ -113,6 +114,7 @@ function mapCourseNode(courseNode: HierarchyContentNode): LPCourseNode {
     leafIds,
     units: (courseNode.children ?? []).map(mapUnitNode),
     skills,
+    skillCodes,
     isAssessmentCourse: isAssessment,
     ...(isAssessment ? { questionCount: leafIds.length } : {}),
   };
@@ -120,7 +122,8 @@ function mapCourseNode(courseNode: HierarchyContentNode): LPCourseNode {
 
 function mapLevelNode(levelNode: HierarchyContentNode): LPLevelNode {
   const courses = (levelNode.children ?? []).map(mapCourseNode);
-  const ownSkills = unionSkills(displayable(levelNode.skills), levelNode.skill, levelNode.se_skills);
+  const ownCodes = (levelNode.skill ?? []).filter(Boolean);
+  const ownSkills = unionSkills(displayable(levelNode.skill), levelNode.se_skills);
   const skills = ownSkills.length > 0 ? ownSkills : unionSkills(...courses.map((c) => c.skills));
   return {
     identifier: levelNode.identifier,
@@ -128,6 +131,7 @@ function mapLevelNode(levelNode: HierarchyContentNode): LPLevelNode {
     index: levelNode.index ?? 0,
     description: levelNode.description,
     skills,
+    skillCodes: ownCodes.length > 0 ? ownCodes : [...new Set(courses.flatMap((c) => c.skillCodes))],
     courses,
   };
 }
@@ -153,6 +157,7 @@ export function parseLearningPath(root: HierarchyContentNode | null | undefined)
       policy: 'Fixed',
       levels: [],
       allSkills: [],
+    allSkillCodes: [],
       courseTotal: 0,
       leafTotal: 0,
     };
@@ -185,6 +190,15 @@ export function parseLearningPath(root: HierarchyContentNode | null | undefined)
     ...levels.map((l) => l.skills),
     outcomeAssessment?.skills
   );
+  // Prefer the root's own tag: it is the authoritative union, written at publish. Fall back to the
+  // children's codes for a path published before the root carried one.
+  const allSkillCodes = (root.skill ?? []).filter(Boolean).length
+    ? [...new Set((root.skill ?? []).filter(Boolean))]
+    : [...new Set([
+        ...(priorAssessment?.skillCodes ?? []),
+        ...levels.flatMap((l) => l.skillCodes),
+        ...(outcomeAssessment?.skillCodes ?? []),
+      ])];
 
   return {
     identifier: root.identifier,
@@ -195,6 +209,9 @@ export function parseLearningPath(root: HierarchyContentNode | null | undefined)
     priorAssessment,
     outcomeAssessment,
     allSkills,
+    allSkillCodes,
+    targetRole: root.targetRole,
+    competencyFramework: root.competencyFramework,
     courseTotal,
     leafTotal: root.leafNodesCount ?? getLeafContentIdsFromHierarchy(root).length,
   };

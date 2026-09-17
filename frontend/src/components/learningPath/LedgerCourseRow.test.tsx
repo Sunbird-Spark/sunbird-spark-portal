@@ -13,7 +13,7 @@ function buildCourse(): LPCourseNode {
     name: 'LP-Course-1',
     leafNodesCount: 1,
     leafIds: ['leaf_1'],
-    skills: [],
+    skills: [], skillCodes: [],
     isAssessmentCourse: false,
   };
 }

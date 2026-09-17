@@ -48,7 +48,10 @@ export interface LPCourseNode {
   leafIds: string[];
   /** The course's own children (units/leaves), preserved for the expandable rail rows. */
   units?: LPUnitNode[];
+  /** De-slugged for display. */
   skills: string[];
+  /** The raw competency leaf CODES, for matching against the learner's held skills. */
+  skillCodes: string[];
   /** True when every leaf under this course is a QuML question set. */
   isAssessmentCourse: boolean;
   questionCount?: number;
@@ -60,6 +63,7 @@ export interface LPLevelNode {
   index: number;
   description?: string;
   skills: string[];
+  skillCodes: string[];
   courses: LPCourseNode[];
 }
 
@@ -75,6 +79,11 @@ export interface LearningPathModel {
   /** Unwrapped from the last level, when it held exactly one assessment course. */
   outcomeAssessment?: LPCourseNode;
   allSkills: string[];
+  /** Raw leaf codes across the whole path. */
+  allSkillCodes: string[];
+  /** The role this programme is built for, from the LP root. Drives the gap view. */
+  targetRole?: string;
+  competencyFramework?: string;
   courseTotal: number;
   leafTotal: number;
 }

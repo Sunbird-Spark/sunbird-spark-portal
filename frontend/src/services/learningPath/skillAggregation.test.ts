@@ -9,14 +9,14 @@ function course(overrides: Partial<LPCourseNode>): LPCourseNode {
     name: 'Course',
     leafNodesCount: 1,
     leafIds: ['leaf'],
-    skills: [],
+    skills: [], skillCodes: [],
     isAssessmentCourse: false,
     ...overrides,
   };
 }
 
 function level(overrides: Partial<LPLevelNode>): LPLevelNode {
-  return { identifier: 'lvl', name: 'Level', index: 0, skills: [], courses: [], ...overrides };
+  return { identifier: 'lvl', name: 'Level', index: 0, skills: [], skillCodes: [], courses: [], ...overrides };
 }
 
 function model(overrides: Partial<LearningPathModel>): LearningPathModel {
@@ -27,7 +27,7 @@ function model(overrides: Partial<LearningPathModel>): LearningPathModel {
     name: 'My Path',
     policy: 'Fixed',
     levels,
-    allSkills: [...new Set(levels.flatMap((l) => l.skills))],
+    allSkills: [...new Set(levels.flatMap((l) => l.skills))], allSkillCodes: [],
     courseTotal: levels.reduce((n, l) => n + l.courses.length, 0),
     leafTotal,
     ...overrides,
@@ -43,7 +43,7 @@ function pathSummary(doneLeafIds: string[]): ViewerSummaryRecord {
 describe('buildPathSkillSummary', () => {
   it('marks a fully-completed level\'s skills as gained', () => {
     const m = model({
-      levels: [level({ identifier: 'l1', skills: ['a', 'b'], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] })],
+      levels: [level({ identifier: 'l1', skills: ['a', 'b'], skillCodes: [], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] })],
     });
     const summary = buildPathSkillSummary(m, pathSummary(['leaf1']), new Map());
 
@@ -56,8 +56,8 @@ describe('buildPathSkillSummary', () => {
   it('leaves later, locked levels\' skills pending under the Fixed policy', () => {
     const m = model({
       levels: [
-        level({ identifier: 'l1', skills: ['a'], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] }),
-        level({ identifier: 'l2', skills: ['b'], courses: [course({ identifier: 'c2', leafIds: ['leaf2'] })] }),
+        level({ identifier: 'l1', skills: ['a'], skillCodes: [], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] }),
+        level({ identifier: 'l2', skills: ['b'], skillCodes: [], courses: [course({ identifier: 'c2', leafIds: ['leaf2'] })] }),
       ],
     });
     const summary = buildPathSkillSummary(m, pathSummary(['leaf1']), new Map());
@@ -70,8 +70,8 @@ describe('buildPathSkillSummary', () => {
   it('records each skill\'s source level and when an attained level was completed', () => {
     const m = model({
       levels: [
-        level({ identifier: 'l1', name: 'Foundations', skills: ['a'], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] }),
-        level({ identifier: 'l2', name: 'Advanced', skills: ['b'], courses: [course({ identifier: 'c2', leafIds: ['leaf2'] })] }),
+        level({ identifier: 'l1', name: 'Foundations', skills: ['a'], skillCodes: [], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] }),
+        level({ identifier: 'l2', name: 'Advanced', skills: ['b'], skillCodes: [], courses: [course({ identifier: 'c2', leafIds: ['leaf2'] })] }),
       ],
     });
     const courseRecords = new Map<string, ViewerSummaryRecord>([
@@ -91,7 +91,7 @@ describe('buildPathSkillSummary', () => {
 
   it('reports not-started with no progress at all', () => {
     const m = model({
-      levels: [level({ identifier: 'l1', skills: ['a'], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] })],
+      levels: [level({ identifier: 'l1', skills: ['a'], skillCodes: [], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] })],
     });
     const summary = buildPathSkillSummary(m, undefined, new Map());
 
@@ -113,14 +113,14 @@ describe('aggregateSkills', () => {
 
   it('unions skill names across paths so a skill gained anywhere counts once', () => {
     const a = buildPathSkillSummary(
-      model({ levels: [level({ identifier: 'l1', skills: ['shared', 'a'], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] })] }),
+      model({ levels: [level({ identifier: 'l1', skills: ['shared', 'a'], skillCodes: [], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] })] }),
       pathSummary(['leaf1']),
       new Map()
     );
     const b = buildPathSkillSummary(
       model({
         identifier: 'path-2',
-        levels: [level({ identifier: 'l2', skills: ['shared', 'b'], courses: [course({ identifier: 'c2', leafIds: ['leaf2'] })] })],
+        levels: [level({ identifier: 'l2', skills: ['shared', 'b'], skillCodes: [], courses: [course({ identifier: 'c2', leafIds: ['leaf2'] })] })],
       }),
       undefined,
       new Map()
@@ -140,7 +140,7 @@ describe('filterPathSummaries', () => {
     model({
       identifier: 'p1',
       name: 'Data Basics',
-      levels: [level({ identifier: 'l1', skills: ['SQL'], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] })],
+      levels: [level({ identifier: 'l1', skills: ['SQL'], skillCodes: [], courses: [course({ identifier: 'c1', leafIds: ['leaf1'] })] })],
     }),
     pathSummary(['leaf1']),
     new Map()
@@ -149,7 +149,7 @@ describe('filterPathSummaries', () => {
     model({
       identifier: 'p2',
       name: 'Cloud Fundamentals',
-      levels: [level({ identifier: 'l2', skills: ['AWS'], courses: [course({ identifier: 'c2', leafIds: ['leaf2'] })] })],
+      levels: [level({ identifier: 'l2', skills: ['AWS'], skillCodes: [], courses: [course({ identifier: 'c2', leafIds: ['leaf2'] })] })],
     }),
     undefined,
     new Map()
