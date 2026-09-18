@@ -72,4 +72,18 @@ export class SkillService {
       `${COMPETENCY}/framework/read/${encodeURIComponent(frameworkId)}`
     );
   }
+
+  /**
+   * Admin assigns a learner's CURRENT role.
+   *
+   * The only competency write that names another user: `assignUserId` is explicit in the body,
+   * because every learner-facing endpoint deliberately takes the user from the token instead.
+   */
+  public assignRole(request: {
+    assignUserId: string;
+    frameworkId: string;
+    role: string;
+  }): Promise<ApiResponse<unknown>> {
+    return getClient().post(`${COMPETENCY}/role/assign`, { request });
+  }
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import useImpression from "@/hooks/useImpression";
 import useInteract from "@/hooks/useInteract";
 import { useTelemetry } from "@/hooks/useTelemetry";
-import { FiShield, FiLock } from "react-icons/fi";
+import { FiShield, FiLock, FiTarget } from "react-icons/fi";
 import { useToast } from "@/hooks/useToast";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import {
@@ -11,6 +11,7 @@ import {
   type OrganisationOption,
 } from "@/services/UserManagementService";
 import RoleManagementTab from "./RoleManagementTab";
+import { CompetencyRoleTab } from "./CompetencyRoleTab";
 import UserConsentTab from "./UserConsentTab";
 import { TermsAndConditionsDialog } from "@/components/termsAndCondition/TermsAndConditionsDialog";
 import { useSystemSetting } from "@/hooks/useSystemSetting";
@@ -30,9 +31,14 @@ type UMTab = {
   icon: React.ElementType;
 };
 
+// Frameworks an admin may assign roles against. A single deployment runs one competency
+// framework; this is a list so a multi-framework tenant needs no code change.
+const COMPETENCY_FRAMEWORKS = ["fw_health_competency7"];
+
 const getUmTabs = (t: (k: string) => string): UMTab[] => [
   { id: "role-management", label: t("userManagement.tabs.changeUserRoles"), icon: FiShield },
   { id: "user-consent", label: t("userManagement.tabs.userConsent"), icon: FiLock },
+  { id: "competency-role", label: t("userManagement.tabs.competencyRole"), icon: FiTarget },
 ];
 
 /* ── Main Page ───────────────────────────────────────────────────────────── */
@@ -220,6 +226,9 @@ const UserManagementPage = () => {
                     />
                   )}
                   {activeTab === "user-consent" && <UserConsentTab />}
+                  {activeTab === "competency-role" && (
+                    <CompetencyRoleTab frameworkIds={COMPETENCY_FRAMEWORKS} />
+                  )}
                 </div>
 
               </div>

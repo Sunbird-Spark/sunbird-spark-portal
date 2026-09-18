@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationResult } from '@tanstack/react-query';
 import {
   skillService,
   normaliseProfile,
@@ -165,5 +166,28 @@ export function useSaveTargetRole(frameworkId: string | undefined) {
       void queryClient.invalidateQueries({ queryKey: ['skillGap'] });
       void queryClient.invalidateQueries({ queryKey: ['skillRecommend'] });
     },
+  });
+}
+
+
+/**
+ * Admin assignment of a learner's current role.
+ *
+ * Separate from `useSaveTargetRole`, which is the learner setting their own aspiration. These are
+ * different facts with different authorities: assigned vs aspired. Invalidates nothing on the
+ * admin's own caches - the learner's profile is not loaded here.
+ */
+export function useAssignRole(): UseMutationResult<
+  unknown,
+  Error,
+  { userId: string; frameworkId: string; role: string }
+> {
+  return useMutation({
+    mutationFn: (v: { userId: string; frameworkId: string; role: string }) =>
+      skillService.assignRole({
+        assignUserId: v.userId,
+        frameworkId: v.frameworkId,
+        role: v.role,
+      }),
   });
 }

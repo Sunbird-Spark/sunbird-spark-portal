@@ -1141,7 +1141,8 @@
     "pageTitle": "Gerenciamento de usuários",
     "tabs": {
       "changeUserRoles": "Alterar funções de usuários",
-      "userConsent": "Consentimento do usuário"
+      "userConsent": "Consentimento do usuário",
+      "competencyRole": "Competency Role"
     },
     "disclaimer": {
       "intro": "Ao usar os recursos de gerenciamento de usuários, você reconhece e aceita os",
@@ -1253,6 +1254,18 @@
       "colCourse": "Curso",
       "colConsentGivenOn": "Consentimento em",
       "colExpiry": "Expiração"
+    },
+    "competencyRole": {
+      "intro": "Assign the job role a learner is measured against — Staff Nurse (ICU), Nursing Officer. This is NOT the platform permissions set in Change User Roles. The learner's own target role is left untouched.",
+      "userId": "Sunbird user ID",
+      "userIdPlaceholder": "e.g. 00baafef-f85d-4476-80ac-baf63d2ca7d5",
+      "framework": "Competency framework",
+      "role": "Assigned role",
+      "choose": "Choose a role",
+      "assign": "Assign role",
+      "assigning": "Assigning…",
+      "assigned": "Assigned {{role}}",
+      "failed": "Could not assign that role. Check the user ID and try again."
     }
   },
   "formFields": {
