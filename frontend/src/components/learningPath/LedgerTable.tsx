@@ -4,9 +4,13 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 import { Badge } from '@/components/ui/badge';
 import { LedgerLevelRow } from './LedgerLevelRow';
 import type { LearningPathModel, LevelProgressInfo, LevelStatusKey, ProgressInfo } from '@/types/learningPathTypes';
+import type { PathSkill } from '@/services/learningPath/pathSkillStatus';
 import type { ViewerSummaryRecord } from '@/types/viewerServiceTypes';
 
 interface LedgerTableProps {
+  /** Per-skill state, forwarded so each course row can name what it grants. */
+  stateOf?: (code: string) => PathSkill | undefined;
+  skillName?: (code: string) => string;
   model: LearningPathModel;
   levelProgress: LevelProgressInfo[];
   levelStatuses: LevelStatusKey[];
@@ -44,6 +48,8 @@ export function LedgerTable({
   onOpenPrior,
   onOpenOutcome,
   onOpenCourse,
+  stateOf,
+  skillName,
 }: LedgerTableProps) {
   const { t } = useAppI18n();
   const [openLevelId, setOpenLevelId] = useState<string | null>(model.levels[0]?.identifier ?? null);
@@ -102,6 +108,8 @@ export function LedgerTable({
 
       {model.levels.map((level, i) => (
         <LedgerLevelRow
+          stateOf={stateOf}
+          skillName={skillName}
           key={level.identifier}
           level={level}
           levelNumber={i + 1}

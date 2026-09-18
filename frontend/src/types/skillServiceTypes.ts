@@ -107,6 +107,8 @@ export interface CompetencyFrameworkBody {
   leafCount?: number;
   /** role code -> its required leaf skills. */
   roles?: Record<string, string[]>;
+  /** role code -> authored display name. Codes are not display strings. */
+  roleNames?: Record<string, string>;
 }
 export interface CompetencyFrameworkResponse extends CompetencyFrameworkBody {
   result?: CompetencyFrameworkBody;
@@ -180,6 +182,8 @@ export interface CompetencyFrameworkMeta {
   depth: number;
   leafSkills: string[];
   roles: Record<string, string[]>;
+  /** role code -> authored display name, so the UI never shows a de-slugged code. */
+  roleNames: Record<string, string>;
   /** Role codes that require at least one skill. */
   roleCodes: string[];
 }

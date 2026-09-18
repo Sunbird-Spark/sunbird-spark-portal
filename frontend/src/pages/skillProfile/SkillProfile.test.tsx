@@ -92,6 +92,7 @@ beforeEach(() => {
         depth: 3,
         leafSkills: ['dosage-calculation'],
         roles: { 'staff-nurse': ['dosage-calculation'] },
+        roleNames: { 'staff-nurse': 'Staff Nurse (ICU)' },
         roleCodes: ['staff-nurse'],
       },
     },

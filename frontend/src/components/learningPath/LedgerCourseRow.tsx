@@ -117,7 +117,7 @@ export function LedgerCourseRow({
           {/* An "Optional" badge on its own gives no reason. Naming the skills the learner already
               holds turns a bare label into an explanation. */}
           {skillLine && (
-            <span className="text-xs text-sunbird-gray-82" data-testid="course-skill-line">
+            <span className="block text-xs text-sunbird-gray-82" data-testid="course-skill-line">
               {skillLine}
             </span>
           )}

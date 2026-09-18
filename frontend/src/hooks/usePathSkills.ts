@@ -72,7 +72,12 @@ export function usePathSkills(
     summary,
     name: (code: string) => skillName(vocab, code),
     targetRole: model.targetRole,
-    roleName: model.targetRole ? skillName(vocab, model.targetRole) : '',
+    // The authored name wins. A code is not a display string: de-slugging turns
+    // "staff-nurse-icu" into "Staff nurse icu", losing the capitalisation and punctuation the
+    // author wrote. Falls back to de-slugging only for a role with no name on record.
+    roleName: model.targetRole
+      ? (meta?.roleNames?.[model.targetRole] ?? skillName(vocab, model.targetRole))
+      : '',
     isLoading: profileLoading || fwLoading,
   };
 }

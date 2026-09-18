@@ -168,6 +168,7 @@ export function normaliseFrameworkMeta(
     depth: typeof body.depth === 'number' ? body.depth : 0,
     leafSkills: body.leafSkills ?? [],
     roles,
+    roleNames: body.roleNames ?? {},
     roleCodes: Object.keys(roles)
       .filter((code) => (roles[code] ?? []).length > 0)
       .sort((a, b) => a.localeCompare(b)),

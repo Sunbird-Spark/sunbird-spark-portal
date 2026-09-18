@@ -4,9 +4,13 @@ import { LevelStatusBadge } from './LevelStatusBadge';
 import { LedgerCourseRow } from './LedgerCourseRow';
 import { computeCourseProgress } from '@/services/learningPath/learningPathProgress';
 import type { LPLevelNode, LevelProgressInfo, LevelStatusKey } from '@/types/learningPathTypes';
+import type { PathSkill } from '@/services/learningPath/pathSkillStatus';
 import type { ViewerSummaryRecord } from '@/types/viewerServiceTypes';
 
 interface LedgerLevelRowProps {
+  /** Per-skill state, forwarded to each course row so it can name what it grants. */
+  stateOf?: (code: string) => PathSkill | undefined;
+  skillName?: (code: string) => string;
   level: LPLevelNode;
   levelNumber: number;
   progress: LevelProgressInfo;
@@ -31,6 +35,8 @@ export function LedgerLevelRow({
   summaryByCollectionId,
   pathSummary,
   isEnrolled,
+  stateOf,
+  skillName,
   onToggle,
   onOpenLevel,
   onOpenCourse,
@@ -86,6 +92,8 @@ export function LedgerLevelRow({
                   onOpen={() => onOpenCourse(course.identifier, course.leafIds[0] ?? '')}
                   isEnrolled={isEnrolled}
                   isOptional={courseProgress.optional}
+                  stateOf={stateOf}
+                  skillName={skillName}
                 />
               );
             })}

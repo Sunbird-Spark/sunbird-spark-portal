@@ -54,6 +54,8 @@ const SkillProfile = () => {
   const vocab = activeFramework ? vocabularies[activeFramework] : undefined;
   const meta = activeFramework ? metas[activeFramework] : undefined;
   const name = (code: string) => skillName(vocab, code);
+  // Authored role names where available; a code de-slugs poorly ("Staff nurse icu").
+  const roleName = (code: string) => meta?.roleNames?.[code] ?? skillName(vocab, code);
 
   const frameworkSkills = useMemo(
     () => skills.filter((s) => s.frameworkId === activeFramework),
@@ -107,19 +109,19 @@ const SkillProfile = () => {
           <RoleGapPanel
             {...(gap?.current ? { current: gap.current } : {})}
             {...(targetGap ? { target: targetGap } : {})}
-            roleName={name}
+            roleName={roleName}
             vocabulary={vocab}
           />
 
           <RolePicker
             roles={meta?.roleCodes ?? []}
             {...(target ?? targetGap?.role ? { selected: target ?? targetGap?.role } : {})}
-            roleName={name}
+            roleName={roleName}
             onSelect={chooseTarget}
           />
 
           {recommendation && recommendation.candidates.length > 0 && (
-            <NextStepsList candidates={recommendation.candidates} roleName={name(recommendation.role)} />
+            <NextStepsList candidates={recommendation.candidates} roleName={roleName(recommendation.role)} />
           )}
 
           <div className="flex flex-col gap-4">
