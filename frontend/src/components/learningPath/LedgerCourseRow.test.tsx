@@ -75,4 +75,45 @@ describe('LedgerCourseRow isEnrolled', () => {
     fireEvent.click(screen.getByTestId('ledger-course-row'));
     expect(onOpen).toHaveBeenCalledTimes(1);
   });
+
+  // An "Optional" badge alone gives no reason. Naming the skills the learner already holds turns
+  // the label into an explanation of WHY the entry assessment waived it.
+  it('explains a waived course by naming the skills already held', () => {
+    const held = (c: string) => ({ code: c, state: 'held' as const, percent: 0, notTaught: false });
+    render(
+      <LedgerCourseRow
+        course={{ ...buildCourse(), skillCodes: ['hand-hygiene', 'ppe-use'] }}
+        progress={{ pct: 0, completed: 0, total: 2, status: 'notStarted' }}
+        onOpen={() => {}}
+        isOptional
+        stateOf={held}
+        skillName={(c) => c.replace(/-/g, ' ')}
+      />
+    );
+    expect(screen.getByTestId('course-skill-line')).toHaveTextContent('alreadyHold');
+  });
+
+  it('says what an unheld course grants', () => {
+    render(
+      <LedgerCourseRow
+        course={{ ...buildCourse(), skillCodes: ['hand-hygiene'] }}
+        progress={{ pct: 0, completed: 0, total: 2, status: 'notStarted' }}
+        onOpen={() => {}}
+        stateOf={() => undefined}
+        skillName={(c) => c}
+      />
+    );
+    expect(screen.getByTestId('course-skill-line')).toHaveTextContent('givesYou');
+  });
+
+  it('shows no skill line for an untagged course', () => {
+    render(
+      <LedgerCourseRow
+        course={buildCourse()}
+        progress={{ pct: 0, completed: 0, total: 2, status: 'notStarted' }}
+        onOpen={() => {}}
+      />
+    );
+    expect(screen.queryByTestId('course-skill-line')).not.toBeInTheDocument();
+  });
 });

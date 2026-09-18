@@ -5,6 +5,7 @@ import { CourseUnitTree } from './CourseUnitTree';
 import type { LPCourseNode } from '@/types/learningPathTypes';
 import type { LPAssessmentInfo } from '@/services/learningPath';
 import type { ProgressInfo } from '@/types/learningPathTypes';
+import type { PathSkill } from '@/services/learningPath/pathSkillStatus';
 
 interface LedgerCourseRowProps {
   course: LPCourseNode;
@@ -23,6 +24,9 @@ interface LedgerCourseRowProps {
   /** Best score / attempts per leaf, forwarded to the unit tree. */
   assessmentInfo?: Record<string, LPAssessmentInfo>;
   activeContentId?: string | null;
+  /** Per-skill state, so the row can say what it grants and why it was waived. */
+  stateOf?: (code: string) => PathSkill | undefined;
+  skillName?: (code: string) => string;
   /**
    * Defaults to `true` so every existing caller is unaffected. When `false`
    * (the learner has not joined this Learning Path), the CTA reads "Enrol to
@@ -60,11 +64,25 @@ export function LedgerCourseRow({
   activeContentId = null,
   isEnrolled = true,
   isOptional = false,
+  stateOf,
+  skillName,
 }: LedgerCourseRowProps) {
   const { t } = useAppI18n();
   const Icon = course.isAssessmentCourse ? FiHelpCircle : FiBookOpen;
   const units = course.units ?? [];
   const isExpandable = Boolean(onToggle) && units.length > 0;
+
+  const grants = course.skillCodes ?? [];
+  const nameOf = skillName ?? ((c: string) => c);
+  // "Already hold" is only claimable when we actually know the learner's state for every one.
+  const allHeld =
+    grants.length > 0 && stateOf !== undefined && grants.every((c) => stateOf(c)?.state === 'held');
+  const skillLine =
+    grants.length === 0
+      ? undefined
+      : allHeld
+        ? t('learningPath.alreadyHold', { skills: grants.map(nameOf).join(', ') })
+        : t('learningPath.givesYou', { skills: grants.map(nameOf).join(', ') });
 
   return (
     <div className="rounded-md border border-sunbird-gray-e5 bg-surface" data-testid="ledger-course-row-wrapper">
@@ -96,6 +114,13 @@ export function LedgerCourseRow({
           <span className="text-xs text-sunbird-gray-75">
             {progress.completed}/{progress.total} · {progress.pct}%
           </span>
+          {/* An "Optional" badge on its own gives no reason. Naming the skills the learner already
+              holds turns a bare label into an explanation. */}
+          {skillLine && (
+            <span className="text-xs text-sunbird-gray-82" data-testid="course-skill-line">
+              {skillLine}
+            </span>
+          )}
         </div>
         <span className="shrink-0 text-sm font-medium text-sunbird-brick">
           {isEnrolled ? t(CTA_KEY[progress.status]) : t('learningPath.enrolToStart')}

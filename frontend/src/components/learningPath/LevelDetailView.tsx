@@ -4,6 +4,7 @@ import { LedgerCourseRow } from './LedgerCourseRow';
 import { LevelSkillsCard } from './LevelSkillsCard';
 import { WaiverNote } from './WaiverNote';
 import { computeCourseProgress } from '@/services/learningPath/learningPathProgress';
+import type { PathSkill } from '@/services/learningPath/pathSkillStatus';
 import type { LPLevelNode, LevelProgressInfo, LevelStatusKey } from '@/types/learningPathTypes';
 import type { ViewerSummaryRecord } from '@/types/viewerServiceTypes';
 
@@ -17,6 +18,9 @@ interface LevelDetailViewProps {
   pathSummary?: ViewerSummaryRecord;
   /** Forwarded to each course row's CTA - see `LedgerCourseRow`'s `isEnrolled`. Defaults to `true`. */
   isEnrolled?: boolean;
+  /** Per-skill state for this path; absent when unenrolled or the path declares no framework. */
+  stateOf?: (code: string) => PathSkill | undefined;
+  skillName?: (code: string) => string;
   onBack: () => void;
   onOpenCourse: (courseId: string, contentId: string) => void;
 }
@@ -31,6 +35,8 @@ export function LevelDetailView({
   summaryByCollectionId,
   pathSummary,
   isEnrolled = true,
+  stateOf,
+  skillName,
   onBack,
   onOpenCourse,
 }: LevelDetailViewProps) {
@@ -82,13 +88,16 @@ export function LevelDetailView({
                 onOpen={() => onOpenCourse(course.identifier, course.leafIds[0] ?? '')}
                 isEnrolled={isEnrolled}
                 isOptional={courseProgress.optional}
+                stateOf={stateOf}
+                skillName={skillName}
               />
             );
           })}
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <LevelSkillsCard skills={level.skills} />
+        <LevelSkillsCard codes={level.skillCodes.length ? level.skillCodes : level.skills}
+          stateOf={stateOf} name={skillName ?? ((c) => c)} />
         {waiverNote && <WaiverNote note={waiverNote} />}
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useParams, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import { useLearningPath } from '@/hooks/useLearningPath';
@@ -5,6 +6,7 @@ import { usePermissions } from '@/hooks/usePermission';
 import useImpression from '@/hooks/useImpression';
 import PageLoader from '@/components/common/PageLoader';
 import { LevelDetailView } from '@/components/learningPath/LevelDetailView';
+import { usePathSkills } from '@/hooks/usePathSkills';
 import { AssessmentGate } from '@/components/learningPath/AssessmentGate';
 import { PathCompletionView } from '@/components/learningPath/PathCompletionView';
 import { LearningPathOverview } from './LearningPathOverview';
@@ -36,6 +38,14 @@ const LearningPathPage = () => {
 
   const lp = useLearningPath(pathId, contextId);
   const { model, policy, levelStatuses, pathSummary, outcomeState, enrollment } = lp;
+
+  // Computed once for the whole page so the overview card and every level card agree, and the
+  // profile is fetched once rather than per level.
+  const pathSkills = usePathSkills(model, lp.summaryByCollectionId, pathSummary);
+  const skillStateOf = useCallback(
+    (code: string) => pathSkills.summary?.skills.find((s) => s.code === code),
+    [pathSkills.summary]
+  );
 
   // Durable local scores (survive the `['viewerSummary']` refetch that wipes
   // `pathSummary.assessmentStatus`) - merged with the path record below via
@@ -184,6 +194,8 @@ const LearningPathPage = () => {
             summaryByCollectionId={lp.summaryByCollectionId}
             pathSummary={pathSummary}
             isEnrolled={enrollment.isEnrolled}
+            stateOf={enrollment.isEnrolled ? skillStateOf : undefined}
+            skillName={pathSkills.name}
             onBack={goOverview}
             onOpenCourse={openCourse}
           />

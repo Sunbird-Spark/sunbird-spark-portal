@@ -1617,7 +1617,11 @@
     "skillsFromThisPath": "Skills from this path",
     "skillsHeldOf": "{{held}} of {{total}} skills",
     "notOnThisPath": "not on this path",
-    "viewFullProfile": "View full profile"
+    "viewFullProfile": "View full profile",
+    "skillHeld": "Held",
+    "skillNotStarted": "Not started",
+    "givesYou": "Gives you: {{skills}}",
+    "alreadyHold": "You already hold: {{skills}}"
   },
   "skillProfile": {
     "title": "My Competency Profile",
