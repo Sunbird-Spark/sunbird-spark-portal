@@ -4,7 +4,7 @@ import { useCollection } from '@/hooks/useCollection';
 import { useContentRead } from '@/hooks/useContent';
 import { useQumlContent } from '@/hooks/useQumlContent';
 import { useContentView } from '@/hooks/useContentView';
-import { useAutoAdvanceContent, AUTO_ADVANCE_DELAY_MS } from '@/hooks/useAutoAdvanceContent';
+import { useAutoAdvanceContent } from '@/hooks/useAutoAdvanceContent';
 import { getLeafContentIdsFromHierarchy } from '@/services/collection/hierarchyTree';
 import { computeCourseProgress } from '@/services/learningPath/learningPathProgress';
 import { pathLeavesInOrder, nextLeaf } from '@/services/learningPath/pathOrder';
@@ -128,28 +128,8 @@ export function LearningPathPlayerView({
   // assessment and any Question Set course) arrives via onPlayerEvent instead -
   // without this, question-set progress/score never reaches useContentView.
   const handlePlayerEvent = useCallback(
-    (event: unknown) => {
-      const normalised = normalizeQumlPlayerEvent(event);
-      handleContentView(normalised as Parameters<typeof handleContentView>[0]);
-
-      // Advance on the SUBMIT itself, not on a status transition.
-      //
-      // A question set only becomes Completed when QUML_SUMMARY carries both a score AND
-      // `endpageseen` (useContentView). A learner who submits without landing on the end page is
-      // only marked complete later, by the END event as they leave - so the status never changes
-      // while they are still on the page and auto-advance could never fire. Re-taking an already
-      // passed assessment has the same problem from the other direction: the status is already 2
-      // on open, so there is no transition either.
-      //
-      // Submitting an assessment is an explicit terminal action, unlike scrolling a PDF, so the
-      // submit event is the honest signal here.
-      const eid = String((normalised as { eid?: unknown })?.eid ?? '');
-      if (eid.toUpperCase() === 'QUML_SUMMARY' && nextInPath) {
-        const target = nextInPath;
-        window.setTimeout(() => onNavigateContent(target.courseId, target.contentId), AUTO_ADVANCE_DELAY_MS);
-      }
-    },
-    [handleContentView, nextInPath, onNavigateContent]
+    (event: unknown) => handleContentView(normalizeQumlPlayerEvent(event) as Parameters<typeof handleContentView>[0]),
+    [handleContentView]
   );
 
   const course = [
