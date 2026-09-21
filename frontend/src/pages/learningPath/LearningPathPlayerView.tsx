@@ -7,6 +7,7 @@ import { useContentView } from '@/hooks/useContentView';
 import { useAutoAdvanceContent } from '@/hooks/useAutoAdvanceContent';
 import { getLeafContentIdsFromHierarchy } from '@/services/collection/hierarchyTree';
 import { computeCourseProgress } from '@/services/learningPath/learningPathProgress';
+import { pathLeavesInOrder, nextLeaf } from '@/services/learningPath/pathOrder';
 import { normalizeQumlPlayerEvent } from '@/services/players/playerEventNormalizer';
 import { LearningPathPlayerCard } from '@/components/learningPath/LearningPathPlayerCard';
 import { LearningPathRail } from '@/components/learningPath/LearningPathRail';
@@ -103,21 +104,16 @@ export function LearningPathPlayerView({
   //
   // Waived courses are skipped: a course the entry assessment marked optional should not be the
   // thing a learner is dropped into next.
+  // Reading order for the whole path, assessments included - see pathOrder.ts.
   const pathLeaves = useMemo(
     () =>
-      model.levels.flatMap((level) =>
-        level.courses.flatMap((course) =>
-          computeCourseProgress(course, summaryByCollectionId, pathSummary).optional
-            ? []
-            : course.leafIds.map((leaf) => ({ courseId: course.identifier, contentId: leaf }))
-        )
-      ),
+      pathLeavesInOrder(model, (c) => computeCourseProgress(c, summaryByCollectionId, pathSummary).optional),
     [model, summaryByCollectionId, pathSummary]
   );
-  const nextInPath = useMemo(() => {
-    const at = pathLeaves.findIndex((l) => l.contentId === contentId && l.courseId === courseId);
-    return at >= 0 ? pathLeaves[at + 1] : undefined;
-  }, [pathLeaves, contentId, courseId]);
+  const nextInPath = useMemo(
+    () => nextLeaf(pathLeaves, courseId, contentId),
+    [pathLeaves, courseId, contentId]
+  );
 
   useAutoAdvanceContent({
     contentId,
