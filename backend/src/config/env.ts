@@ -4,6 +4,19 @@ dotenv.config();
 
 const env = process.env;
 
+// NOTE: intentionally uses console.error, not utils/logger.js — logger.js imports
+// envConfig from this file for SUNBIRD_PORTAL_LOG_LEVEL, so importing logger.js here
+// would create a circular import that throws on module evaluation.
+const parseEnabledProviders = (raw: string): string[] => {
+    try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        console.error(`Invalid ENABLED_SSO_PROVIDERS value, falling back to no SSO providers: "${raw}"`);
+        return [];
+    }
+};
+
 // Protocol for cluster-internal service calls. Defaults to plain HTTP because
 // these services are only reachable inside the Kubernetes network (TLS is
 // terminated at the gateway/ingress); set to 'https' when running a TLS-enabled
@@ -54,6 +67,7 @@ export const envConfig = {
     LEARN_BASE_URL: env.LEARN_BASE_URL || `${internalServiceProtocol}://userorg-service:9000`,
     KNOWLG_MW_BASE_URL: env.KNOWLG_MW_BASE_URL || `${internalServiceProtocol}://knowledge-mw-service:5000`,
     ENABLE_AI_SEARCH: env.ENABLE_AI_SEARCH || 'true',
+    ENABLED_SSO_PROVIDERS: parseEnabledProviders(env.ENABLED_SSO_PROVIDERS || '["google"]'),
     // Comma-separated list of extra origins allowed by CORS (in addition to the
     // dev frontend URL and the mobile webview origins wired up in app.ts).
     CORS_ALLOWED_ORIGINS: env.CORS_ALLOWED_ORIGINS || '',

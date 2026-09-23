@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { oidcSession, requireAuth } from './auth/oidcMiddleware.js';
 import formRoutes from './routes/formsRoutes.js';
-import googleRoutes from './routes/googleRoutes.js';
+import ssoRoutes from './routes/ssoRoutes.js';
 import portalAuthRoutes from './routes/portalAuthRoutes.js';
 import portalProxyRoutes from './routes/portalProxyRoutes.js';
 import editorRoutes from './routes/editorRoutes.js';
@@ -22,6 +22,7 @@ import knowlgMwProxyRoutes from './routes/knowlgMwProxyRoutes.js';
 import anonymousActionRoutes from './routes/anonymousActionRoutes.js';
 import mobileRoutes from './routes/mobileRoutes.js';
 import reviewCommentRoutes from './routes/reviewCommentRoutes.js';
+import { validateSsoConfig } from './bootstrap/validateSsoConfig.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -82,6 +83,7 @@ app.use((req, res, next) => {
 app.use(pathTraversalGuard);
 
 loadTenants();
+validateSsoConfig();
 // CORS: same-origin in production (backend serves the SPA build), so cross-origin
 // access is limited to the dev frontend and the mobile app's webview origins.
 const corsAllowedOrigins = [
@@ -127,7 +129,9 @@ app.use('/portal/review/comment/v1', sessionMiddleware, oidcSession(), requireAu
 
 app.use('/data/v1/form', formRoutes);
 app.use('/portal/user/v1/auth', sessionMiddleware, ...anonymousMiddlewares, oidcSession(), authRoutes);
-app.use('/google', googleRoutes);
+// Mounted at root (not under a namespace prefix) so /google/auth stays literally
+// unchanged for existing clients/Keycloak theme — :provider absorbs the segment.
+app.use('/', ssoRoutes);
 
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 // Specific /action endpoints must always proxy to kong.

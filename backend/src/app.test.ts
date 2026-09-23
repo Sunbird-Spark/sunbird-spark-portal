@@ -39,6 +39,7 @@ vi.mock('./config/env.js', () => ({
     OIDC_ISSUER_URL: '',
     SUNBIRD_PORTAL_SESSION_STORE: 'memory',
     DEVELOPMENT_REACT_APP_URL: undefined,
+    ENABLED_SSO_PROVIDERS: ['google'],
   }
 }));
 

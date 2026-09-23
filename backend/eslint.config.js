@@ -37,6 +37,10 @@ export default [
       ],
 
       'no-console': 'off',
+      // Base rule flags unused params in TS interface method signatures (false
+      // positives); @typescript-eslint/no-unused-vars below is TS-aware and
+      // supersedes it — this is the standard typescript-eslint setup.
+      'no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     },
