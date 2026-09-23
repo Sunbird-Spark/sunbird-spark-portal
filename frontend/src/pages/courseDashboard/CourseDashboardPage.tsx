@@ -21,22 +21,29 @@ const VALID_TABS: DashboardTab[] = ['batches', 'certificates'];
 
 const CourseDashboardPage: React.FC = () => {
   const { t } = useAppI18n();
-  const { collectionId, tab } = useParams<{ collectionId: string; tab: string }>();
-  useImpression({ type: 'view', pageid: 'course-dashboard', env: 'course', object: { id: collectionId || '', type: 'Course' } });
+  const { collectionId, pathId, tab } = useParams<{ collectionId?: string; pathId?: string; tab: string }>();
+  // Same page serves both /collection/:collectionId/dashboard/:tab and
+  // /learning-path/:pathId/dashboard/:tab - a Learning Path id is just another
+  // collection id as far as the batch/certificate/report APIs are concerned.
+  const isLearningPath = !!pathId;
+  const contentId = pathId ?? collectionId;
+  const basePath = isLearningPath ? `/learning-path/${pathId}` : `/collection/${collectionId}`;
+  const objectType = isLearningPath ? 'Learning Path' : 'Course';
+  useImpression({ type: 'view', pageid: 'course-dashboard', env: 'course', object: { id: contentId || '', type: objectType } });
   const navigate = useNavigate();
 
-  const { data: collectionData, isLoading, isError, error } = useCollection(collectionId);
+  const { data: collectionData, isLoading, isError, error } = useCollection(contentId);
   const { data: currentUserId } = useCurrentUserId();
   const isOwner =
     !!collectionData?.createdBy &&
     !!currentUserId &&
     collectionData.createdBy === currentUserId;
 
-  useImpression({ type: 'view', pageid: 'course-dashboard', object: { id: collectionId || '', type: 'Collection' } });
+  useImpression({ type: 'view', pageid: 'course-dashboard', object: { id: contentId || '', type: 'Collection' } });
   const { interact } = useInteract();
 
   const isMentorRole = useIsMentor();
-  const { data: mentorBatches, isLoading: isMentorBatchesLoading } = useBatchListForMentor(collectionId, { enabled: isMentorRole });
+  const { data: mentorBatches, isLoading: isMentorBatchesLoading } = useBatchListForMentor(contentId, { enabled: isMentorRole });
   const isMentorOfCourse = !!mentorBatches && mentorBatches.length > 0;
 
   const canAccessDashboard = isOwner || isMentorOfCourse;
@@ -47,17 +54,17 @@ const CourseDashboardPage: React.FC = () => {
   useEffect(() => {
     if (!isPermissionDetermining && collectionData && currentUserId !== undefined) {
       if (!canAccessDashboard) {
-        navigate(`/collection/${collectionId}`, { replace: true });
+        navigate(basePath, { replace: true });
       }
     }
-  }, [canAccessDashboard, isPermissionDetermining, collectionData, currentUserId, collectionId, navigate]);
+  }, [canAccessDashboard, isPermissionDetermining, collectionData, currentUserId, basePath, navigate]);
 
   // Redirect to default tab if the tab param is invalid
   useEffect(() => {
     if (tab && !VALID_TABS.includes(tab as DashboardTab)) {
-      navigate(`/collection/${collectionId}/dashboard/batches`, { replace: true });
+      navigate(`${basePath}/dashboard/batches`, { replace: true });
     }
-  }, [tab, collectionId, navigate]);
+  }, [tab, basePath, navigate]);
 
   const activeTab: DashboardTab = VALID_TABS.includes(tab as DashboardTab)
     ? (tab as DashboardTab)
@@ -65,10 +72,13 @@ const CourseDashboardPage: React.FC = () => {
 
   const switchTab = (t: DashboardTab) => {
     interact({ id: 'course-dashboard-tab-switch', type: 'CLICK', pageid: 'course-dashboard', cdata: [{ id: t, type: 'Tab' }] });
-    navigate(`/collection/${collectionId}/dashboard/${t}`);
+    navigate(`${basePath}/dashboard/${t}`);
   };
 
   const courseName = collectionData?.title ?? '';
+  const backLabel = isLearningPath ? t('courseDashboard.backToPathPage') : t('courseDashboard.backToCoursePage');
+  const dashboardTitle = isLearningPath ? t('learningPath.dashboardTitle') : t('courseDashboard.title');
+  const manageDashboardLabel = isLearningPath ? t('learningPath.manageDashboard') : t('courseDashboard.manageDashboard');
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100" data-testid="dashboard-page">
@@ -85,7 +95,7 @@ const CourseDashboardPage: React.FC = () => {
           data-testid="back-to-course-btn"
         >
           <FiArrowLeft className="w-4 h-4" />
-          {t('courseDashboard.backToCoursePage')}
+          {backLabel}
         </button>
 
         {/* ─── Loading / error for collection name and permissions ─── */}
@@ -108,7 +118,7 @@ const CourseDashboardPage: React.FC = () => {
               </h1>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>{t('courseDashboard.title')}</span>
+              <span>{dashboardTitle}</span>
             </div>
           </div>
         )}
@@ -119,7 +129,7 @@ const CourseDashboardPage: React.FC = () => {
             {/* ─── Header area of Box ─── */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <p className="text-sm font-semibold text-foreground font-rubik">
-                {t('courseDashboard.manageDashboard')}
+                {manageDashboardLabel}
               </p>
             </div>
 
@@ -157,11 +167,14 @@ const CourseDashboardPage: React.FC = () => {
 
             {/* ─── Tab content ─── */}
             <div className="flex flex-col bg-white rounded-2xl">
-              {collectionId && activeTab === 'batches' && (
-                <BatchesTab collectionId={collectionId} />
+              {contentId && activeTab === 'batches' && (
+                <BatchesTab
+                  collectionId={contentId}
+                  emptyHint={isLearningPath ? t('learningPath.selectBatchHint') : undefined}
+                />
               )}
-              {collectionId && activeTab === 'certificates' && (
-                <CertificatesTab collectionId={collectionId} canReissue={canAccessDashboard} />
+              {contentId && activeTab === 'certificates' && (
+                <CertificatesTab collectionId={contentId} canReissue={canAccessDashboard} />
               )}
             </div>
           </div>

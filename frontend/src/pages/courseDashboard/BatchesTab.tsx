@@ -24,9 +24,11 @@ const STATUS_STYLES: Record<string, string> = {
 
 interface BatchesTabProps {
   collectionId: string;
+  /** Overrides the "select a batch to view its report" hint (defaults to the course-flavoured copy) — used by non-Course callers like the Learning Path dashboard. */
+  emptyHint?: string;
 }
 
-const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
+const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId, emptyHint }) => {
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
   const isMentor = useIsMentor();
   const isContentCreator = useIsContentCreator();
@@ -127,7 +129,7 @@ const BatchesTab: React.FC<BatchesTabProps> = ({ collectionId }) => {
         ) : (
           <div className="flex items-center justify-center py-16 px-8">
             <p className="text-muted-foreground text-sm font-rubik" data-testid="no-batch-selected">
-              {t('batchesTab.selectFromDropdown')}
+              {emptyHint ?? t('batchesTab.selectFromDropdown')}
             </p>
           </div>
         )}

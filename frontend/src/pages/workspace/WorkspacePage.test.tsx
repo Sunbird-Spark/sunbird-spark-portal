@@ -191,7 +191,7 @@ vi.mock('./CreateContentModal', () => ({
 vi.mock('./ContentNameDialog', () => {
   let nameValue = '';
   return {
-    default: ({ open, onClose, onSubmit, optionId }: { open: boolean; onClose: () => void; onSubmit: (name: string) => void; optionId: string }) => {
+    default: ({ open, onClose, onSubmit, optionId }: { open: boolean; onClose: () => void; onSubmit: (name: string, extra?: { isEvaluationCourse?: boolean }) => void; optionId: string }) => {
       if (!open) { nameValue = ''; return null; }
       return (
         <div role="dialog" aria-label="Enter content name">
@@ -200,6 +200,7 @@ vi.mock('./ContentNameDialog', () => {
             onChange={(e) => { nameValue = e.target.value; }}
           />
           <button type="button" onClick={() => onSubmit(nameValue || 'Test Content')}>Create</button>
+          <button type="button" onClick={() => onSubmit(nameValue || 'Test Content', { isEvaluationCourse: true })}>Create as Evaluation</button>
           <button type="button" onClick={onClose}>Cancel</button>
         </div>
       );
@@ -778,6 +779,38 @@ describe('WorkspacePage', () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         '/edit/collection-editor/do_course_new_123',
         { state: { from: '/' } }
+      );
+    });
+  });
+
+  it('creates a course with primaryCategory "Evaluation Course" when flagged', async () => {
+    mockContentCreate.mockResolvedValue({ data: { identifier: 'do_course_eval_123' } });
+    renderWithProviders(<WorkspacePage />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Create content' })).toBeInTheDocument();
+    });
+
+    const dialog = screen.getByRole('dialog', { name: 'Create content' });
+    fireEvent.click(within(dialog).getByRole('button', { name: /Course/ }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: 'Enter content name' })).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('Enter content name'), {
+      target: { value: 'My Evaluation Course' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Create as Evaluation' }));
+
+    await waitFor(() => {
+      expect(mockContentCreate).toHaveBeenCalledWith(
+        'My Evaluation Course',
+        expect.objectContaining({
+          contentType: 'Course',
+          primaryCategory: 'Evaluation Course',
+        })
       );
     });
   });

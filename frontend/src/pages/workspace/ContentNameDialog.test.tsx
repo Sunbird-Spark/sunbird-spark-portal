@@ -21,6 +21,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'collection.contentPlaylist': 'Content Playlist',
         'collection.digitalTextbook': 'Digital Textbook',
         'collection.questionPaper': 'Question Paper',
+        'workspace.evaluationCourse': 'Evaluation Course',
       };
       let result = translations[key] ?? key;
       if (params) {
@@ -232,6 +233,57 @@ describe('ContentNameDialog', () => {
       fireEvent.submit(screen.getByPlaceholderText('Enter collection name').closest('form')!);
 
       expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Collection', { description: undefined });
+    });
+  });
+
+  describe('course mode (optionId="course")', () => {
+    const courseProps = { ...defaultProps, optionId: 'course', optionTitle: 'Course' };
+
+    it('should render the Evaluation Course checkbox', () => {
+      render(<ContentNameDialog {...courseProps} />);
+      expect(screen.getByText('Evaluation Course')).toBeInTheDocument();
+    });
+
+    it('should not render the Evaluation Course checkbox for other option types', () => {
+      render(<ContentNameDialog {...defaultProps} optionId="collection" optionTitle="Collection" />);
+      expect(screen.queryByText('Evaluation Course')).not.toBeInTheDocument();
+    });
+
+    it('should submit with isEvaluationCourse: false by default', () => {
+      render(<ContentNameDialog {...courseProps} />);
+
+      fireEvent.change(screen.getByPlaceholderText('Enter course name'), { target: { value: 'My Course' } });
+      fireEvent.submit(screen.getByPlaceholderText('Enter course name').closest('form')!);
+
+      expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Course', {
+        description: undefined,
+        isEvaluationCourse: false,
+      });
+    });
+
+    it('should submit with isEvaluationCourse: true when checked', () => {
+      render(<ContentNameDialog {...courseProps} />);
+
+      fireEvent.change(screen.getByPlaceholderText('Enter course name'), { target: { value: 'My Course' } });
+      fireEvent.click(screen.getByRole('checkbox'));
+      fireEvent.submit(screen.getByPlaceholderText('Enter course name').closest('form')!);
+
+      expect(defaultProps.onSubmit).toHaveBeenCalledWith('My Course', {
+        description: undefined,
+        isEvaluationCourse: true,
+      });
+    });
+
+    it('should reset the checkbox when dialog is closed and reopened', () => {
+      const { rerender } = render(<ContentNameDialog {...courseProps} />);
+
+      fireEvent.click(screen.getByRole('checkbox'));
+      expect(screen.getByRole('checkbox')).toBeChecked();
+
+      rerender(<ContentNameDialog {...courseProps} open={false} />);
+      rerender(<ContentNameDialog {...courseProps} open={true} />);
+
+      expect(screen.getByRole('checkbox')).not.toBeChecked();
     });
   });
 

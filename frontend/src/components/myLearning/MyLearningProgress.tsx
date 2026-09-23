@@ -1,20 +1,43 @@
 import { useAppI18n } from "@/hooks/useAppI18n";
+import type { LearningTypeFilter } from "./MyLearningCourses";
 
 interface MyLearningProgressProps {
+  /** Which tab is selected - the Learning Path tab shows Skills/Paths stats instead of Lessons/Contents. */
+  typeFilter?: LearningTypeFilter;
   lessonsVisited: number;
   totalLessons: number;
   contentsCompleted: number;
   totalContents: number;
+  /** Only meaningful (and only rendered) when `typeFilter === 'learningPath'` - see useMySkills(). */
+  skillsGained?: number;
+  skillsTotal?: number;
+  pathsCompleted?: number;
+  pathsTotal?: number;
 }
 
-const MyLearningProgress = ({ 
-  lessonsVisited = 0, 
-  totalLessons = 0, 
-  contentsCompleted = 0, 
-  totalContents = 0 
+const MyLearningProgress = ({
+  typeFilter = 'course',
+  lessonsVisited = 0,
+  totalLessons = 0,
+  contentsCompleted = 0,
+  totalContents = 0,
+  skillsGained = 0,
+  skillsTotal = 0,
+  pathsCompleted = 0,
+  pathsTotal = 0,
 }: MyLearningProgressProps) => {
   const { t } = useAppI18n();
-  const totalHours = lessonsVisited;
+  const isLearningPathTab = typeFilter === 'learningPath';
+  // Outer/inner ring values swap to Skills/Learning Paths on the Learning Path
+  // tab - see bug: Skills Count and Learning Path Count showing the same
+  // numbers as the Course tab instead of their own real counts.
+  const outerValue = isLearningPathTab ? skillsGained : lessonsVisited;
+  const outerTotal = isLearningPathTab ? skillsTotal : totalLessons;
+  const innerValue = isLearningPathTab ? pathsCompleted : contentsCompleted;
+  const innerTotal = isLearningPathTab ? pathsTotal : totalContents;
+  const outerLabel = isLearningPathTab ? t('myLearning.skillsGained') : t('myLearning.lessonVisited');
+  const innerLabel = isLearningPathTab ? t('myLearning.learningPathsCompleted') : t('myLearning.contentsCompleted');
+  const totalHours = outerValue;
 
   const compactNumberFormatter = new Intl.NumberFormat(undefined, {
     notation: 'compact',
@@ -35,18 +58,18 @@ const MyLearningProgress = ({
   const center = size / 2;
   const strokeWidth = 12; // Increased to be more prominent
   
-  // Outer circle (Lessons)
+  // Outer circle (Lessons, or Skills gained on the Learning Path tab)
   const outerRadius = 58;
   const outerCircumference = 2 * Math.PI * outerRadius;
-  const lessonsPercentage = totalLessons > 0 ? (lessonsVisited / totalLessons) : 0;
+  const outerPercentage = outerTotal > 0 ? (outerValue / outerTotal) : 0;
   // Ensure a small segment is visible if progress is 0 but lessons exist? No, follows data.
-  const lessonsStrokeDasharray = `${lessonsPercentage * outerCircumference} ${outerCircumference}`;
-  
-  // Inner circle (Contents)
+  const outerStrokeDasharray = `${outerPercentage * outerCircumference} ${outerCircumference}`;
+
+  // Inner circle (Contents, or Learning Paths completed on the Learning Path tab)
   const innerRadius = 34; // Slightly more gap
   const innerCircumference = 2 * Math.PI * innerRadius;
-  const contentsPercentage = totalContents > 0 ? (contentsCompleted / totalContents) : 0;
-  const contentsStrokeDasharray = `${contentsPercentage * innerCircumference} ${innerCircumference}`;
+  const innerPercentage = innerTotal > 0 ? (innerValue / innerTotal) : 0;
+  const innerStrokeDasharray = `${innerPercentage * innerCircumference} ${innerCircumference}`;
 
   return (
     <div className="mylearning-donut-container">
@@ -84,20 +107,20 @@ const MyLearningProgress = ({
               fill="none" 
               className="mylearning-donut-ring-outer"
               strokeWidth={strokeWidth}
-              strokeDasharray={lessonsStrokeDasharray}
+              strokeDasharray={outerStrokeDasharray}
               strokeLinecap="round"
               transform={`rotate(-45 ${center} ${center})`}
             />
-            
+
             {/* Inner Progress (Contents) - Dark Brown */}
-            <circle 
-              cx={center} 
-              cy={center} 
-              r={innerRadius} 
-              fill="none" 
+            <circle
+              cx={center}
+              cy={center}
+              r={innerRadius}
+              fill="none"
               className="mylearning-donut-ring-inner"
               strokeWidth={strokeWidth}
-              strokeDasharray={contentsStrokeDasharray}
+              strokeDasharray={innerStrokeDasharray}
               strokeLinecap="round"
               transform={`rotate(135 ${center} ${center})`}
             />
@@ -115,10 +138,10 @@ const MyLearningProgress = ({
               <div className="w-8 h-2 bg-[hsl(var(--sunbird-learning-outer))] rounded-full"></div>
             </div>
             <div className="text-[1.125rem] font-bold text-sunbird-obsidian mb-0.5 font-rubik">
-              {lessonsVisited}/{totalLessons}
+              {outerValue}/{outerTotal}
             </div>
             <div className="text-[0.875rem] text-gray-500 font-rubik">
-              {t('myLearning.lessonVisited')}
+              {outerLabel}
             </div>
           </div>
 
@@ -127,10 +150,10 @@ const MyLearningProgress = ({
               <div className="w-8 h-2 bg-[hsl(var(--sunbird-learning-inner))] rounded-full"></div>
             </div>
             <div className="text-[1.125rem] font-bold text-[hsl(var(--sunbird-learning-inner))] mb-0.5 font-rubik">
-              {contentsCompleted}/{totalContents}
+              {innerValue}/{innerTotal}
             </div>
             <div className="text-[0.875rem] text-gray-500 font-rubik">
-              {t('myLearning.contentsCompleted')}
+              {innerLabel}
             </div>
           </div>
         </div>

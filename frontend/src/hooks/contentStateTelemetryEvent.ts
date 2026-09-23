@@ -73,3 +73,28 @@ export function normalizeScormAssessEvent(event: unknown): unknown {
     },
   };
 }
+
+/**
+ * Sum an attempt's accumulated ASSESS events into attempt totals.
+ *
+ * The Viewer Service's `/v1/assessment/submit` receives the raw ASSESS events,
+ * but sending explicit totals alongside them means neither the service nor the
+ * UI has to re-derive them. Mirrors how the legacy course service aggregates
+ * `content/state/update` assessments: total score is the sum of `edata.score`
+ * and total max is the sum of `edata.item.maxscore`.
+ */
+export function sumAssessEventTotals(events: unknown[]): { score: number; maxScore: number } {
+  let score = 0;
+  let maxScore = 0;
+  events.forEach((event) => {
+    if (!event || typeof event !== "object") return;
+    const edata = (event as { edata?: Record<string, unknown> }).edata;
+    if (!edata) return;
+    const eventScore = toNumber(edata.score);
+    if (typeof eventScore === "number") score += eventScore;
+    const item = edata.item as { maxscore?: unknown } | undefined;
+    const eventMax = toNumber(item?.maxscore);
+    if (typeof eventMax === "number") maxScore += eventMax;
+  });
+  return { score, maxScore };
+}

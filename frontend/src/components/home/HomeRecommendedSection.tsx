@@ -8,15 +8,18 @@ import { useAppI18n } from '@/hooks/useAppI18n';
 interface HomeRecommendedSectionProps {
     creatorIds?: string[];
     enrolledCourseIds?: string[];
+    /** Restricts recommendations to these primaryCategory values (e.g. ['Learning Path']). Omit to keep today's default (all known categories). */
+    primaryCategory?: string[];
 }
 
-const HomeRecommendedSection = ({ creatorIds = [], enrolledCourseIds = [] }: HomeRecommendedSectionProps) => {
+const HomeRecommendedSection = ({ creatorIds = [], enrolledCourseIds = [], primaryCategory }: HomeRecommendedSectionProps) => {
     const { t } = useAppI18n();
     const { data, isLoading } = useContentSearch({
         request: {
             filters: {
                 status: ["Live"],
-                objectType: ["Content"]
+                objectType: ["Content"],
+                ...(primaryCategory ? { primaryCategory } : {}),
             },
             sort_by: {
                 lastUpdatedOn: "desc"

@@ -1,11 +1,12 @@
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/common/Button";
+import { Checkbox } from "@/components/common/CheckBox";
 import { useAppI18n } from '@/hooks/useAppI18n';
 
 interface ContentNameDialogProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (name: string, extra?: { description?: string }) => void;
+  onSubmit: (name: string, extra?: { description?: string; isEvaluationCourse?: boolean }) => void;
   isLoading?: boolean;
   optionTitle?: string;
   optionId?: string;
@@ -26,9 +27,13 @@ export default function ContentNameDialog({
   const { t } = useAppI18n();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [isEvaluationCourse, setIsEvaluationCourse] = useState(false);
 
   // Only show description for Course/Learning Path creation
   const showDescription = optionId === 'course' || optionId === 'learning-path';
+
+  // Only Course creation can be flagged as an Evaluation Course
+  const showEvaluationCourseOption = optionId === 'course';
 
   const submitCdata = useMemo(
     () => JSON.stringify([...(cdata ?? []), { id: name, type: 'ContentName' }]),
@@ -40,12 +45,14 @@ export default function ContentNameDialog({
     if (!open) {
       setName("");
       setDescription("");
+      setIsEvaluationCourse(false);
     }
   }, [open]);
 
   const handleClose = useCallback(() => {
     setName("");
     setDescription("");
+    setIsEvaluationCourse(false);
     onClose();
   }, [onClose]);
 
@@ -70,7 +77,10 @@ export default function ContentNameDialog({
     const trimmed = name.trim();
     if (!trimmed) return;
     
-    onSubmit(trimmed, { description: description.trim() || undefined });
+    onSubmit(trimmed, {
+      description: description.trim() || undefined,
+      ...(showEvaluationCourseOption ? { isEvaluationCourse } : {}),
+    });
   };
 
   return (
@@ -127,6 +137,18 @@ export default function ContentNameDialog({
                 disabled={isLoading}
               />
             </>
+          )}
+
+          {showEvaluationCourseOption && (
+            <label className="flex items-center gap-2 mb-4 cursor-pointer font-rubik">
+              <Checkbox
+                checked={isEvaluationCourse}
+                onCheckedChange={(checked) => setIsEvaluationCourse(checked as boolean)}
+                disabled={isLoading}
+                className="h-4 w-4 rounded border-sunbird-theme-accent data-[state=checked]:bg-sunbird-theme-accent-muted data-[state=checked]:border-sunbird-theme-accent-muted"
+              />
+              <span className="text-sm text-foreground">{t('workspace.evaluationCourse')}</span>
+            </label>
           )}
 
           <div className="flex justify-end gap-3">

@@ -142,4 +142,22 @@ describe('HomeRecommendedSection', () => {
         expect(screen.getByText('Generative AI for Cybersecurity Professionals')).toBeInTheDocument();
         expect(screen.getByText('Data Engineering Foundations')).toBeInTheDocument();
     });
+
+    it('omits primaryCategory from the search filters when the prop is not passed', () => {
+        renderComponent();
+
+        const [[options]] = (useContentSearch as any).mock.calls;
+        expect(options.request.filters).not.toHaveProperty('primaryCategory');
+    });
+
+    it('passes the primaryCategory prop through to the search filters when provided', () => {
+        render(
+            <BrowserRouter>
+                <HomeRecommendedSection primaryCategory={['Learning Path']} />
+            </BrowserRouter>
+        );
+
+        const [[options]] = (useContentSearch as any).mock.calls;
+        expect(options.request.filters.primaryCategory).toEqual(['Learning Path']);
+    });
 });
