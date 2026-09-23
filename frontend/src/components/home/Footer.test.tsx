@@ -198,33 +198,21 @@ describe('Footer', () => {
       expect(privacyDialog).toHaveAttribute('data-terms-url', 'https://example.com/privacy');
     });
 
-    it('falls back to termsUrl when privacyUrl is not available', () => {
+    it('renders as a plain span when privacyUrl is not available, even if termsUrl is', () => {
+      // privacyUrl must never fall back to termsUrl — showing the wrong legal
+      // document silently is worse than showing no link at all.
       mockUseGetTncUrl
         .mockReturnValueOnce({ data: 'https://example.com/terms' }) // tncConfig → termsUrl
         .mockReturnValueOnce({ data: undefined });                   // privacyConfig → no privacyUrl
       renderFooter();
 
-      const privacyDialog = screen
-        .getAllByTestId('tnc-dialog')
-        .find((d) => d.getAttribute('data-title') === 'Privacy Policy');
-
-      expect(privacyDialog).toBeDefined();
-      expect(privacyDialog).toHaveAttribute('data-terms-url', 'https://example.com/terms');
-    });
-
-    it('renders a button trigger (not a span) when any URL is available', () => {
-      mockUseGetTncUrl
-        .mockReturnValueOnce({ data: 'https://example.com/terms' })
-        .mockReturnValueOnce({ data: undefined });
-      renderFooter();
-
-      const privacyDialog = screen
-        .getAllByTestId('tnc-dialog')
-        .find((d) => d.getAttribute('data-title') === 'Privacy Policy');
-
-      const btn = privacyDialog?.querySelector('button');
-      expect(btn).toBeDefined();
-      expect(btn?.textContent).toBe('Privacy Policy');
+      const el = screen.getByText('Privacy Policy');
+      expect(el.tagName).toBe('SPAN');
+      expect(
+        screen
+          .queryAllByTestId('tnc-dialog')
+          .some((d) => d.getAttribute('data-title') === 'Privacy Policy')
+      ).toBe(false);
     });
 
     it('opens dialog with privacyUrl when only privacyUrl is available but termsUrl is not', () => {
