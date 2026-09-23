@@ -280,6 +280,7 @@
     "contentStatusCompleted": "مكتمل",
     "contentStatusInProgress": "قيد التقدم",
     "contentStatusNotViewed": "لم تتم المشاهدة",
+    "contentLocked": "مقفل",
     "selfAssessMaxAttempt": "لقد وصلت إلى الحد الأقصى لعدد المحاولات لهذا التقييم.",
     "selfAssessLastAttempt": "هذه هي محاولتك الأخيرة لهذا التقييم.",
     "attemptsLabel": "المحاولة {{current}} من {{max}}",

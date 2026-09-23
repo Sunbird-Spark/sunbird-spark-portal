@@ -187,4 +187,53 @@ describe('CollectionSidebar', () => {
       );
     });
   });
+  describe('sequential access lock', () => {
+    it('locks only the ids in lockedContentIds', () => {
+      renderSidebar({
+        ...defaultProps,
+        contentStatusMap: { 'lesson-1': 2, 'lesson-2': 0 },
+        lockedContentIds: new Set(['lesson-2']),
+      });
+      // lesson-1 is complete and stays a link; lesson-2 is locked and loses its link.
+      expect(screen.getByRole('link', { name: /Video Lesson/i })).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: /Document Lesson/i })).not.toBeInTheDocument();
+      expect(screen.getAllByLabelText('courseDetails.contentLocked')).toHaveLength(1);
+    });
+
+    it('locks nothing when lockedContentIds is undefined', () => {
+      renderSidebar({
+        ...defaultProps,
+        contentStatusMap: { 'lesson-1': 0, 'lesson-2': 0 },
+      });
+      expect(screen.getByRole('link', { name: /Video Lesson/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Document Lesson/i })).toBeInTheDocument();
+      expect(screen.queryByLabelText('courseDetails.contentLocked')).not.toBeInTheDocument();
+    });
+
+    it('passes the locked set down into nested sub-units', () => {
+      const nested: HierarchyContentNode[] = [
+        {
+          identifier: 'mod-1',
+          name: 'Module One',
+          mimeType: COLLECTION_MIME,
+          children: [
+            {
+              identifier: 'sub-1',
+              name: 'Sub Unit',
+              mimeType: COLLECTION_MIME,
+              children: [{ identifier: 'deep-1', name: 'Deep Lesson', mimeType: 'video/mp4' }],
+            },
+          ],
+        },
+      ];
+      renderSidebar({
+        ...defaultProps,
+        children: nested,
+        contentStatusMap: { 'deep-1': 0 },
+        lockedContentIds: new Set(['deep-1']),
+      });
+      expect(screen.queryByRole('link', { name: /Deep Lesson/i })).not.toBeInTheDocument();
+      expect(screen.getByLabelText('courseDetails.contentLocked')).toBeInTheDocument();
+    });
+  });
 });

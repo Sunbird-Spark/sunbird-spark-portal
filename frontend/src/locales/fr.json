@@ -280,6 +280,7 @@
     "contentStatusCompleted": "Terminé",
     "contentStatusInProgress": "En cours",
     "contentStatusNotViewed": "Non consulté",
+    "contentLocked": "Verrouillé",
     "selfAssessMaxAttempt": "Vous avez atteint le nombre maximum de tentatives pour cette évaluation.",
     "selfAssessLastAttempt": "Ceci est votre dernière tentative pour cette évaluation.",
     "attemptsLabel": "Tentative {{current}} sur {{max}}",
