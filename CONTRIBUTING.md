@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-# Sunbird Portal Contributing Guide
+# Spark Portal Contributing Guide
 
 First off, thanks for taking the time to contribute! ❤️
 
