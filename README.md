@@ -2,6 +2,10 @@
 
 A modern, scalable educational platform built with React and Node.js, designed for national-scale deployment.Sunbird is a next-generation scalable open-source learning solution for teachers and tutors. Built for the 21st century with state-of-the-art technology, Sunbird runs natively in cloud/mobile environments. The open-source governance of Sunbird allows a massive community of nation-builders to co-create and extend the solution in novel ways.
 
+## Maintainer
+
+[@pallakartheekreddy](https://github.com/pallakartheekreddy)
+
 ## Architecture Overview
 
 This is a **monorepo** containing two independent applications:
@@ -1284,7 +1288,7 @@ Code quality analysis is configured via `sonar-project.properties`. Coverage rep
 
 ## Development Workflow
 
-1. **Create feature branch**: `git checkout -b feature/your-feature-name`
+1. **Create feature branch**: `git checkout -b feat/your-feature-name`
 2. **Make changes** following TypeScript strict guidelines
 3. **Run quality checks**:
    ```bash
