@@ -1,0 +1,101 @@
+name: Bug report
+description: Something in the portal isn't working the way it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this.
+
+        **Please don't report security vulnerabilities here.** Use the
+        **Security → Report a vulnerability** tab instead.
+
+  - type: checkboxes
+    id: prechecks
+    attributes:
+      label: Before you start
+      options:
+        - label: I searched existing issues and this isn't already reported
+          required: true
+        - label: I'm on Node 24.12.0 and the latest version of the branch
+          required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where is the problem?
+      options:
+        - Frontend (React / Vite)
+        - Backend (Express API)
+        - Proxy between the two
+        - Authentication or sign-in
+        - Theming, fonts or templates
+        - Content player or editors
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what actually happened instead.
+      placeholder: I expected ... but instead ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Steps someone else can follow to see the same thing.
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See error
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version or branch
+      placeholder: v1.1.1
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node version, and browser for anything user-facing.
+      placeholder: |
+        OS: macOS 15.1
+        Node: 24.12.0
+        Browser: Chrome 130
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console output or stack trace
+      description: Browser console for frontend issues, server output for backend ones.
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: For UI problems, a screenshot usually explains it faster than words.
+
+  - type: dropdown
+    id: contributing
+    attributes:
+      label: Would you like to work on this?
+      options:
+        - I'd like to fix it myself
+        - I'd like guidance before trying
+        - I'm only reporting it
+    validations:
+      required: true

@@ -1284,7 +1284,7 @@ Code quality analysis is configured via `sonar-project.properties`. Coverage rep
 
 ## Development Workflow
 
-1. **Create feature branch**: `git checkout -b feature/your-feature-name`
+1. **Create feature branch**: `git checkout -b feat/your-feature-name`
 2. **Make changes** following TypeScript strict guidelines
 3. **Run quality checks**:
    ```bash
