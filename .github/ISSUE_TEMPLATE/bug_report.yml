@@ -1,4 +1,4 @@
-name: Bug report
+name: "\U0001F41E Bug report"
 description: Something in the portal isn't working the way it should
 labels: ["bug"]
 body:
