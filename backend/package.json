@@ -27,7 +27,7 @@
     "@yugabytedb/pg": "^8.7.3-yb-10",
     "ajv": "^8.17.1",
     "axios": "^1.13.2",
-    "cassandra-driver": "^4.8.0",
+    "cassandra-driver": "^4.10.0",
     "connect-pg-simple": "^10.0.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.19",
