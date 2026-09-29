@@ -4,20 +4,14 @@ import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Header, PrimaryButton } from './ForgotPasswordComponents';
 import { getSafeRedirectUrl, isMobileApp } from '@/utils/forgotPasswordUtils';
 import { useAppI18n } from '@/hooks/useAppI18n';
-import { LANGUAGE_STORAGE_KEY, LANGUAGE_MAP, type SupportedLanguage } from '@/configs/languages';
-import i18n from '@/configs/i18n';
+import { applyLanguageFromUrl } from '@/utils/languageFromUrl';
 
 const PasswordResetSuccess: React.FC = () => {
     const { t } = useAppI18n();
     const isMobileRedirect = isMobileApp();
 
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const lang = params.get('lang');
-        if (lang && LANGUAGE_MAP[lang as SupportedLanguage]) {
-            try { localStorage.setItem(LANGUAGE_STORAGE_KEY, lang); } catch { /* storage unavailable */ }
-            void i18n.changeLanguage(lang).catch((err) => { console.error('Failed to change language to', lang, err); });
-        }
+        applyLanguageFromUrl();
         // Theme / font / template handled by ThemeProvider.
     }, []);
 

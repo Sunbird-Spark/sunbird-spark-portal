@@ -87,6 +87,9 @@ export default function ProfileDataSharingModal({
     <div
       className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4"
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="profile-data-sharing-modal-title"
@@ -94,6 +97,11 @@ export default function ProfileDataSharingModal({
       <div
         className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col border border-border shadow-lg"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key === "Escape") onClose();
+        }}
+        role="presentation"
       >
         <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
           <h2

@@ -201,6 +201,51 @@ describe('RoleDialog', () => {
     expect(onOrgChange).toHaveBeenCalledWith('org123');
   });
 
+  it('calls onClose when Escape is pressed on the panel or the overlay', () => {
+    const onClose = vi.fn();
+    render(
+      <RoleDialog
+        dialogState={mockStateAdd}
+        availableRoles={MOCK_ROLES}
+        existingRoleIds={[]}
+        selectedRole=""
+        organisationId=""
+        isSavingRole={false}
+        onClose={onClose}
+        onSave={vi.fn()}
+        onSelectedRoleChange={vi.fn()}
+        onOrganisationIdChange={vi.fn()}
+        userOrganisations={[]}
+      />
+    );
+    fireEvent.keyDown(screen.getByText('Add New Role'), { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(onClose.mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('does not close on Escape while isSavingRole is true', () => {
+    const onClose = vi.fn();
+    render(
+      <RoleDialog
+        dialogState={mockStateAdd}
+        availableRoles={MOCK_ROLES}
+        existingRoleIds={[]}
+        selectedRole=""
+        organisationId=""
+        isSavingRole={true}
+        onClose={onClose}
+        onSave={vi.fn()}
+        onSelectedRoleChange={vi.fn()}
+        onOrganisationIdChange={vi.fn()}
+        userOrganisations={[]}
+      />
+    );
+    fireEvent.keyDown(screen.getByText('Add New Role'), { key: 'Escape' });
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it('disables buttons when isSavingRole is true', () => {
     render(
       <RoleDialog

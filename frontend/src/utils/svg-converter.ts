@@ -53,9 +53,11 @@ export const convertSvgToOutput = async (
             ? decodeURIComponent(input.replace(/data:image\/svg\+xml,/, '')).replace(/<!--\s*[a-zA-Z0-9-]*\s*-->/g, '')
             : input;
 
+        // Rely on DOMPurify's built-in SVG profiles (which already allow the
+        // standard SVG element set) instead of widening the allowlist via
+        // ADD_TAGS. FORBID_* entries are kept as defence-in-depth.
         template = DOMPurify.sanitize(template, {
             USE_PROFILES: { svg: true, svgFilters: true },
-            ADD_TAGS: ['svg', 'path', 'rect', 'circle', 'text', 'g', 'defs', 'image', 'use'],
             FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
             FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover']
         });

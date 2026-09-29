@@ -120,6 +120,14 @@ export const NotificationPopover = () => {
                                             key={item.id}
                                             className={`notification-item cursor-pointer ${item.status === 'unread' ? 'notification-item--unread' : ''}`}
                                             onClick={() => handleNotificationClick(item)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    handleNotificationClick(item);
+                                                }
+                                            }}
+                                            role="button"
+                                            tabIndex={0}
                                         >
                                             <div className="notification-item-body">
                                                 <p className="notification-item-message">{getMessage(item)}</p>

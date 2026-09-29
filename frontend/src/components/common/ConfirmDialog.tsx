@@ -47,13 +47,16 @@ export default function ConfirmDialog({
 
   const confirmButtonClass =
     confirmVariant === "destructive"
-      ? "bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white font-rubik"
+      ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground font-rubik"
       : "bg-sunbird-theme-accent hover:bg-sunbird-theme-accent/90 text-white font-rubik";
 
       return createPortal(
         <div
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       onClick={handleClose}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") handleClose();
+      }}
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -61,6 +64,11 @@ export default function ConfirmDialog({
       <div
         className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-sunbird-gray-f3"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key === "Escape") handleClose();
+        }}
+        role="presentation"
       >
         <h2 className="text-xl font-semibold font-rubik text-sunbird-obsidian mb-2">
           {title}

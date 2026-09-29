@@ -222,6 +222,9 @@ export default function ContentDynamicFormDialog({
     <div
       className="content-form-overlay"
       onClick={isLoading ? undefined : onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && !isLoading) onClose();
+      }}
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -229,6 +232,11 @@ export default function ContentDynamicFormDialog({
       <div
         className="content-form-container"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key === 'Escape' && !isLoading) onClose();
+        }}
+        role="presentation"
       >
         <h2 className="content-form-title">{title}</h2>
         <p className="content-form-subtitle">{t('workspace.fillDetails')}</p>

@@ -70,6 +70,29 @@ describe('CreateContentModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('calls onClose when Escape is pressed on the backdrop', () => {
+    const onClose = vi.fn();
+    render(
+      <CreateContentModal open onClose={onClose} onOptionSelect={vi.fn()} />
+    );
+    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Create content' }), { key: 'Enter' });
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Create content' }), { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onClose on Escape inside the panel but ignores other keys', () => {
+    const onClose = vi.fn();
+    render(
+      <CreateContentModal open onClose={onClose} onOptionSelect={vi.fn()} />
+    );
+    const heading = screen.getByRole('heading', { name: 'Create content' });
+    fireEvent.keyDown(heading, { key: 'Enter' });
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.keyDown(heading, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('calls onOptionSelect when an option is selected and does not close on content click', () => {
     const onOptionSelect = vi.fn();
     const onClose = vi.fn();

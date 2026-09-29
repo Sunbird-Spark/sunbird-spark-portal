@@ -21,6 +21,9 @@ export default function CreateContentModal({
     <div
       className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4"
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose();
+      }}
       role="dialog"
       aria-modal="true"
       aria-label={t('workspace.createContent')}
@@ -28,6 +31,11 @@ export default function CreateContentModal({
       <div
         className="bg-sunbird-gray-f3 rounded-2xl max-w-7xl w-full max-h-[90vh] overflow-y-auto p-6"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key === 'Escape') onClose();
+        }}
+        role="presentation"
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold font-rubik text-foreground">{t('workspace.createContent')}</h2>

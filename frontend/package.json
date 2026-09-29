@@ -27,8 +27,8 @@
     "@project-sunbird/generic-editor-v2": "^2.0.6",
     "@project-sunbird/sunbird-epub-player-web-component": "^2.0.0",
     "@project-sunbird/sunbird-pdf-player-web-component": "^2.0.0",
-    "@project-sunbird/sunbird-questionset-editor-web-component-react": "^0.1.19",
-    "@project-sunbird/sunbird-quml-player-web-component-react": "^0.1.19",
+    "@project-sunbird/sunbird-questionset-editor-web-component-react": "^0.1.20",
+    "@project-sunbird/sunbird-quml-player-web-component-react": "^0.1.20",
     "@project-sunbird/sunbird-video-player-web-component": "^2.3.1",
     "@project-sunbird/telemetry-sdk": "^2.0.1",
     "@radix-ui/react-accordion": "^1.2.11",
@@ -83,7 +83,10 @@
     "tough-cookie": "^4.1.4",
     "elliptic": "^6.6.1",
     "jsonld": "^6.0.0",
-    "undici": "^6.22.0"
+    "undici": "^6.22.0",
+    "@emnapi/core": "1.11.3",
+    "@emnapi/runtime": "1.11.3",
+    "@emnapi/wasi-threads": "1.2.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

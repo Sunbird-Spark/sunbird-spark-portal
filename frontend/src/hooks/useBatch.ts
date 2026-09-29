@@ -231,7 +231,7 @@ export const useCreateBatch = () => {
       queryClient.setQueryData<Batch[]>(['batchList', variables.courseId, true], (old) => {
         if (!old) return old;
         const newBatch: Batch = {
-          id: response.data?.batchId || Math.random().toString(),
+          id: response.data?.batchId || crypto.randomUUID(),
           courseId: variables.courseId,
           name: variables.name,
           description: variables.description,

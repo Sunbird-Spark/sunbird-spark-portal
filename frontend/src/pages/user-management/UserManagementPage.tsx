@@ -94,7 +94,7 @@ const UserManagementPage = () => {
     if (Array.isArray(responseData.organisations)) {
       responseData.organisations.forEach((org: any) => {
         const orgId = org.organisationId || org.id;
-        const orgName = org.orgName || org.orgName;
+        const orgName = org.orgName || org.name;
         if (orgId && !orgs.find(o => o.organisationId === orgId)) {
           orgs.push({
             organisationId: orgId,

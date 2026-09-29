@@ -196,6 +196,25 @@ describe('HelpSupport', () => {
         expect(mockNavigate).toHaveBeenCalledWith('/help-support/login');
     });
 
+    it('navigates when Enter or Space is pressed on a category card and ignores other keys', () => {
+        render(
+            <MemoryRouter initialEntries={['/help-support']}>
+                <HelpSupport />
+            </MemoryRouter>
+        );
+
+        fireEvent.keyDown(screen.getByText('Login'), { key: 'Enter' });
+        expect(mockNavigate).toHaveBeenCalledWith('/help-support/login');
+
+        mockNavigate.mockClear();
+        fireEvent.keyDown(screen.getByText('Profile'), { key: ' ' });
+        expect(mockNavigate).toHaveBeenCalledWith('/help-support/profile');
+
+        mockNavigate.mockClear();
+        fireEvent.keyDown(screen.getByText('Login'), { key: 'Tab' });
+        expect(mockNavigate).not.toHaveBeenCalled();
+    });
+
     // --- New tests for previously uncovered lines ---
 
     it('opens ReportIssueDialog when Report Issue button is clicked (covers line 57)', () => {

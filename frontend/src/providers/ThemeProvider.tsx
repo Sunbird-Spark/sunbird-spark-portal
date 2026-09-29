@@ -101,31 +101,34 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const fontParam = params.get('font');
     const layoutParam = params.get('layout');
 
+    // Persist the matched catalog entry's own id (a clean, literal-derived
+    // string) rather than the raw URL param, so tainted input never reaches
+    // browser storage.
     if (templateParam) {
       const matchedTemplate = TEMPLATES.find((t) => t.id === templateParam);
       if (matchedTemplate) {
-        localStorage.setItem(TEMPLATE_STORAGE_KEY, templateParam);
+        localStorage.setItem(TEMPLATE_STORAGE_KEY, matchedTemplate.id);
         setActiveTemplate(matchedTemplate);
       }
     }
     if (themeParam) {
       const matchedTheme = THEMES.find((t) => t.id === themeParam);
       if (matchedTheme) {
-        localStorage.setItem(THEME_STORAGE_KEY, themeParam);
+        localStorage.setItem(THEME_STORAGE_KEY, matchedTheme.id);
         setActiveTheme(matchedTheme);
       }
     }
     if (fontParam) {
       const matchedFont = FONTS.find((f) => f.id === fontParam);
       if (matchedFont) {
-        localStorage.setItem(FONT_STORAGE_KEY, fontParam);
+        localStorage.setItem(FONT_STORAGE_KEY, matchedFont.id);
         setActiveFont(matchedFont);
       }
     }
     if (layoutParam) {
       const matchedLayout = LAYOUTS.find((l) => l.id === layoutParam);
       if (matchedLayout) {
-        localStorage.setItem(LAYOUT_STORAGE_KEY, layoutParam);
+        localStorage.setItem(LAYOUT_STORAGE_KEY, matchedLayout.id);
         setActiveLayout(matchedLayout);
       }
     }

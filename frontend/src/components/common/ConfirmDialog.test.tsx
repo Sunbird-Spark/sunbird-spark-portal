@@ -79,6 +79,32 @@ describe('ConfirmDialog', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it('closes when Escape is pressed directly on the backdrop element', () => {
+    renderDialog();
+
+    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Delete Content' }), { key: 'Enter' });
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(screen.getByRole('dialog', { name: 'Delete Content' }), { key: 'Escape' });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('applies the destructive styling for the destructive confirm variant', () => {
+    renderDialog({ confirmVariant: 'destructive' });
+
+    expect(screen.getByRole('button', { name: 'Confirm' }).className).toContain('bg-destructive');
+  });
+
+  it('closes once on Escape inside the dialog panel and ignores other keys', () => {
+    renderDialog();
+
+    fireEvent.keyDown(screen.getByText('Are you sure?'), { key: 'Enter' });
+    expect(onClose).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(screen.getByText('Are you sure?'), { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('closes on Escape key when not loading', () => {
     renderDialog();
 

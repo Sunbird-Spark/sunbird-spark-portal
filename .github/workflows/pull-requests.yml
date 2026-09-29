@@ -3,6 +3,11 @@ name: Pull Request Quality Checks
 on:
   pull_request:
 
+# Least privilege: these jobs only lint, build and test.
+# Naming only contents implicitly sets every other scope to none.
+permissions:
+  contents: read
+
 jobs:
   frontend-checks:
     name: Frontend Quality & Tests
@@ -10,16 +15,24 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24.12.0
 
+      # Regenerate package-lock.json only with the Node version in .nvmrc, which
+      # matches the one pinned above and in the Dockerfile. A newer npm places the
+      # @emnapi/* packages (via @unrs/resolver-binding-wasm32-wasi) differently in
+      # the tree, and `npm ci` in the release image build then rejects the lockfile
+      # with "Missing: @emnapi/core@... from lock file" -- even though CI passes.
+      # The OS does not matter here; the npm version does.
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm install
+        run: |
+          npm ci --ignore-scripts
+          node copy-assets.js
 
       - name: Frontend lint
         working-directory: frontend
@@ -39,16 +52,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24.12.0
 
       - name: Install backend dependencies
         working-directory: backend
-        run: npm install
+        run: npm ci --ignore-scripts
 
       - name: Backend lint
         working-directory: backend
