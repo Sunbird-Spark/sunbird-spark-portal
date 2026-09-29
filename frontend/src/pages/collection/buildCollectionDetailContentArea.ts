@@ -22,6 +22,7 @@ export interface BuildContentAreaArgs {
   courseProgressProps: CourseProgressCardProps | null | undefined;
   contentStatusMap: Record<string, number> | undefined;
   contentAttemptInfoMap: Record<string, { attemptCount: number }> | undefined;
+  lockedContentIds: Set<string> | undefined;
   batches: unknown;
   selectedBatchId: string;
   setSelectedBatchId: (id: string) => void;
@@ -82,6 +83,7 @@ export function buildCollectionDetailContentArea(
       courseProgressProps: args.courseProgressProps,
       contentStatusMap: args.contentStatusMap,
       contentAttemptInfoMap: args.contentAttemptInfoMap,
+      lockedContentIds: args.lockedContentIds,
       batches: args.batches as CollectionDetailLayoutContentAreaProps["enrollment"]["batches"],
       selectedBatchId: args.selectedBatchId,
       setSelectedBatchId: args.setSelectedBatchId,

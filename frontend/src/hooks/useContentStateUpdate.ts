@@ -10,12 +10,7 @@ import type { ConsumptionSummary } from "../services/collection/contentProgressC
 import { useUserId } from "./useAuthInfo";
 import { eventHasScore, extractSummary, normalizeScormAssessEvent } from "./contentStateTelemetryEvent";
 import type { TelemetryEvent } from "./contentStateTelemetryEvent";
-
-const ContentStatus = {
-  NotStarted: 0,
-  InProgress: 1,
-  Completed: 2,
-} as const;
+import { CONTENT_STATUS as ContentStatus } from "@/types/collectionTypes";
 
 interface UseContentStateUpdateParams {
   collectionId: string | undefined;

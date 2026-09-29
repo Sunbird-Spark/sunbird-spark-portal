@@ -248,4 +248,51 @@ describe('ContentRow', () => {
       expect(mockToast).not.toHaveBeenCalled();
     });
   });
+  describe('sequential access lock', () => {
+    it('renders the lock icon instead of the status label when locked', () => {
+      renderContentRow({
+        ...defaultProps,
+        isLocked: true,
+        contentStatusMap: { 'content-1': 0 },
+      });
+      expect(screen.getByLabelText('courseDetails.contentLocked')).toBeInTheDocument();
+      expect(screen.queryByText('courseDetails.contentStatusNotViewed')).not.toBeInTheDocument();
+    });
+
+    it('renders no link when locked, so the row cannot be clicked through', () => {
+      renderContentRow({ ...defaultProps, isLocked: true });
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    });
+
+    it('marks the locked row as aria-disabled', () => {
+      const { container } = renderContentRow({ ...defaultProps, isLocked: true });
+      expect(container.querySelector('[aria-disabled="true"]')).not.toBeNull();
+    });
+
+    it('is not keyboard-focusable when locked', () => {
+      const { container } = renderContentRow({ ...defaultProps, isLocked: true });
+      expect(container.querySelector('[tabindex]')).toBeNull();
+    });
+
+    it('renders a normal link when not locked', () => {
+      renderContentRow({ ...defaultProps, isLocked: false });
+      expect(screen.getByRole('link', { name: /Test Lesson/i })).toBeInTheDocument();
+      expect(screen.queryByLabelText('courseDetails.contentLocked')).not.toBeInTheDocument();
+    });
+
+    it('stays inert when locked even if attempts are also exhausted', () => {
+      // Unreachable in practice (you cannot burn attempts on content you cannot open),
+      // but the lock must win rather than falling through to the attempts toast.
+      renderContentRow({
+        ...defaultProps,
+        node: { identifier: 'quiz-1', name: 'Quiz', mimeType: 'application/vnd.sunbird.questionset', maxAttempts: 2 },
+        href: '/collection/col-1/content/quiz-1',
+        isLocked: true,
+        contentAttemptInfoMap: { 'quiz-1': { attemptCount: 2 } },
+      });
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
+      expect(mockToast).not.toHaveBeenCalled();
+    });
+  });
 });

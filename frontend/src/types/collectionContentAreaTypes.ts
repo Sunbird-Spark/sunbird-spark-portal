@@ -30,6 +30,9 @@ export interface CollectionContentAreaEnrollmentProps {
   courseProgressProps: CourseProgressCardProps | null | undefined;
   contentStatusMap: any;
   contentAttemptInfoMap?: Record<string, { attemptCount: number }>;
+  /** Leaf ids locked by sequential access. Gated alongside `contentStatusMap`, so
+   *  creators/mentors and unenrolled viewers receive `undefined` (nothing locked). */
+  lockedContentIds?: Set<string>;
   batches: BatchListItem[] | undefined;
   selectedBatchId: string;
   setSelectedBatchId: (id: string) => void;

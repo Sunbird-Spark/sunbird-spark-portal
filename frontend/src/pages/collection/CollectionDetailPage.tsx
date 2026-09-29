@@ -39,6 +39,7 @@ const CollectionDetailPage = () => {
     contentStatusMap,
     contentStateFetched,
     contentAttemptInfoMap,
+    lockedContentIds,
     courseProgressProps,
     batches,
     batchListLoading,
@@ -178,6 +179,7 @@ const CollectionDetailPage = () => {
     isEnrolledInCurrentBatch,
     contentStatusMap,
     contentStateFetched,
+    lockedContentIds,
   });
 
   useEffect(() => {
@@ -203,7 +205,7 @@ const CollectionDetailPage = () => {
     contentBlocked, upcomingBatchBlocked, isBatchEnded, batchStartDateForOverview, playerMetadata, playerIsLoading,
     playerError: playerError ?? null, handlePlayerEvent, handleTelemetryEvent, maxAttemptsExceeded,
     cdata: collectionCdata, objectRollup: collectionObjectRollup,
-    courseProgressProps, contentStatusMap, contentAttemptInfoMap, batches, selectedBatchId, setSelectedBatchId,
+    courseProgressProps, contentStatusMap, contentAttemptInfoMap, lockedContentIds, batches, selectedBatchId, setSelectedBatchId,
     handleJoinCourse, batchListLoading, joinLoading, batchListError, joinError, hasCertificate, firstCertPreviewUrl,
     setCertificatePreviewUrl, setCertificatePreviewOpen,
     enrolledDate: enrollment.enrollmentForCollection?.enrolledDate,
