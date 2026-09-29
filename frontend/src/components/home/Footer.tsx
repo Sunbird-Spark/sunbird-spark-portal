@@ -99,8 +99,8 @@ const Footer = () => {
             ) : (
               <span className="text-sunbird-theme-accent">{t("footer.terms")}</span>
             )}
-            {(privacyUrl || termsUrl) ? (
-              <TermsAndConditionsDialog termsUrl={(privacyUrl || termsUrl)!} title={t("footer.privacy")}>
+            {privacyUrl ? (
+              <TermsAndConditionsDialog termsUrl={privacyUrl} title={t("footer.privacy")}>
                 <button
                   type="button"
                   className="hover:opacity-80 transition-opacity text-sunbird-theme-accent"
