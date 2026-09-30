@@ -64,9 +64,9 @@ import {
     validateOAuthCallback,
     markSessionAsUsed,
     handleUserAuthentication,
-} from './googleAuthService.js';
+} from './oauthSessionUtils.js';
 
-describe('GoogleAuthService - Validation & Helpers', () => {
+describe('OAuthSessionUtils - Validation & Helpers', () => {
     let mockRequest: Partial<Request>;
 
 
@@ -93,7 +93,8 @@ describe('GoogleAuthService - Validation & Helpers', () => {
         it('should validate valid session and reject invalid ones', () => {
             // Valid session
             mockRequest.session = {
-                googleOAuth: {
+                ssoOAuth: {
+                    provider: 'google',
                     state: 'test-state',
                     codeVerifier: 'test-verifier',
                     client_id: 'test-client-id',
@@ -109,11 +110,11 @@ describe('GoogleAuthService - Validation & Helpers', () => {
             expect(() => validateOAuthSession(mockRequest as Request)).toThrow('OAUTH_SESSION_MISSING');
 
             // Already used
-            mockRequest.session = { googleOAuth: { state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client-id', sessionUsed: true, timestamp: Date.now() } } as any;
+            mockRequest.session = { ssoOAuth: { provider: 'google', state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client-id', sessionUsed: true, timestamp: Date.now() } } as any;
             expect(() => validateOAuthSession(mockRequest as Request)).toThrow('OAUTH_SESSION_ALREADY_USED');
 
             // Expired session
-            mockRequest.session = { googleOAuth: { state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client-id', timestamp: Date.now() - (6 * 60 * 1000), sessionUsed: false } } as any;
+            mockRequest.session = { ssoOAuth: { provider: 'google', state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client-id', timestamp: Date.now() - (6 * 60 * 1000), sessionUsed: false } } as any;
             expect(() => validateOAuthSession(mockRequest as Request)).toThrow('OAUTH_SESSION_EXPIRED');
         });
     });
@@ -128,9 +129,9 @@ describe('GoogleAuthService - Validation & Helpers', () => {
             mockRequest.query = { state: 'wrong-state', code: 'test-code' };
             expect(() => validateOAuthCallback(mockRequest as Request, 'test-state')).toThrow('INVALID_OAUTH_STATE');
 
-            // OAuth error
+            // OAuth error — generic error string now, no provider name baked in
             mockRequest.query = { state: 'test-state', error: 'access_denied' };
-            expect(() => validateOAuthCallback(mockRequest as Request, 'test-state')).toThrow('GOOGLE_OAUTH_ERROR: access_denied');
+            expect(() => validateOAuthCallback(mockRequest as Request, 'test-state')).toThrow('OAUTH_ERROR: access_denied');
 
             // Invalid codes
             mockRequest.query = { state: 'test-state' };
@@ -145,9 +146,9 @@ describe('GoogleAuthService - Validation & Helpers', () => {
     describe('markSessionAsUsed', () => {
         it('should mark session as used or handle missing session', () => {
             // Mark existing session
-            mockRequest.session = { googleOAuth: { state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client-id', timestamp: Date.now(), sessionUsed: false } } as any;
+            mockRequest.session = { ssoOAuth: { provider: 'google', state: 'test-state', codeVerifier: 'test-verifier', client_id: 'test-client-id', timestamp: Date.now(), sessionUsed: false } } as any;
             markSessionAsUsed(mockRequest as Request);
-            expect(mockRequest.session?.googleOAuth?.sessionUsed).toBe(true);
+            expect(mockRequest.session?.ssoOAuth?.sessionUsed).toBe(true);
 
             // Handle missing session
             mockRequest.session = {} as any;
@@ -182,8 +183,8 @@ describe('GoogleAuthService - Validation & Helpers', () => {
         });
 
         it('should handle authentication errors', async () => {
-            // Missing email
-            await expect(handleUserAuthentication({ name: 'Test User' }, 'test-client-id', mockRequest as Request)).rejects.toThrow('GOOGLE_EMAIL_NOT_FOUND');
+            // Missing email — generic error now, not Google-specific
+            await expect(handleUserAuthentication({ name: 'Test User' }, 'test-client-id', mockRequest as Request)).rejects.toThrow('SSO_EMAIL_NOT_FOUND');
 
             // Fetch user error
             mockGetUserByEmail.mockRejectedValue(new Error('Database error'));

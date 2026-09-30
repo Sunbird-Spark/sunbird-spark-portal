@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { Response as ApiResponse } from '../models/Response.js';
 import { envConfig } from '../config/env.js';
+import { validateSsoConfig } from '../bootstrap/validateSsoConfig.js';
 import packageJson from '../../package.json' with { type: 'json' };
 
 const { version, buildHash } = packageJson as { version: string; buildHash?: string };
@@ -20,6 +21,7 @@ export const getAppInfo = (req: Request, res: Response) => {
         appId: appId,
         enableAiSearch,
         cloudStorageUrls: envConfig.SUNBIRD_CLOUD_STORAGE_URLS,
+        enabledSsoProviders: validateSsoConfig(),
     };
 
     response.setResult({ data: appInfo });
