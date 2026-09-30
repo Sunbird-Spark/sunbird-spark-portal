@@ -42,6 +42,9 @@ GOOGLE_OAUTH_CLIENT_ID_IOS=test_ios_google_client_id
 KEYCLOAK_GOOGLE_CLIENT_ID=test_keycloak_client_id
 KEYCLOAK_GOOGLE_CLIENT_SECRET=test_keycloak_client_secret
 
+# SSO provider framework — JSON array of enabled provider names from src/services/ssoProviders.ts
+ENABLED_SSO_PROVIDERS=["google"]
+
 # Mobile Auth Configuration
 # Android native Keycloak client (confidential — directAccessGrantsEnabled: true, publicClient: false)
 KEYCLOAK_ANDROID_CLIENT_ID=android

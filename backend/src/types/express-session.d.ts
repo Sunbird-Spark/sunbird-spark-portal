@@ -57,7 +57,8 @@ declare module 'express-session' {
         oidcCodeVerifier?: string;
         oidcState?: string;
         auth_redirect_uri?: string;
-        googleOAuth?: {
+        ssoOAuth?: {
+            provider: string;
             codeVerifier: string;
             state: string;
             client_id: string;
