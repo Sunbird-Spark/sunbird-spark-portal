@@ -1,6 +1,6 @@
 # Sunbird Portal
 
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/akshitha-1210/sunbird-spark-portal/badge)](https://scorecard.dev/viewer/?uri=github.com/akshitha-1210/sunbird-spark-portal)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/Sunbird-Spark/sunbird-spark-portal/badge)](https://scorecard.dev/viewer/?uri=github.com/Sunbird-Spark/sunbird-spark-portal)
 
 A modern, scalable educational platform built with React and Node.js, designed for national-scale deployment.Sunbird is a next-generation scalable open-source learning solution for teachers and tutors. Built for the 21st century with state-of-the-art technology, Sunbird runs natively in cloud/mobile environments. The open-source governance of Sunbird allows a massive community of nation-builders to co-create and extend the solution in novel ways.
 
