@@ -39,12 +39,15 @@ vi.mock('@/hooks/useTelemetry', () => ({
 }));
 
 // ── Data hooks ────────────────────────────────────────────────────────────────
-const mockUseContentRead = vi.fn();
+const mockUseContentWithEnrichments = vi.fn();
 const mockUseContentSearch = vi.fn();
 const mockUseQumlContent = vi.fn();
 
+vi.mock('@/hooks/useContentWithEnrichments', () => ({
+  useContentWithEnrichments: (id: string) => mockUseContentWithEnrichments(id),
+}));
+
 vi.mock('@/hooks/useContent', () => ({
-  useContentRead: (id: string) => mockUseContentRead(id),
   useContentSearch: (opts: any) => mockUseContentSearch(opts),
 }));
 
@@ -108,11 +111,7 @@ describe('ContentPlayerPage', () => {
     capturedOnTelemetryEvent = undefined;
     mockParams.contentId = 'do_player_001';
 
-    mockUseContentRead.mockReturnValue({
-      data: { data: { content: regularContent } },
-      isLoading: false,
-      error: null,
-    });
+    mockUseContentWithEnrichments.mockReturnValue({ content: regularContent, isLoading: false, error: null });
     mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: null });
     mockUseContentSearch.mockReturnValue({ data: null });
   });
@@ -120,27 +119,19 @@ describe('ContentPlayerPage', () => {
   // ── Loading / error states ────────────────────────────────────────────────
 
   it('shows loader while content is loading', () => {
-    mockUseContentRead.mockReturnValue({ data: null, isLoading: true, error: null });
+    mockUseContentWithEnrichments.mockReturnValue({ content: undefined, isLoading: true, error: null });
     renderPage();
     expect(screen.getByTestId('page-loader')).toBeInTheDocument();
   });
 
   it('shows error message when content fetch fails', () => {
-    mockUseContentRead.mockReturnValue({
-      data: null,
-      isLoading: false,
-      error: { message: 'Network error' },
-    });
+    mockUseContentWithEnrichments.mockReturnValue({ content: undefined, isLoading: false, error: { message: 'Network error' } });
     renderPage();
     expect(screen.getByText('content.errorLoading')).toBeInTheDocument();
   });
 
   it('shows not-found message when content is absent', () => {
-    mockUseContentRead.mockReturnValue({
-      data: { data: { content: null } },
-      isLoading: false,
-      error: null,
-    });
+    mockUseContentWithEnrichments.mockReturnValue({ content: null, isLoading: false, error: null });
     renderPage();
     expect(screen.getByText('content.notFound')).toBeInTheDocument();
   });
@@ -172,11 +163,7 @@ describe('ContentPlayerPage', () => {
       name: 'Test QuestionSet',
       mimeType: 'application/vnd.sunbird.questionset',
     };
-    mockUseContentRead.mockReturnValue({
-      data: { data: { content: qumlContent } },
-      isLoading: false,
-      error: null,
-    });
+    mockUseContentWithEnrichments.mockReturnValue({ content: qumlContent, isLoading: false, error: null });
     mockUseQumlContent.mockReturnValue({ data: qumlContent, isLoading: false, error: null });
 
     renderPage();
@@ -185,19 +172,15 @@ describe('ContentPlayerPage', () => {
   });
 
   it('shows loader when QUML data is loading', () => {
-    mockUseContentRead.mockReturnValue({
-      data: {
-        data: {
-          content: {
-            identifier: 'do_player_001',
-            name: 'Test QuestionSet',
-            mimeType: 'application/vnd.sunbird.questionset',
-          },
-        },
+    mockUseContentWithEnrichments.mockReturnValue({
+  content: {
+        identifier: 'do_player_001',
+        name: 'Test QuestionSet',
+        mimeType: 'application/vnd.sunbird.questionset',
       },
-      isLoading: false,
-      error: null,
-    });
+  isLoading: false,
+  error: null,
+});
     mockUseQumlContent.mockReturnValue({ data: null, isLoading: true, error: null });
 
     renderPage();

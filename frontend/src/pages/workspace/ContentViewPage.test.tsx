@@ -7,9 +7,9 @@ import ContentViewPage from './ContentViewPage';
 const mockNavigate = vi.fn();
 const mockToast = vi.fn();
 
-// Hoist useContentRead mock so it can be overridden per test
-const { mockUseContentRead } = vi.hoisted(() => ({
-  mockUseContentRead: vi.fn(),
+// Hoist useContentWithEnrichments mock so it can be overridden per test
+const { mockUseContentWithEnrichments } = vi.hoisted(() => ({
+  mockUseContentWithEnrichments: vi.fn(),
 }));
 
 vi.mock('@/hooks/useContentPlayer', () => ({
@@ -20,8 +20,8 @@ vi.mock('@/hooks/useContentPlayer', () => ({
 }));
 
 // Default mock: content with status 'Review' and valid dates
-vi.mock('@/hooks/useContent', () => ({
-  useContentRead: (...args: any[]) => mockUseContentRead(...args),
+vi.mock('@/hooks/useContentWithEnrichments', () => ({
+  useContentWithEnrichments: (...args: any[]) => mockUseContentWithEnrichments(...args),
 }));
 
 vi.mock('@/hooks/useQumlContent', () => ({
@@ -165,19 +165,15 @@ const renderPage = () =>
 
 // Default content response used by most tests
 const defaultContentResponse = {
-  data: {
-    data: {
-      content: {
-        name: 'Test Content',
-        description: 'Test Description',
-        creator: 'Test Creator',
-        lastUpdatedOn: '2024-01-01',
-        createdOn: '2024-01-01',
-        primaryCategory: 'Resource',
-        mimeType: 'application/pdf',
-        status: 'Review',
-      },
-    },
+  content: {
+    name: 'Test Content',
+    description: 'Test Description',
+    creator: 'Test Creator',
+    lastUpdatedOn: '2024-01-01',
+    createdOn: '2024-01-01',
+    primaryCategory: 'Resource',
+    mimeType: 'application/pdf',
+    status: 'Review',
   },
   isLoading: false,
   error: null,
@@ -186,7 +182,7 @@ const defaultContentResponse = {
 describe('ContentViewPage - Layout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseContentRead.mockReturnValue(defaultContentResponse);
+    mockUseContentWithEnrichments.mockReturnValue(defaultContentResponse);
   });
   afterEach(() => cleanup());
 
@@ -215,7 +211,7 @@ describe('ContentViewPage - Layout', () => {
 describe('ContentReviewPage - Button Functionality', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseContentRead.mockReturnValue(defaultContentResponse);
+    mockUseContentWithEnrichments.mockReturnValue(defaultContentResponse);
     mockNavigate.mockClear();
     mockToast.mockClear();
   });
@@ -276,7 +272,7 @@ describe('ContentReviewPage - Button Functionality', () => {
 describe('ContentViewPage - Publish and Reject flows', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseContentRead.mockReturnValue(defaultContentResponse);
+    mockUseContentWithEnrichments.mockReturnValue(defaultContentResponse);
   });
   afterEach(() => cleanup());
 
@@ -308,30 +304,26 @@ describe('ContentViewPage - Publish and Reject flows', () => {
 describe('ContentViewPage - formatDate null path and navigation guard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseContentRead.mockReturnValue(defaultContentResponse);
+    mockUseContentWithEnrichments.mockReturnValue(defaultContentResponse);
   });
   afterEach(() => cleanup());
 
   it('shows notAvailable fallback when content has no dates (covers formatDate returning null, line 229)', () => {
-    // Override useContentRead to return content with null/undefined date fields
-    mockUseContentRead.mockReturnValue({
-      data: {
-        data: {
-          content: {
-            name: 'No-Date Content',
-            description: 'Desc',
-            creator: 'Author',
-            lastUpdatedOn: undefined,
-            createdOn: undefined,
-            primaryCategory: 'Resource',
-            mimeType: 'application/pdf',
-            status: 'Review',
-          },
-        },
+    // Override useContentWithEnrichments to return content with null/undefined date fields
+    mockUseContentWithEnrichments.mockReturnValue({
+  content: {
+        name: 'No-Date Content',
+        description: 'Desc',
+        creator: 'Author',
+        lastUpdatedOn: undefined,
+        createdOn: undefined,
+        primaryCategory: 'Resource',
+        mimeType: 'application/pdf',
+        status: 'Review',
       },
-      isLoading: false,
-      error: null,
-    });
+  isLoading: false,
+  error: null,
+});
 
     render(
       <QueryClientProvider client={new QueryClient()}>
@@ -347,25 +339,21 @@ describe('ContentViewPage - formatDate null path and navigation guard', () => {
   });
 
   it('navigates to /workspace with replace:true when in review mode and status is not Review (covers lines 166-167)', () => {
-    // Override useContentRead to return a content with status 'Draft' (not 'Review')
-    mockUseContentRead.mockReturnValue({
-      data: {
-        data: {
-          content: {
-            name: 'Draft Content',
-            description: 'Desc',
-            creator: 'Author',
-            lastUpdatedOn: '2024-01-01',
-            createdOn: '2024-01-01',
-            primaryCategory: 'Resource',
-            mimeType: 'application/pdf',
-            status: 'Draft',
-          },
-        },
+    // Override useContentWithEnrichments to return a content with status 'Draft' (not 'Review')
+    mockUseContentWithEnrichments.mockReturnValue({
+  content: {
+        name: 'Draft Content',
+        description: 'Desc',
+        creator: 'Author',
+        lastUpdatedOn: '2024-01-01',
+        createdOn: '2024-01-01',
+        primaryCategory: 'Resource',
+        mimeType: 'application/pdf',
+        status: 'Draft',
       },
-      isLoading: false,
-      error: null,
-    });
+  isLoading: false,
+  error: null,
+});
 
     mockNavigate.mockClear();
 

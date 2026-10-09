@@ -16,7 +16,22 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-describe('useWorkspace - transcriptFilter', () => {
+type SearchBody = { request: { limit?: number; filters: Record<string, unknown> } };
+
+const searchCalls = () => (mockClient.post as unknown as { mock: { calls: [string, SearchBody][] } }).mock.calls;
+const contentSearchBody = () => searchCalls().find((call) => call[1]?.request?.limit !== 1)![1];
+const countsBody = () => searchCalls().find((call) => call[1]?.request?.limit === 1)![1];
+
+const renderWorkspace = async (options: Partial<Parameters<typeof useWorkspace>[0]> = {}) => {
+  renderHook(
+    () => useWorkspace({ userId: 'user_1', activeTab: 'all', sortBy: 'updated', typeFilter: 'all', ...options }),
+    { wrapper: Wrapper },
+  );
+  await waitFor(() => expect(mockClient.post).toHaveBeenCalled());
+  await waitFor(() => expect(searchCalls().length).toBeGreaterThanOrEqual(2));
+};
+
+describe('useWorkspace - enrichmentFilter', () => {
   beforeEach(() => {
     queryClient.clear();
     mockClient = {
@@ -30,94 +45,77 @@ describe('useWorkspace - transcriptFilter', () => {
     init(mockClient);
   });
 
-  it('does not touch status filtering at all - transcriptFilter leaves whatever the tab already narrowed to', async () => {
-    renderHook(
-      () =>
-        useWorkspace({
-          userId: 'user_1',
-          activeTab: 'all',
-          sortBy: 'updated',
-          typeFilter: 'all',
-          transcriptFilter: true,
-        }),
-      { wrapper: Wrapper },
-    );
+  it('adds enrichmentTypes to the content search filters when an enrichment filter is set', async () => {
+    await renderWorkspace({ enrichmentFilter: ['Transcript'] });
+    expect(contentSearchBody().request.filters.enrichmentTypes).toEqual(['Transcript']);
+  });
 
-    await waitFor(() => expect(mockClient.post).toHaveBeenCalled());
-    const contentSearchCall = (mockClient.post as any).mock.calls.find(
-      (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit !== 1,
+  it('adds enrichmentTypes to the counts request too, so tab badges match the filtered list', async () => {
+    await renderWorkspace({ enrichmentFilter: ['Transcript'] });
+    expect(countsBody().request.filters.enrichmentTypes).toEqual(['Transcript']);
+  });
+
+  it('omits enrichmentTypes from both requests when the filter is empty or not given (negative)', async () => {
+    await renderWorkspace({ enrichmentFilter: [] });
+    expect(contentSearchBody().request.filters).not.toHaveProperty('enrichmentTypes');
+    expect(countsBody().request.filters).not.toHaveProperty('enrichmentTypes');
+  });
+
+  it('never sends the removed exists field (negative)', async () => {
+    await renderWorkspace({ enrichmentFilter: ['Transcript'] });
+    expect(contentSearchBody().request).not.toHaveProperty('exists');
+    expect(countsBody().request).not.toHaveProperty('exists');
+  });
+
+  it('refetches with the new filter when enrichmentFilter changes', async () => {
+    const { rerender } = renderHook(
+      ({ filter }: { filter: string[] }) =>
+        useWorkspace({ userId: 'user_1', activeTab: 'all', sortBy: 'updated', typeFilter: 'all', enrichmentFilter: filter }),
+      { wrapper: Wrapper, initialProps: { filter: [] as string[] } },
     );
-    // "all" tab's own status filter is already the full allow-list - unaffected by transcriptFilter either way.
-    expect(contentSearchCall[1].request.filters).toEqual({
+    await waitFor(() => expect(searchCalls().length).toBeGreaterThanOrEqual(2));
+    const before = searchCalls().length;
+    rerender({ filter: ['Transcript'] });
+    await waitFor(() => expect(searchCalls().length).toBeGreaterThan(before));
+    const last = searchCalls().filter((call) => call[1]?.request?.limit !== 1).pop()![1];
+    expect(last.request.filters.enrichmentTypes).toEqual(['Transcript']);
+  });
+
+  it('does not touch status filtering at all - the filter leaves whatever the tab already narrowed to', async () => {
+    await renderWorkspace({ enrichmentFilter: ['Transcript'] });
+    // "all" tab's own status filter is already the full allow-list - unaffected by the filter either way.
+    expect(contentSearchBody().request.filters).toEqual({
       createdBy: 'user_1',
       primaryCategory: expect.any(Array),
       status: [...WORKSPACE_STATUS_FILTER],
+      enrichmentTypes: ['Transcript'],
     });
   });
 
-  it('preserves a narrower tab\'s own status filter when transcriptFilter is true (regression: previously widened to every status, breaking Drafts/Review/Published)', async () => {
-    renderHook(
-      () =>
-        useWorkspace({
-          userId: 'user_1',
-          activeTab: 'drafts',
-          sortBy: 'updated',
-          typeFilter: 'all',
-          transcriptFilter: true,
-        }),
-      { wrapper: Wrapper },
-    );
-
-    await waitFor(() => expect(mockClient.post).toHaveBeenCalled());
-    const contentSearchCall = (mockClient.post as any).mock.calls.find(
-      (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit !== 1,
-    );
-    expect(contentSearchCall[1].request.filters.status).toEqual(['Draft', 'FlagDraft']);
+  it('preserves a narrower tab\'s own status filter when the filter is set (regression: previously widened to every status, breaking Drafts/Review/Published)', async () => {
+    await renderWorkspace({ activeTab: 'drafts', enrichmentFilter: ['Transcript'] });
+    expect(contentSearchBody().request.filters.status).toEqual(['Draft', 'FlagDraft']);
   });
 
-  it('preserves the "uploads" secondary view\'s Draft-only status when transcriptFilter is also true (regression: previously widened to every status)', async () => {
-    renderHook(
-      () =>
-        useWorkspace({
-          userId: 'user_1',
-          activeTab: 'all',
-          sortBy: 'updated',
-          typeFilter: 'all',
-          secondaryView: 'uploads',
-          transcriptFilter: true,
-        }),
-      { wrapper: Wrapper },
-    );
-
-    await waitFor(() => expect(mockClient.post).toHaveBeenCalled());
-    const contentSearchCall = (mockClient.post as any).mock.calls.find(
-      (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit !== 1,
-    );
-    expect(contentSearchCall[1].request.filters.status).toEqual(['Draft']);
-    // mimeType narrowing from the "uploads" view is untouched by the transcript filter.
-    expect(contentSearchCall[1].request.filters.mimeType).toEqual(expect.any(Array));
+  it('combines with the "uploads" secondary view: Draft-only status and mimeType narrowing are untouched', async () => {
+    await renderWorkspace({ secondaryView: 'uploads', enrichmentFilter: ['Transcript'] });
+    const { filters } = contentSearchBody().request;
+    expect(filters.status).toEqual(['Draft']);
+    expect(filters.mimeType).toEqual(expect.any(Array));
+    expect(filters.enrichmentTypes).toEqual(['Transcript']);
   });
 
-  it('does not widen the reviewer pending-review queue\'s status/createdBy scoping when transcriptFilter is true (regression: previously leaked other creators\' drafts into the review queue)', async () => {
-    renderHook(
-      () =>
-        useWorkspace({
-          userId: 'user_1',
-          activeTab: 'pending-review',
-          sortBy: 'updated',
-          typeFilter: 'all',
-          userRole: 'reviewer',
-          transcriptFilter: true,
-        }),
-      { wrapper: Wrapper },
-    );
-
-    await waitFor(() => expect(mockClient.post).toHaveBeenCalled());
-    const contentSearchCall = (mockClient.post as any).mock.calls.find(
-      (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit !== 1,
-    );
-    expect(contentSearchCall[1].request.filters.status).toEqual(['Review', 'Processing', 'FlagReview']);
-    expect(contentSearchCall[1].request.filters.createdBy).toEqual({ '!=': 'user_1' });
+  it('combines with the "collaborations" secondary view without dropping collaborators scoping', async () => {
+    await renderWorkspace({ secondaryView: 'collaborations', enrichmentFilter: ['Transcript'] });
+    const { filters } = contentSearchBody().request;
+    expect(filters.collaborators).toEqual(['user_1']);
+    expect(filters.enrichmentTypes).toEqual(['Transcript']);
   });
 
+  it('does not widen the reviewer pending-review queue\'s status/createdBy scoping when the filter is set (regression: previously leaked other creators\' drafts into the review queue)', async () => {
+    await renderWorkspace({ activeTab: 'pending-review', userRole: 'reviewer', enrichmentFilter: ['Transcript'] });
+    const { filters } = contentSearchBody().request;
+    expect(filters.status).toEqual(['Review', 'Processing', 'FlagReview']);
+    expect(filters.createdBy).toEqual({ '!=': 'user_1' });
+  });
 });

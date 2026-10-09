@@ -587,7 +587,9 @@
     "roleCreator": "منشئ",
     "roleReviewer": "مراجع",
     "more": "المزيد",
-    "hasTranscripts": "النصوص",
+    "enrichmentFilters": {
+      "Transcript": "تم طلب النص"
+    },
     "searchPlaceholder": "البحث في المحتوى...",
     "clearSearch": "مسح البحث",
     "gridView": "عرض الشبكة",

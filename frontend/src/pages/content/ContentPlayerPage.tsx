@@ -8,7 +8,8 @@ import RelatedContent from "@/components/common/RelatedContent";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import { ContentPlayer as PlayerComponent } from "@/components/players";
 import { useContentPlayer } from "@/hooks/useContentPlayer";
-import { useContentRead, useContentSearch } from "@/hooks/useContent";
+import { useContentSearch } from "@/hooks/useContent";
+import { useContentWithEnrichments } from "@/hooks/useContentWithEnrichments";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
@@ -31,10 +32,10 @@ const ContentPlayerPage = () => {
   const backTo = stateFrom && !stateFrom.startsWith('/content/') && !stateFrom.startsWith('/collection/') ? stateFrom : '/explore';
   const linkState = { from: backTo };
 
-  // VideoPlayer's init effect depends on `metadata` identity, so the player must get its
-  // metadata from a single read; swapping the object mid-playback rebuilds the player.
-  const { data, isLoading, error } = useContentRead(contentId || '');
-  const contentData = data?.data?.content;
+  // VideoPlayer's init effect depends on `metadata` identity, so the player must get its metadata
+  // as one object; swapping it mid-playback rebuilds the player. useContentWithEnrichments therefore
+  // holds `isLoading` until the content read and the enrichment list (transcripts) have both settled.
+  const { content: contentData, isLoading, error } = useContentWithEnrichments(contentId || '');
 
   // Check if this is QUML content that needs special handling
   const isQumlContent = contentData?.mimeType === 'application/vnd.sunbird.questionset' ||

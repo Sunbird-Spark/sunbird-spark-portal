@@ -41,15 +41,18 @@ const mockCollectionData = {
 /* ── Data hooks ── */
 const mockUseCollection = vi.fn();
 const mockUseContentSearch = vi.fn();
-const mockUseContentRead = vi.fn();
+const mockUseContentWithEnrichments = vi.fn();
 const mockUseCollectionEnrollment = vi.fn();
 const mockUseQumlContent = vi.fn();
 vi.mock('@/hooks/useCollection', () => ({
   useCollection: (id: string | undefined) => mockUseCollection(id),
 }));
+vi.mock('@/hooks/useContentWithEnrichments', () => ({
+  useContentWithEnrichments: (contentId: string, options?: { enabled?: boolean; fields?: string[] }) => mockUseContentWithEnrichments(contentId, options),
+}));
+
 vi.mock('@/hooks/useContent', () => ({
   useContentSearch: (opts: { request?: object; enabled?: boolean }) => mockUseContentSearch(opts),
-  useContentRead: (contentId: string, options?: { enabled?: boolean; fields?: string[] }) => mockUseContentRead(contentId, options),
 }));
 
 const mockEnrollment = {
@@ -328,12 +331,7 @@ describe('CollectionDetailPage', () => {
       isError: false,
       isFetching: false,
     });
-    mockUseContentRead.mockReturnValue({
-      data: { data: { content: null } },
-      isLoading: false,
-      error: null,
-      isFetching: false,
-    });
+    mockUseContentWithEnrichments.mockReturnValue({ content: null, isLoading: false, error: null });
     mockUseCollectionEnrollment.mockReturnValue(mockEnrollment);
     mockUseQumlContent.mockReturnValue({
       data: null,

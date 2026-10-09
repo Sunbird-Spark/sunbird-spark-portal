@@ -587,7 +587,9 @@
     "roleCreator": "Créateur",
     "roleReviewer": "Réviseur",
     "more": "Plus",
-    "hasTranscripts": "Transcriptions",
+    "enrichmentFilters": {
+      "Transcript": "Transcription demandée"
+    },
     "searchPlaceholder": "Rechercher du contenu...",
     "clearSearch": "Effacer la recherche",
     "gridView": "Vue grille",

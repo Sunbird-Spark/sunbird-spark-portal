@@ -90,6 +90,32 @@ describe('ContentService', () => {
     expect(callUrl).toContain('artifactUrl');
   });
 
+  it('requests enrichmentTypes among the default read fields', async () => {
+    mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+    await service.contentRead('do_123');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callUrl = (mockClient as any).get.mock.calls[0][0] as string;
+    expect(callUrl).toContain('enrichmentTypes');
+  });
+
+  it('never adds an enrich param to the content read URL (negative)', async () => {
+    mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+    await service.contentRead('do_123', undefined, 'edit');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callUrl = (mockClient as any).get.mock.calls[0][0] as string;
+    expect(callUrl).toContain('mode=edit');
+    expect(callUrl).not.toContain('enrich=');
+  });
+
+  it('passes filters.enrichmentTypes through to the search body and sends no exists field', async () => {
+    mockClient.post = vi.fn().mockResolvedValue({ data: { content: [] }, status: 200, headers: {} });
+    await service.contentSearch({ filters: { objectType: 'Content', enrichmentTypes: ['Transcript'] } });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const body = (mockClient as any).post.mock.calls[0][1];
+    expect(body.request.filters).toEqual({ objectType: 'Content', enrichmentTypes: ['Transcript'] });
+    expect(body.request).not.toHaveProperty('exists');
+  });
+
   it('should call contentRead with custom fields when provided', async () => {
     mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
     await service.contentRead('do_456', ['name', 'description']);

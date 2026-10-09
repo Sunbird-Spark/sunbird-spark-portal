@@ -7,7 +7,7 @@ import Header from '@/components/home/Header';
 import Footer from '@/components/home/Footer';
 import PageLoader from '@/components/common/PageLoader';
 import { useContentPlayer } from '@/hooks/useContentPlayer';
-import { useContentRead } from '@/hooks/useContent';
+import { useContentWithEnrichments } from '@/hooks/useContentWithEnrichments';
 import { useQumlContent } from '@/hooks/useQumlContent';
 import { ContentService } from '@/services/ContentService';
 import { FormService } from '@/services/FormService';
@@ -55,8 +55,7 @@ const ContentReviewPage = ({ mode }: { mode: 'view' | 'review' }) => {
   const [isLoadingRequestChangesForm, setIsLoadingRequestChangesForm] = useState(false);
   const [showPublishWarning, setShowPublishWarning] = useState(false);
 
-  const { data, isLoading, error } = useContentRead(contentId || '', { mode: 'edit' });
-  const contentData = data?.data?.content;
+  const { content: contentData, isLoading, error } = useContentWithEnrichments(contentId || '', { mode: 'edit' });
   const isQumlContent =
     contentData?.mimeType === 'application/vnd.sunbird.questionset' ||
     contentData?.mimeType === 'application/vnd.sunbird.question';

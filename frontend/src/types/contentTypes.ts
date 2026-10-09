@@ -74,6 +74,8 @@ export interface ContentData {
   createdBy: string;
   compatibilityLevel: number;
   relatedContent?: ContentData[];
+  /** Enrichment types the creator asked for (e.g. ['Transcript']); the platform generates them after publish. */
+  enrichmentTypes?: string[];
   transcripts?: PlayerTranscript[];
 }
 

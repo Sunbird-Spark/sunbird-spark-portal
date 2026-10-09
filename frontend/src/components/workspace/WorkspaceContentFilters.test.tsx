@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import WorkspaceContentFilters from './WorkspaceContentFilters';
+import { ENRICHMENT_REGISTRY } from '@/services/enrichment/registry';
 import type { ContentTypeFilter, ViewMode } from '@/types/workspaceTypes';
 
 vi.mock('@/hooks/useAppI18n', () => ({
@@ -13,7 +14,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'workspace.typeFilters.content': 'Content',
         'workspace.typeFilters.quiz': 'Quiz',
         'workspace.typeFilters.collection': 'Collection',
-        'workspace.hasTranscripts': 'Transcripts',
+        'workspace.enrichmentFilters.Transcript': 'Transcript requested',
         'workspace.gridView': 'Grid view',
         'workspace.listView': 'List view',
       };
@@ -39,20 +40,20 @@ vi.mock('@/components/common/DropdownMenu', () => ({
 
 const renderFilters = (overrides: Partial<React.ComponentProps<typeof WorkspaceContentFilters>> = {}) => {
   const onTypeFilterChange = vi.fn();
-  const onTranscriptFilterChange = vi.fn();
+  const onEnrichmentFilterChange = vi.fn();
   const onViewModeChange = vi.fn();
   render(
     <WorkspaceContentFilters
       typeFilter={'all' as ContentTypeFilter}
       onTypeFilterChange={onTypeFilterChange}
-      transcriptFilter={false}
-      onTranscriptFilterChange={onTranscriptFilterChange}
+      enrichmentFilter={[]}
+      onEnrichmentFilterChange={onEnrichmentFilterChange}
       viewMode={'grid' as ViewMode}
       onViewModeChange={onViewModeChange}
       {...overrides}
     />,
   );
-  return { onTypeFilterChange, onTranscriptFilterChange, onViewModeChange };
+  return { onTypeFilterChange, onEnrichmentFilterChange, onViewModeChange };
 };
 
 describe('WorkspaceContentFilters', () => {
@@ -67,10 +68,25 @@ describe('WorkspaceContentFilters', () => {
     expect(onTypeFilterChange).toHaveBeenCalledWith('quiz');
   });
 
-  it('toggles the transcript filter on click', () => {
-    const { onTranscriptFilterChange } = renderFilters();
-    fireEvent.click(screen.getByRole('button', { name: 'Transcripts' }));
-    expect(onTranscriptFilterChange).toHaveBeenCalledWith(true);
+  it('renders one unpressed toggle per registered enrichment type', () => {
+    renderFilters();
+    const toggles = document.querySelectorAll('button[aria-pressed]');
+    expect(toggles).toHaveLength(ENRICHMENT_REGISTRY.length);
+    toggles.forEach((toggle) => expect(toggle).toHaveAttribute('aria-pressed', 'false'));
+  });
+
+  it('calls onEnrichmentFilterChange(type, true) when an inactive toggle is clicked', () => {
+    const { onEnrichmentFilterChange } = renderFilters();
+    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
+    expect(onEnrichmentFilterChange).toHaveBeenCalledWith('Transcript', true);
+  });
+
+  it('marks an active toggle as pressed and calls onEnrichmentFilterChange(type, false) when clicked', () => {
+    const { onEnrichmentFilterChange } = renderFilters({ enrichmentFilter: ['Transcript'] });
+    const button = screen.getByRole('button', { name: 'Transcript requested' });
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(button);
+    expect(onEnrichmentFilterChange).toHaveBeenCalledWith('Transcript', false);
   });
 
   it('calls onViewModeChange for grid/list toggles', () => {

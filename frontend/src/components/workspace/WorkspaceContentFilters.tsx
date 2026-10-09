@@ -3,6 +3,7 @@ import { Button } from "@/components/common/Button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/common/DropdownMenu";
 import { cn } from "@/lib/utils";
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { ENRICHMENT_REGISTRY } from "@/services/enrichment/registry";
 import type { ViewMode, ContentTypeFilter } from "@/types/workspaceTypes";
 
 interface WorkspaceContentFiltersProps {
@@ -10,13 +11,13 @@ interface WorkspaceContentFiltersProps {
   isBookReviewerOnly?: boolean;
   typeFilter: ContentTypeFilter;
   onTypeFilterChange: (filter: ContentTypeFilter) => void;
-  transcriptFilter: boolean;
-  onTranscriptFilterChange: (value: boolean) => void;
+  enrichmentFilter: string[];
+  onEnrichmentFilterChange: (type: string, on: boolean) => void;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
 }
 
-/** The "All Types" / "Has Transcripts" / grid-list toggle row shown next to the
+/** The "All Types" / one toggle per registered enrichment type / grid-list toggle row shown next to the
  *  search bar whenever content is visible - split out of WorkspaceToolbar to
  *  keep that file under the project's max-lines limit. */
 const WorkspaceContentFilters = ({
@@ -24,8 +25,8 @@ const WorkspaceContentFilters = ({
   isBookReviewerOnly = false,
   typeFilter,
   onTypeFilterChange,
-  transcriptFilter,
-  onTranscriptFilterChange,
+  enrichmentFilter,
+  onEnrichmentFilterChange,
   viewMode,
   onViewModeChange,
 }: WorkspaceContentFiltersProps) => {
@@ -56,19 +57,25 @@ const WorkspaceContentFilters = ({
         </DropdownMenu>
       )}
 
-      {/* Has Transcripts Filter - server-side, via exists: ['enrichment'] on the search request */}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => onTranscriptFilterChange(!transcriptFilter)}
-        aria-pressed={transcriptFilter}
-        className={cn(
-          "font-rubik rounded-xl flex-shrink-0",
-          transcriptFilter && "bg-sunbird-theme-accent-muted/20 border-sunbird-theme-accent text-sunbird-theme-accent"
-        )}
-      >
-        {t('workspace.hasTranscripts')}
-      </Button>
+      {/* Enrichment filters - one per registered type; server-side, via `enrichmentTypes` in the search filters */}
+      {ENRICHMENT_REGISTRY.map((def) => {
+        const active = enrichmentFilter.includes(def.type);
+        return (
+          <Button
+            key={def.type}
+            variant="outline"
+            size="sm"
+            onClick={() => onEnrichmentFilterChange(def.type, !active)}
+            aria-pressed={active}
+            className={cn(
+              "font-rubik rounded-xl flex-shrink-0",
+              active && "bg-sunbird-theme-accent-muted/20 border-sunbird-theme-accent text-sunbird-theme-accent"
+            )}
+          >
+            {t(def.filterLabelKey)}
+          </Button>
+        );
+      })}
 
       {/* View Toggle */}
       <div className="flex bg-gray-100 rounded-lg p-0.5 flex-shrink-0">

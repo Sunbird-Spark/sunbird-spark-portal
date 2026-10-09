@@ -27,8 +27,8 @@ interface WorkspaceToolbarProps {
   onViewModeChange: (mode: ViewMode) => void;
   typeFilter: ContentTypeFilter;
   onTypeFilterChange: (filter: ContentTypeFilter) => void;
-  transcriptFilter: boolean;
-  onTranscriptFilterChange: (value: boolean) => void;
+  enrichmentFilter: string[];
+  onEnrichmentFilterChange: (type: string, on: boolean) => void;
   contentCount?: number;
   totalCount?: number;
   onCreateClick: () => void;
@@ -52,8 +52,8 @@ const WorkspaceToolbar = ({
   onViewModeChange,
   typeFilter,
   onTypeFilterChange,
-  transcriptFilter,
-  onTranscriptFilterChange,
+  enrichmentFilter,
+  onEnrichmentFilterChange,
   contentCount,
   totalCount,
   onCreateClick,
@@ -192,8 +192,8 @@ const WorkspaceToolbar = ({
                 isBookReviewerOnly={isBookReviewerOnly}
                 typeFilter={typeFilter}
                 onTypeFilterChange={onTypeFilterChange}
-                transcriptFilter={transcriptFilter}
-                onTranscriptFilterChange={onTranscriptFilterChange}
+                enrichmentFilter={enrichmentFilter}
+                onEnrichmentFilterChange={onEnrichmentFilterChange}
                 viewMode={viewMode}
                 onViewModeChange={onViewModeChange}
               />

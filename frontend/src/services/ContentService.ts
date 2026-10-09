@@ -13,7 +13,7 @@ const DEFAULT_CONTENT_FIELDS = [
   'questions', 'resourceType', 'scoreDisplayConfig', 'status', 'streamingUrl',
   'template', 'templateId', 'totalQuestions', 'totalScore', 'versionKey', 'visibility',
   'year', 'primaryCategory', 'additionalCategories', 'interceptionPoints', 'interceptionType',
-  'scoList', 'launchFile','scormVersion'
+  'scoList', 'launchFile','scormVersion', 'enrichmentTypes'
 ];
 
 export class ContentService {

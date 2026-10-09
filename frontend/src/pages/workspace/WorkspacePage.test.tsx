@@ -3,13 +3,14 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import WorkspacePage from './WorkspacePage';
 import type { UseWorkspaceReturn, WorkspaceItem } from '@/types/workspaceTypes';
 import type { ContentFormData } from './ContentDynamicFormDialog';
 
-const { mockNavigate, mockContentCreate, mockQuestionSetMutateAsync, mockQuestionSetRetireMutateAsync } = vi.hoisted(() => ({
+const { mockNavigate, mockInteract, mockContentCreate, mockQuestionSetMutateAsync, mockQuestionSetRetireMutateAsync } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
+  mockInteract: vi.fn(),
   mockContentCreate: vi.fn(),
   mockQuestionSetMutateAsync: vi.fn(),
   mockQuestionSetRetireMutateAsync: vi.fn(),
@@ -28,6 +29,8 @@ vi.mock('@/services/ContentService', () => ({
     contentRetire = vi.fn().mockResolvedValue({ data: { result: 'success' } });
   },
 }));
+
+vi.mock('@/hooks/useInteract', () => ({ default: () => ({ interact: mockInteract }) }));
 
 vi.mock('@/hooks/useWorkspace', () => ({ useWorkspace: (...args: unknown[]) => mockUseWorkspace(...args) }));
 
@@ -139,13 +142,13 @@ vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
   default: ({
     onCreateClick,
     onViewChange,
-    transcriptFilter,
-    onTranscriptFilterChange,
+    enrichmentFilter,
+    onEnrichmentFilterChange,
   }: {
     onCreateClick: () => void;
     onViewChange: (v: string) => void;
-    transcriptFilter: boolean;
-    onTranscriptFilterChange: (value: boolean) => void;
+    enrichmentFilter: string[];
+    onEnrichmentFilterChange: (type: string, on: boolean) => void;
   }) => (
     <div data-testid="segmented-control">
       <button type="button" onClick={onCreateClick}>createNew</button>
@@ -154,7 +157,7 @@ vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
       <button type="button" onClick={() => onViewChange('uploads')}>Uploads</button>
       <button type="button" onClick={() => onViewChange('collaborations')}>Collaborations</button>
       <button type="button" onClick={() => onViewChange('create')}>Create view</button>
-      <button type="button" onClick={() => onTranscriptFilterChange(!transcriptFilter)}>Transcripts</button>
+      <button type="button" onClick={() => onEnrichmentFilterChange('Transcript', !enrichmentFilter.includes('Transcript'))}>Transcript requested</button>
     </div>
   ),
 }));
@@ -244,6 +247,19 @@ const createTestQueryClient = () =>
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
 
+const LocationProbe = () => <div data-testid="location-search">{useLocation().search}</div>;
+
+function renderAt(url: string) {
+  return render(
+    <QueryClientProvider client={createTestQueryClient()}>
+      <MemoryRouter initialEntries={[url]}>
+        <WorkspacePage />
+        <LocationProbe />
+      </MemoryRouter>
+    </QueryClientProvider>
+  );
+}
+
 function renderWithProviders(ui: React.ReactElement) {
   return render(
     <QueryClientProvider client={createTestQueryClient()}>
@@ -308,14 +324,53 @@ describe('WorkspacePage', () => {
     expect(screen.getByRole('button', { name: 'All 0' })).toBeInTheDocument();
   });
 
-  it('re-queries useWorkspace with transcriptFilter: true after clicking Has Transcripts', async () => {
+  it('re-queries useWorkspace with enrichmentFilter: ["Transcript"] after toggling the filter on', async () => {
     renderWithProviders(<WorkspacePage />);
-    fireEvent.click(screen.getByRole('button', { name: 'Transcripts' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
     await waitFor(() =>
       expect(mockUseWorkspace).toHaveBeenLastCalledWith(
-        expect.objectContaining({ transcriptFilter: true }),
+        expect.objectContaining({ enrichmentFilter: ['Transcript'] }),
       ),
     );
+  });
+
+  it('starts with an empty enrichmentFilter when the URL has none', () => {
+    renderAt('/workspace');
+    expect(mockUseWorkspace).toHaveBeenLastCalledWith(expect.objectContaining({ enrichmentFilter: [] }));
+  });
+
+  it('initialises enrichmentFilter from ?enrichment=Transcript', () => {
+    renderAt('/workspace?enrichment=Transcript');
+    expect(mockUseWorkspace).toHaveBeenLastCalledWith(expect.objectContaining({ enrichmentFilter: ['Transcript'] }));
+  });
+
+  it('ignores unknown values in ?enrichment= (negative)', () => {
+    renderAt('/workspace?enrichment=Bogus,Transcript,Other');
+    expect(mockUseWorkspace).toHaveBeenLastCalledWith(expect.objectContaining({ enrichmentFilter: ['Transcript'] }));
+  });
+
+  it('does not honour the old ?transcripts=1 param (negative)', () => {
+    renderAt('/workspace?transcripts=1');
+    expect(mockUseWorkspace).toHaveBeenLastCalledWith(expect.objectContaining({ enrichmentFilter: [] }));
+  });
+
+  it('writes ?enrichment= to the URL when toggled on and removes it when toggled off', async () => {
+    renderAt('/workspace');
+    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
+    await waitFor(() => expect(screen.getByTestId('location-search').textContent).toContain('enrichment=Transcript'));
+    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
+    await waitFor(() => expect(screen.getByTestId('location-search').textContent).not.toContain('enrichment='));
+  });
+
+  it('sends a telemetry interact event with the enrichment type and on/off state', () => {
+    renderAt('/workspace');
+    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
+    expect(mockInteract).toHaveBeenCalledWith({
+      id: 'workspace-enrichment-filter',
+      type: 'CLICK',
+      pageid: 'workspace',
+      cdata: [{ id: 'Transcript', type: 'EnrichmentFilter' }, { id: 'true', type: 'EnrichmentFilterState' }],
+    });
   });
 
   it('closes create modal when close button is clicked', async () => {

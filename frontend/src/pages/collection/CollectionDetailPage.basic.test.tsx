@@ -45,7 +45,7 @@ const mockCollectionData = {
 };
 const mockUseCollection = vi.fn();
 const mockUseContentSearch = vi.fn();
-const mockUseContentRead = vi.fn();
+const mockUseContentWithEnrichments = vi.fn();
 const mockUseQumlContent = vi.fn();
 vi.mock('@/hooks/useCollection', () => ({
   useCollection: (id: string | undefined) => mockUseCollection(id),
@@ -71,9 +71,12 @@ const mockEnrollment = {
 vi.mock('@/hooks/useCollectionEnrollment', () => ({
   useCollectionEnrollment: () => mockEnrollment,
 }));
+vi.mock('@/hooks/useContentWithEnrichments', () => ({
+  useContentWithEnrichments: (id: string, opts?: { enabled?: boolean; mode?: string }) => mockUseContentWithEnrichments(id, opts),
+}));
+
 vi.mock('@/hooks/useContent', () => ({
   useContentSearch: (opts: { request?: object; enabled?: boolean }) => mockUseContentSearch(opts),
-  useContentRead: (id: string, opts?: { enabled?: boolean; mode?: string }) => mockUseContentRead(id, opts),
 }));
 vi.mock('@/hooks/useQumlContent', () => ({
   useQumlContent: (id: string, opts?: { enabled?: boolean }) => mockUseQumlContent(id, opts),
@@ -198,7 +201,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
     vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(false);
     mockUseCollection.mockReturnValue({ data: mockCollectionData, isLoading: false });
     mockUseContentSearch.mockReturnValue({ data: { data: { content: [] } }, isLoading: false });
-    mockUseContentRead.mockReturnValue({ data: null, isLoading: false, error: null });
+    mockUseContentWithEnrichments.mockReturnValue({ content: undefined, isLoading: false, error: null });
     mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: null });
     mockEnrollment.enrollmentForCollection = undefined;
     mockEnrollment.isEnrolledInCurrentBatch = false;
@@ -232,9 +235,9 @@ describe('CollectionDetailPage - Basic Functionality', () => {
     );
   });
 
-  it('calls useContentRead with contentId from URL params', () => {
+  it('calls useContentWithEnrichments with contentId from URL params', () => {
     renderWithProviders(<CollectionDetailPage />);
-    expect(mockUseContentRead).toHaveBeenCalledWith('l1', undefined);
+    expect(mockUseContentWithEnrichments).toHaveBeenCalledWith('l1', undefined);
   });
 
   it('passes contentId to CollectionOverview', () => {
@@ -243,7 +246,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
   });
 
   it('passes playerIsLoading=true to CollectionOverview while content is loading', () => {
-    mockUseContentRead.mockReturnValue({ data: null, isLoading: true, error: null });
+    mockUseContentWithEnrichments.mockReturnValue({ content: undefined, isLoading: true, error: null });
     renderWithProviders(<CollectionDetailPage />);
     expect(screen.getByTestId('collection-overview')).toHaveAttribute('data-player-loading', 'true');
   });
