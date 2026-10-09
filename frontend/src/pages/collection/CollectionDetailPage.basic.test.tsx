@@ -73,7 +73,7 @@ vi.mock('@/hooks/useCollectionEnrollment', () => ({
 }));
 vi.mock('@/hooks/useContent', () => ({
   useContentSearch: (opts: { request?: object; enabled?: boolean }) => mockUseContentSearch(opts),
-  useContentRead: (id: string, opts?: { enrichTranscripts?: boolean }) => mockUseContentRead(id, opts),
+  useContentRead: (id: string, opts?: { enabled?: boolean; mode?: string }) => mockUseContentRead(id, opts),
 }));
 vi.mock('@/hooks/useQumlContent', () => ({
   useQumlContent: (id: string, opts?: { enabled?: boolean }) => mockUseQumlContent(id, opts),
@@ -234,7 +234,7 @@ describe('CollectionDetailPage - Basic Functionality', () => {
 
   it('calls useContentRead with contentId from URL params', () => {
     renderWithProviders(<CollectionDetailPage />);
-    expect(mockUseContentRead).toHaveBeenCalledWith('l1', { enrichTranscripts: true });
+    expect(mockUseContentRead).toHaveBeenCalledWith('l1', undefined);
   });
 
   it('passes contentId to CollectionOverview', () => {

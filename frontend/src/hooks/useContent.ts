@@ -89,15 +89,14 @@ export const useContentSearch = (
 
 export const useContentRead = (
   contentId: string,
-  options?: { enabled?: boolean; fields?: string[]; mode?: string; enrichTranscripts?: boolean }
+  options?: { enabled?: boolean; fields?: string[]; mode?: string }
 ): UseQueryResult<ApiResponse<ContentApiResponse>, Error> => {
   const enabled = options?.enabled ?? true;
   const fields = options?.fields;
   const mode = options?.mode;
-  const enrichTranscripts = options?.enrichTranscripts ?? false;
   return useQuery({
-    queryKey: ['content-read', contentId, fields, mode, enrichTranscripts],
-    queryFn: () => contentService.contentRead(contentId, fields, mode, enrichTranscripts),
+    queryKey: ['content-read', contentId, fields, mode],
+    queryFn: () => contentService.contentRead(contentId, fields, mode),
     enabled: enabled && !!contentId,
     staleTime: 60 * 60 * 1000,
   });

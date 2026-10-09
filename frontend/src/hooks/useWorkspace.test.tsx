@@ -30,27 +30,7 @@ describe('useWorkspace - transcriptFilter', () => {
     init(mockClient);
   });
 
-  it('includes exists: ["enrichment"] in the content search request when transcriptFilter is true', async () => {
-    renderHook(
-      () =>
-        useWorkspace({
-          userId: 'user_1',
-          activeTab: 'all',
-          sortBy: 'updated',
-          typeFilter: 'all',
-          transcriptFilter: true,
-        }),
-      { wrapper: Wrapper },
-    );
-
-    await waitFor(() => expect(mockClient.post).toHaveBeenCalled());
-    const contentSearchCall = (mockClient.post as any).mock.calls.find(
-      (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit !== 1,
-    );
-    expect(contentSearchCall[1].request.exists).toEqual(['enrichment']);
-  });
-
-  it('does not touch status filtering at all - exists ANDs with whatever the tab already narrowed to', async () => {
+  it('does not touch status filtering at all - transcriptFilter leaves whatever the tab already narrowed to', async () => {
     renderHook(
       () =>
         useWorkspace({
@@ -93,7 +73,6 @@ describe('useWorkspace - transcriptFilter', () => {
       (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit !== 1,
     );
     expect(contentSearchCall[1].request.filters.status).toEqual(['Draft', 'FlagDraft']);
-    expect(contentSearchCall[1].request.exists).toEqual(['enrichment']);
   });
 
   it('preserves the "uploads" secondary view\'s Draft-only status when transcriptFilter is also true (regression: previously widened to every status)', async () => {
@@ -141,63 +120,4 @@ describe('useWorkspace - transcriptFilter', () => {
     expect(contentSearchCall[1].request.filters.createdBy).toEqual({ '!=': 'user_1' });
   });
 
-  it('also includes exists: ["enrichment"] in the counts request, so tab badges stay consistent with the filtered list', async () => {
-    renderHook(
-      () =>
-        useWorkspace({
-          userId: 'user_1',
-          activeTab: 'all',
-          sortBy: 'updated',
-          typeFilter: 'all',
-          transcriptFilter: true,
-        }),
-      { wrapper: Wrapper },
-    );
-
-    await waitFor(() => expect(mockClient.post).toHaveBeenCalled());
-    const countsCall = (mockClient.post as any).mock.calls.find(
-      (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit === 1,
-    );
-    expect(countsCall[1].request.exists).toEqual(['enrichment']);
-  });
-
-  it('omits exists from the counts request when transcriptFilter is false (negative)', async () => {
-    renderHook(
-      () =>
-        useWorkspace({
-          userId: 'user_1',
-          activeTab: 'all',
-          sortBy: 'updated',
-          typeFilter: 'all',
-          transcriptFilter: false,
-        }),
-      { wrapper: Wrapper },
-    );
-
-    await waitFor(() => expect(mockClient.post).toHaveBeenCalled());
-    const countsCall = (mockClient.post as any).mock.calls.find(
-      (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit === 1,
-    );
-    expect(countsCall[1].request.exists).toBeUndefined();
-  });
-
-  it('omits exists from the content search request when transcriptFilter is false (negative)', async () => {
-    renderHook(
-      () =>
-        useWorkspace({
-          userId: 'user_1',
-          activeTab: 'all',
-          sortBy: 'updated',
-          typeFilter: 'all',
-          transcriptFilter: false,
-        }),
-      { wrapper: Wrapper },
-    );
-
-    await waitFor(() => expect(mockClient.post).toHaveBeenCalled());
-    const contentSearchCall = (mockClient.post as any).mock.calls.find(
-      (call: [string, { request: { limit?: number } }]) => call[1]?.request?.limit !== 1,
-    );
-    expect(contentSearchCall[1].request.exists).toBeUndefined();
-  });
 });

@@ -8,26 +8,7 @@ export interface ContentVariants {
   spine?: ContentVariant;
 }
 
-// Raw shape returned by content/v1/read under content.enrichment.transcripts
-// when ?enrich=all is passed. Note artifactUrl here is the raw transcript.json,
-// not the VTT - the actual caption file is captionsUrl.
-export interface RawTranscript {
-  code: string;
-  language: string;
-  languageCode: string;
-  artifactUrl?: string;
-  captionsUrl?: string;
-  generatedBy?: string;
-  sourceLanguage?: boolean;
-  status?: string;
-}
-
-export interface ContentEnrichment {
-  transcripts?: RawTranscript[];
-}
-
-// Shape sunbird-video-player's Transcript interface expects - mapped from
-// RawTranscript in ContentService.contentRead().
+// Shape sunbird-video-player's Transcript interface expects.
 export interface PlayerTranscript {
   language: string;
   identifier: string;
@@ -93,7 +74,6 @@ export interface ContentData {
   createdBy: string;
   compatibilityLevel: number;
   relatedContent?: ContentData[];
-  enrichment?: ContentEnrichment;
   transcripts?: PlayerTranscript[];
 }
 
