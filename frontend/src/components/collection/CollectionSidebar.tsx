@@ -35,6 +35,8 @@ interface CollectionSidebarProps {
   contentBlocked?: boolean;
   contentStatusMap?: Record<string, number>;
   contentAttemptInfoMap?: Record<string, ContentAttemptInfo>;
+  /** Leaf ids locked by sequential access; undefined means nothing is locked. */
+  lockedContentIds?: Set<string>;
 }
 
 /** Renders sub-units as labels and content as rows (no collapsibles). */
@@ -46,6 +48,7 @@ function ExpandedUnitContent({
   activeContentId,
   contentStatusMap,
   contentAttemptInfoMap,
+  lockedContentIds,
   t,
   depth = 0,
 }: {
@@ -56,6 +59,7 @@ function ExpandedUnitContent({
   activeContentId: string | null;
   contentStatusMap?: Record<string, number>;
   contentAttemptInfoMap?: Record<string, ContentAttemptInfo>;
+  lockedContentIds?: Set<string>;
   t: (key: string) => string;
   depth?: number;
 }) {
@@ -82,6 +86,7 @@ function ExpandedUnitContent({
                 activeContentId={activeContentId}
                 contentStatusMap={contentStatusMap}
                 contentAttemptInfoMap={contentAttemptInfoMap}
+                lockedContentIds={lockedContentIds}
                 t={t}
                 depth={depth + 1}
               />
@@ -106,6 +111,7 @@ function ExpandedUnitContent({
               isActive={activeContentId === node.identifier}
               contentStatusMap={contentStatusMap}
               contentAttemptInfoMap={contentAttemptInfoMap}
+              isLocked={lockedContentIds?.has(node.identifier) ?? false}
               t={t}
             />
           </div>
@@ -125,6 +131,7 @@ const CollectionSidebar = ({
   contentBlocked = false,
   contentStatusMap,
   contentAttemptInfoMap,
+  lockedContentIds,
 }: CollectionSidebarProps) => {
   const { t } = useAppI18n();
 
@@ -199,6 +206,7 @@ const CollectionSidebar = ({
                     activeContentId={activeContentId}
                     contentStatusMap={contentStatusMap}
                     contentAttemptInfoMap={contentAttemptInfoMap}
+                    lockedContentIds={lockedContentIds}
                     t={t}
                   />
                 </div>

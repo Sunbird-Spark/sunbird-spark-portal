@@ -68,6 +68,9 @@ export interface CourseHierarchyResponse {
 
 export const BATCH_STATUS = { Upcoming: 0, Ongoing: 1, Expired: 2 } as const;
 
+/** Per-content progress as returned by `content/state/read`. */
+export const CONTENT_STATUS = { NotStarted: 0, InProgress: 1, Completed: 2 } as const;
+
 export interface BatchListItem {
   identifier: string;
   name?: string;

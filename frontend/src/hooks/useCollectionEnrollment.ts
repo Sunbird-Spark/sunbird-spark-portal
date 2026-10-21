@@ -17,6 +17,7 @@ import {
   getFirstCertPreviewUrl,
   getEnrollableBatches,
 } from '../services/collection/enrollmentMapper';
+import { getLockedContentIds } from '../services/collection/contentLockCalculator';
 import { useUserId } from './useAuthInfo';
 import type { CollectionData } from '../types/collectionTypes';
 
@@ -85,6 +86,12 @@ export function useCollectionEnrollment(
   const contentList = contentStateResponse?.data?.contentList ?? [];
   const contentStatusMap = useMemo(() => getContentStatusMap(contentList), [contentList]);
   const contentAttemptInfoMap = useMemo(() => getContentAttemptInfoMap(contentList), [contentList]);
+  /** Sequential access: leaves after the first incomplete one. Consumers gate this the
+   *  same way they gate `contentStatusMap`, so creators/mentors never see locks. */
+  const lockedContentIds = useMemo(
+    () => getLockedContentIds(collectionData?.hierarchyRoot, contentStatusMap),
+    [collectionData?.hierarchyRoot, contentStatusMap]
+  );
   const completedFromState = contentList.filter((c) => c.status === 2).length;
   const stateIsAuthoritative = contentStateResponse !== undefined;
   const totalFromState = stateIsAuthoritative ? leafContentIds.length : 0;
@@ -188,6 +195,7 @@ export function useCollectionEnrollment(
     contentStatusMap,
     contentStateFetched: contentStateFetched,
     contentAttemptInfoMap,
+    lockedContentIds,
     courseProgressProps,
     batches,
     batchListLoading,
