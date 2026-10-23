@@ -132,7 +132,7 @@ export default function WorkspacePageContent({
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {filteredItems.map(item => (
             <WorkspaceContentCard
-              key={item.id}
+              key={`${item.id}-${item.status}`}
               item={item}
               userRole={userRole}
               lockInfo={lockedContentMap[item.id]}

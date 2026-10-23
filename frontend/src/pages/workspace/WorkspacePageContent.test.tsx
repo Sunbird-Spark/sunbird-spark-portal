@@ -167,4 +167,17 @@ describe('WorkspacePageContent', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
     expect(onEdit).toHaveBeenCalledWith('item-1');
   });
+
+  it('keeps a Live item and its editing copy (same id, different status) distinct, with no duplicate-key warning', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const live = { ...mockItem, id: 'do_1', title: 'Live copy', status: 'published' as const };
+    const editing = { ...mockItem, id: 'do_1', title: 'Editing copy', status: 'review' as const };
+    const other = { ...mockItem, id: 'do_2', title: 'Other', status: 'published' as const };
+    const { rerender } = render(<WorkspacePageContent {...defaultProps} filteredItems={[live, editing, other]} />);
+    expect(screen.getAllByTestId('content-card')).toHaveLength(3);
+    rerender(<WorkspacePageContent {...defaultProps} filteredItems={[live, editing]} />);
+    expect(screen.getAllByTestId('content-card')).toHaveLength(2);
+    expect(errorSpy.mock.calls.some((c) => String(c[0]).includes('same key'))).toBe(false);
+    errorSpy.mockRestore();
+  });
 });

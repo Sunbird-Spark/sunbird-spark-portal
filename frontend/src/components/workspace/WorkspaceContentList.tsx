@@ -64,7 +64,7 @@ const WorkspaceContentList = ({
 
           return (
             <div
-              key={item.id}
+              key={`${item.id}-${item.status}`}
               className="grid grid-cols-12 gap-4 px-5 py-4 items-center hover:bg-muted/40 transition-colors group"
             >
               {/* Title with thumbnail */}
