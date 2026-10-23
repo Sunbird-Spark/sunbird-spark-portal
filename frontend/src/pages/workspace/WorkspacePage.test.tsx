@@ -148,7 +148,7 @@ vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
     onCreateClick: () => void;
     onViewChange: (v: string) => void;
     enrichmentFilter: string[];
-    onEnrichmentFilterChange: (type: string, on: boolean) => void;
+    onEnrichmentFilterChange: (on: boolean) => void;
   }) => (
     <div data-testid="segmented-control">
       <button type="button" onClick={onCreateClick}>createNew</button>
@@ -157,7 +157,7 @@ vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
       <button type="button" onClick={() => onViewChange('uploads')}>Uploads</button>
       <button type="button" onClick={() => onViewChange('collaborations')}>Collaborations</button>
       <button type="button" onClick={() => onViewChange('create')}>Create view</button>
-      <button type="button" onClick={() => onEnrichmentFilterChange('Transcript', !enrichmentFilter.includes('Transcript'))}>Transcript requested</button>
+      <button type="button" onClick={() => onEnrichmentFilterChange(enrichmentFilter.length === 0)}>AI-enhanced content</button>
     </div>
   ),
 }));
@@ -326,7 +326,7 @@ describe('WorkspacePage', () => {
 
   it('re-queries useWorkspace with enrichmentFilter: ["Transcript"] after toggling the filter on', async () => {
     renderWithProviders(<WorkspacePage />);
-    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
+    fireEvent.click(screen.getByRole('button', { name: 'AI-enhanced content' }));
     await waitFor(() =>
       expect(mockUseWorkspace).toHaveBeenLastCalledWith(
         expect.objectContaining({ enrichmentFilter: ['Transcript'] }),
@@ -356,20 +356,20 @@ describe('WorkspacePage', () => {
 
   it('writes ?enrichment= to the URL when toggled on and removes it when toggled off', async () => {
     renderAt('/workspace');
-    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
+    fireEvent.click(screen.getByRole('button', { name: 'AI-enhanced content' }));
     await waitFor(() => expect(screen.getByTestId('location-search').textContent).toContain('enrichment=Transcript'));
-    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
+    fireEvent.click(screen.getByRole('button', { name: 'AI-enhanced content' }));
     await waitFor(() => expect(screen.getByTestId('location-search').textContent).not.toContain('enrichment='));
   });
 
-  it('sends a telemetry interact event with the enrichment type and on/off state', () => {
+  it('sends a telemetry interact event with the on/off state', () => {
     renderAt('/workspace');
-    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
+    fireEvent.click(screen.getByRole('button', { name: 'AI-enhanced content' }));
     expect(mockInteract).toHaveBeenCalledWith({
       id: 'workspace-enrichment-filter',
       type: 'CLICK',
       pageid: 'workspace',
-      cdata: [{ id: 'Transcript', type: 'EnrichmentFilter' }, { id: 'true', type: 'EnrichmentFilterState' }],
+      cdata: [{ id: 'true', type: 'EnrichmentFilter' }],
     });
   });
 

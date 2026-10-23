@@ -2,7 +2,6 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import WorkspaceContentFilters from './WorkspaceContentFilters';
-import { ENRICHMENT_REGISTRY } from '@/services/enrichment/registry';
 import type { ContentTypeFilter, ViewMode } from '@/types/workspaceTypes';
 
 vi.mock('@/hooks/useAppI18n', () => ({
@@ -14,7 +13,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'workspace.typeFilters.content': 'Content',
         'workspace.typeFilters.quiz': 'Quiz',
         'workspace.typeFilters.collection': 'Collection',
-        'workspace.enrichmentFilters.Transcript': 'Transcript requested',
+        'workspace.aiEnhancedFilter': 'AI-enhanced content',
         'workspace.gridView': 'Grid view',
         'workspace.listView': 'List view',
       };
@@ -68,25 +67,32 @@ describe('WorkspaceContentFilters', () => {
     expect(onTypeFilterChange).toHaveBeenCalledWith('quiz');
   });
 
-  it('renders one unpressed toggle per registered enrichment type', () => {
+  it('renders a single unpressed AI-enhanced toggle with an accessible name and tooltip', () => {
     renderFilters();
     const toggles = document.querySelectorAll('button[aria-pressed]');
-    expect(toggles).toHaveLength(ENRICHMENT_REGISTRY.length);
-    toggles.forEach((toggle) => expect(toggle).toHaveAttribute('aria-pressed', 'false'));
+    expect(toggles).toHaveLength(1);
+    expect(toggles[0]).toHaveAttribute('aria-pressed', 'false');
+    expect(toggles[0]).toHaveAttribute('aria-label', 'AI-enhanced content');
+    expect(toggles[0]).toHaveAttribute('title', 'AI-enhanced content');
   });
 
-  it('calls onEnrichmentFilterChange(type, true) when an inactive toggle is clicked', () => {
+  it('has no visible text, only the icon (negative)', () => {
+    renderFilters();
+    expect(screen.getByRole('button', { name: 'AI-enhanced content' }).textContent).toBe('');
+  });
+
+  it('calls onEnrichmentFilterChange(true) when the inactive toggle is clicked', () => {
     const { onEnrichmentFilterChange } = renderFilters();
-    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
-    expect(onEnrichmentFilterChange).toHaveBeenCalledWith('Transcript', true);
+    fireEvent.click(screen.getByRole('button', { name: 'AI-enhanced content' }));
+    expect(onEnrichmentFilterChange).toHaveBeenCalledWith(true);
   });
 
-  it('marks an active toggle as pressed and calls onEnrichmentFilterChange(type, false) when clicked', () => {
+  it('marks the toggle as pressed when any type is selected and calls onEnrichmentFilterChange(false) when clicked', () => {
     const { onEnrichmentFilterChange } = renderFilters({ enrichmentFilter: ['Transcript'] });
-    const button = screen.getByRole('button', { name: 'Transcript requested' });
+    const button = screen.getByRole('button', { name: 'AI-enhanced content' });
     expect(button).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(button);
-    expect(onEnrichmentFilterChange).toHaveBeenCalledWith('Transcript', false);
+    expect(onEnrichmentFilterChange).toHaveBeenCalledWith(false);
   });
 
   it('calls onViewModeChange for grid/list toggles', () => {

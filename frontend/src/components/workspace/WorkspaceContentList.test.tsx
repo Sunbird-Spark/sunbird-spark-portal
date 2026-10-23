@@ -113,4 +113,22 @@ describe('WorkspaceContentList', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(onDelete).toHaveBeenCalledWith('item-1');
   });
+
+  describe('enrichment badges', () => {
+    const items = [defaultItems[0]!, { ...defaultItems[0]!, id: 'item-2', title: 'Second Item' }];
+    const renderList = (enrichmentsById?: Record<string, string[]>) =>
+      render(
+        <WorkspaceContentList items={items} enrichmentsById={enrichmentsById} onEdit={vi.fn()} onDelete={vi.fn()} onView={vi.fn()} />,
+      );
+
+    it('shows a badge only on the rows whose content has a Live enrichment', () => {
+      renderList({ 'item-1': ['Transcript'] });
+      expect(screen.getAllByRole('img', { name: 'workspace.enrichmentLabels.Transcript' })).toHaveLength(1);
+    });
+
+    it('shows no badge when nothing is available (negative)', () => {
+      renderList(undefined);
+      expect(screen.queryByRole('img', { name: 'workspace.enrichmentLabels.Transcript' })).not.toBeInTheDocument();
+    });
+  });
 });

@@ -1,9 +1,9 @@
 import { FiGrid, FiList, FiChevronDown } from "react-icons/fi";
+import { LuSparkles } from "react-icons/lu";
 import { Button } from "@/components/common/Button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/common/DropdownMenu";
 import { cn } from "@/lib/utils";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import { ENRICHMENT_REGISTRY } from "@/services/enrichment/registry";
 import type { ViewMode, ContentTypeFilter } from "@/types/workspaceTypes";
 
 interface WorkspaceContentFiltersProps {
@@ -12,12 +12,12 @@ interface WorkspaceContentFiltersProps {
   typeFilter: ContentTypeFilter;
   onTypeFilterChange: (filter: ContentTypeFilter) => void;
   enrichmentFilter: string[];
-  onEnrichmentFilterChange: (type: string, on: boolean) => void;
+  onEnrichmentFilterChange: (on: boolean) => void;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
 }
 
-/** The "All Types" / one toggle per registered enrichment type / grid-list toggle row shown next to the
+/** The "All Types" / AI-enhanced / grid-list toggle row shown next to the
  *  search bar whenever content is visible - split out of WorkspaceToolbar to
  *  keep that file under the project's max-lines limit. */
 const WorkspaceContentFilters = ({
@@ -31,6 +31,7 @@ const WorkspaceContentFilters = ({
   onViewModeChange,
 }: WorkspaceContentFiltersProps) => {
   const { t } = useAppI18n();
+  const enrichmentActive = enrichmentFilter.length > 0;
 
   return (
     <>
@@ -57,25 +58,21 @@ const WorkspaceContentFilters = ({
         </DropdownMenu>
       )}
 
-      {/* Enrichment filters - one per registered type; server-side, via `enrichmentTypes` in the search filters */}
-      {ENRICHMENT_REGISTRY.map((def) => {
-        const active = enrichmentFilter.includes(def.type);
-        return (
-          <Button
-            key={def.type}
-            variant="outline"
-            size="sm"
-            onClick={() => onEnrichmentFilterChange(def.type, !active)}
-            aria-pressed={active}
-            className={cn(
-              "font-rubik rounded-xl flex-shrink-0",
-              active && "bg-sunbird-theme-accent-muted/20 border-sunbird-theme-accent text-sunbird-theme-accent"
-            )}
-          >
-            {t(def.filterLabelKey)}
-          </Button>
-        );
-      })}
+      {/* AI-enhanced filter - one toggle for every registered enrichment type; server-side, via `enrichmentTypes` in the search filters */}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onEnrichmentFilterChange(!enrichmentActive)}
+        aria-pressed={enrichmentActive}
+        aria-label={t('workspace.aiEnhancedFilter')}
+        title={t('workspace.aiEnhancedFilter')}
+        className={cn(
+          "rounded-xl flex-shrink-0 px-2.5",
+          enrichmentActive && "bg-sunbird-theme-accent-muted/20 border-sunbird-theme-accent text-sunbird-theme-accent"
+        )}
+      >
+        <LuSparkles className="w-4 h-4" aria-hidden="true" />
+      </Button>
 
       {/* View Toggle */}
       <div className="flex bg-gray-100 rounded-lg p-0.5 flex-shrink-0">

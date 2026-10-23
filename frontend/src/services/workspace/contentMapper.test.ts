@@ -122,4 +122,16 @@ describe('contentMapper', () => {
       expect(mapContentToWorkspaceItem({ identifier: 'a' }).createdAt).toBeNull();
     });
   });
+
+  describe('enrichmentTypes', () => {
+    it('keeps the registered enrichment types the content requested', () => {
+      expect(mapContentToWorkspaceItem({ identifier: 'a', enrichmentTypes: ['Transcript'] }).enrichmentTypes).toEqual(['Transcript']);
+    });
+
+    it('drops unregistered types, and leaves the field undefined for an empty or missing list (negative)', () => {
+      expect(mapContentToWorkspaceItem({ identifier: 'a', enrichmentTypes: ['Unknown'] }).enrichmentTypes).toBeUndefined();
+      expect(mapContentToWorkspaceItem({ identifier: 'a', enrichmentTypes: [] }).enrichmentTypes).toBeUndefined();
+      expect(mapContentToWorkspaceItem({ identifier: 'a' }).enrichmentTypes).toBeUndefined();
+    });
+  });
 });
