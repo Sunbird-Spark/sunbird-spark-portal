@@ -14,6 +14,8 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import useImpression from "@/hooks/useImpression";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import userAuthInfoService from "@/services/userAuthInfoService/userAuthInfoService";
+import { dynamicAssessForLearner } from "@/services/players/dynamicAssessSubset";
 
 const ContentPlayerPage = () => {
   const { t } = useAppI18n();
@@ -54,7 +56,12 @@ const ContentPlayerPage = () => {
   } = useQumlContent(contentId || '', { enabled: isQumlContent });
   
   // Determine which data to use based on content type
-  const playerMetadata = isQumlContent ? qumlData : contentData;
+  // Learners get their own Dynamic Assess draw from the published pool (useQumlContent already draws for QuestionSets); other content passes through unchanged.
+  const learnerId = userAuthInfoService.getUserId();
+  const playerMetadata = useMemo(
+    () => (isQumlContent ? qumlData : dynamicAssessForLearner(contentData, learnerId)),
+    [isQumlContent, qumlData, contentData, learnerId]
+  );
   const playerIsLoading = isQumlContent ? isQumlLoading : isLoading;
   const playerError = isQumlContent ? qumlError : error;
   

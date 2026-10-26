@@ -1,6 +1,11 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { questionSetService } from '../services/QuestionSetService';
 import _ from 'lodash';
+import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
+import { dynamicAssessForLearner, scoreOf } from '@/services/players/dynamicAssessSubset';
+
+/** knowlg-service rejects question/list requests with more identifiers than this (question.list.limit). */
+const QUESTION_LIST_LIMIT = 20;
 
 interface UseQumlContentOptions {
   enabled?: boolean;
@@ -21,9 +26,10 @@ export const useQumlContent = (
   options?: UseQumlContentOptions
 ): UseQueryResult<any, Error> => {
   const enabled = options?.enabled ?? true;
+  const learnerId = userAuthInfoService.getUserId();
 
   return useQuery({
-    queryKey: ['quml', 'questionset', questionSetId],
+    queryKey: ['quml', 'questionset', questionSetId, learnerId],
     enabled: enabled && Boolean(questionSetId),
     queryFn: async () => {
       // Fetch hierarchy
@@ -34,6 +40,9 @@ export const useQumlContent = (
       if (!metadata) {
         throw new Error(`Hierarchy payload missing questionset for ID: ${questionSetId}`);
       }
+
+      // Dynamic Assess: draw the learner's questions before fetching, so question/list (capped at 20 ids) only returns the drawn questions' content.
+      metadata = dynamicAssessForLearner(metadata, learnerId);
 
       // Collect all question IDs from hierarchy
       const collectQuestionIds = (node: any): string[] => {
@@ -54,9 +63,11 @@ export const useQumlContent = (
       // Fetch full question data (with body, responseDeclaration, interactions, etc.)
       let questionMap = new Map<string, any>();
       if (!_.isEmpty(questionIds)) {
-        const listResp = await questionSetService.getQuestionList<any>(questionIds);
-        const questions = _.get(listResp, 'result.questions') || _.get(listResp, 'questions', []);
-        
+        // question/list accepts at most 20 ids per request, so a Dynamic learner set larger than that is fetched in batches; other sets keep the single request.
+        const batches = metadata?.primaryCategory === 'Dynamic QuestionSet' ? _.chunk(questionIds, QUESTION_LIST_LIMIT) : [questionIds];
+        const responses = await Promise.all(batches.map((ids) => questionSetService.getQuestionList<any>(ids)));
+        const questions = responses.flatMap((listResp) => _.get(listResp, 'result.questions') || _.get(listResp, 'questions', []));
+
         questions.forEach((q: any) => {
           const identifier = _.get(q, 'identifier');
           if (identifier) {
@@ -93,6 +104,16 @@ export const useQumlContent = (
       };
 
       metadata = replaceQuestionsInHierarchy(metadata);
+
+      // Dynamic Assess: the draw scored the hierarchy stubs, which may lack marks, so total the hydrated questions instead.
+      if (metadata?.primaryCategory === 'Dynamic QuestionSet' && Array.isArray(metadata.children)) {
+        const maxScore = metadata.children.reduce((sum: number, q: any) => sum + scoreOf(q), 0);
+        metadata.maxScore = maxScore;
+        metadata.outcomeDeclaration = {
+          ...(metadata.outcomeDeclaration ?? {}),
+          maxScore: { cardinality: 'single', type: 'integer', ...(metadata.outcomeDeclaration?.maxScore ?? {}), defaultValue: maxScore },
+        };
+      }
 
       // Ensure outcomeDeclaration.maxScore structure exists
       if (!_.get(metadata, 'outcomeDeclaration')) {

@@ -160,13 +160,14 @@ vi.mock('@/components/workspace/WorkspaceToolbar', () => ({
 }));
 
 vi.mock('./WorkspacePageContent', () => ({
-  default: ({ filteredItems, onDelete, onView }: { filteredItems: WorkspaceItem[]; onDelete: (id: string) => void; onView: (id: string) => void }) => (
+  default: ({ filteredItems, onDelete, onView, onEdit }: { filteredItems: WorkspaceItem[]; onDelete: (id: string) => void; onView: (id: string) => void; onEdit?: (id: string) => void }) => (
     <div data-testid="workspace-content">
       {filteredItems.map((item) => (
         <div key={item.id} data-testid={`content-item-${item.id}`}>
           <span>{item.title}</span>
           <button type="button" onClick={() => onDelete(item.id)}>Delete {item.title}</button>
           <button type="button" onClick={() => onView(item.id)}>View {item.title}</button>
+          <button type="button" onClick={() => onEdit?.(item.id)}>Edit {item.title}</button>
         </div>
       ))}
     </div>
@@ -184,6 +185,7 @@ vi.mock('./CreateContentModal', () => ({
         <button type="button" onClick={() => onOptionSelect('quiz')}>Quiz</button>
         <button type="button" onClick={() => onOptionSelect('collection')}>Collection</button>
         <button type="button" onClick={() => onOptionSelect('textbook')}>Textbook</button>
+        <button type="button" onClick={() => onOptionSelect('dynamic-assess-ecml')}>Dynamic Assess ECML</button>
       </div>
     ) : null,
 }));
@@ -376,6 +378,57 @@ describe('WorkspacePage', () => {
         { state: { from: '/' } }
       );
     });
+  });
+
+  it('refuses to create Dynamic Assess ECML without a framework, instead of opening an unmatched editor route (negative)', async () => {
+    renderWithProviders(<WorkspacePage />);
+    fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Create content' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Dynamic Assess ECML' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Create' }));
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({ description: 'workspace.errors.frameworkRequired', variant: 'destructive' }));
+    });
+    expect(mockContentCreate).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('explains, rather than navigating, when Dynamic Assess ECML content has no framework to open with (negative)', async () => {
+    const item: WorkspaceItem = {
+      id: 'do_dca_1', title: 'Dynamic ECML', description: '', type: 'quiz',
+      primaryCategory: 'Dynamic Course Assessment', mimeType: 'application/vnd.ekstep.ecml-archive',
+      status: 'draft', contentType: 'SelfAssess', createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z', author: 'Test Author', framework: '', contentStatus: 'Draft',
+    };
+    mockUseWorkspace.mockReturnValue({
+      contents: [item], counts: { all: 1, drafts: 1, review: 0, published: 0, pendingReview: 0 },
+      totalCount: 1, isLoading: false, isLoadingMore: false, isCountsLoading: false, isRefreshing: false,
+      error: null, hasMore: false, loadMore: vi.fn(), refetchCounts: vi.fn().mockResolvedValue(undefined),
+      refetchAll: vi.fn().mockResolvedValue(undefined),
+    });
+    renderWithProviders(<WorkspacePage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Dynamic ECML' }));
+    expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({ title: 'workspace.errors.frameworkRequired', variant: 'destructive' }));
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('opens Dynamic Assess ECML content with a framework in the generic editor (positive)', async () => {
+    const item: WorkspaceItem = {
+      id: 'do_dca_2', title: 'Dynamic ECML 2', description: '', type: 'quiz',
+      primaryCategory: 'Dynamic Course Assessment', mimeType: 'application/vnd.ekstep.ecml-archive',
+      status: 'draft', contentType: 'SelfAssess', createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z', author: 'Test Author', framework: 'USF', contentStatus: 'draft',
+    };
+    mockUseWorkspace.mockReturnValue({
+      contents: [item], counts: { all: 1, drafts: 1, review: 0, published: 0, pendingReview: 0 },
+      totalCount: 1, isLoading: false, isLoadingMore: false, isCountsLoading: false, isRefreshing: false,
+      error: null, hasMore: false, loadMore: vi.fn(), refetchCounts: vi.fn().mockResolvedValue(undefined),
+      refetchAll: vi.fn().mockResolvedValue(undefined),
+    });
+    renderWithProviders(<WorkspacePage />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Dynamic ECML 2' }));
+    expect(mockNavigate).toHaveBeenCalledWith('/workspace/content/edit/generic/do_dca_2/draft/USF/draft', expect.anything());
+    expect(mockToast).not.toHaveBeenCalled();
   });
 
   it('uses questionset retire API for questionset content deletion', async () => {

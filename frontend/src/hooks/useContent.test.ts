@@ -62,6 +62,16 @@ describe('useContentSearch', () => {
     expect(filtersStr).toContain('Course');
   });
 
+  it('includes the Dynamic Assess categories in the default keyword search', () => {
+    renderHook(() =>
+      useContentSearch({ request: { query: 'Dynamic', limit: 10, offset: 0, filters: { status: ['Live'] } } })
+    );
+    const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
+    const filtersStr = call.queryKey[6] as string;
+    expect(filtersStr).toContain('Dynamic Course Assessment');
+    expect(filtersStr).toContain('Dynamic QuestionSet');
+  });
+
   it('does NOT inject DEFAULT_PRIMARY_CATEGORIES when primaryCategory is already set', () => {
     renderHook(() =>
       useContentSearch({

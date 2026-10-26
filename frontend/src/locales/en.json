@@ -627,7 +627,9 @@
       "questionEditor": "Question Editor",
       "uploadContent": "Upload Content",
       "uploadLargeContent": "Upload Large Content",
-      "learningPath": "Learning Path"
+      "learningPath": "Learning Path",
+      "dynamicAssessQuestionSet": "Dynamic Assess - QuestionSet",
+      "dynamicAssessEcml": "Dynamic Assess - ECML"
     },
     "editorDescriptions": {
       "course": "Design courses with modules, lessons, and assessments.",
@@ -639,7 +641,9 @@
       "quiz": "Create quizzes with MCQs, fill-in-the-blanks, and auto-grading.",
       "story": "Design interactive stories and gamified learning experiences.",
       "questionSet": "Create and manage sets of questions for quizzes and assessments.",
-      "questionEditor": "Create, edit, and manage individual questions."
+      "questionEditor": "Create, edit, and manage individual questions.",
+      "dynamicAssessQuestionSet": "Create a pool-based QuestionSet that auto-selects questions by skill and difficulty.",
+      "dynamicAssessEcml": "Create pool-based assessment content that auto-selects questions by skill and difficulty."
     },
     "categories": {
       "collectionEditor": {
@@ -672,7 +676,8 @@
     "errors": {
       "unexpectedResponse": "Unexpected server response. Please try again.",
       "creationFailed": "Creation Failed",
-      "unableToCreate": "Unable to create content. Please try again."
+      "unableToCreate": "Unable to create content. Please try again.",
+      "frameworkRequired": "A framework is needed to open this in the editor. Ask your administrator to set a default framework for your organisation."
     },
     "stats": {
       "published": "Published",

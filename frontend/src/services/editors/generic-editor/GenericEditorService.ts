@@ -48,7 +48,11 @@ export class GenericEditorService {
     userId: string,
     routeState?: string
   ): boolean {
-    const isGenericMime = GENERIC_EDITOR_MIME_TYPES.includes(
+    // Dynamic Assess ECML shares Quiz/Story's mimeType, so it's allowed by category, not by mime type.
+    const isDynamicAssessEcml =
+      contentDetails.mimeType === 'application/vnd.ekstep.ecml-archive' &&
+      contentDetails.primaryCategory === 'Dynamic Course Assessment';
+    const isGenericMime = isDynamicAssessEcml || GENERIC_EDITOR_MIME_TYPES.includes(
       contentDetails.mimeType as never
     );
     const isValidStatus = VALID_CONTENT_STATUSES.some(

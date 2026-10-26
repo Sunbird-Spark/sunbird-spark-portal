@@ -7,6 +7,7 @@ interface QuestionSetCreateParams {
   createdFor: string[];
   framework: string;
   creator: string;
+  primaryCategory?: string;
 }
 
 export const useQuestionSetCreate = (): UseMutationResult<any, Error, QuestionSetCreateParams> => {

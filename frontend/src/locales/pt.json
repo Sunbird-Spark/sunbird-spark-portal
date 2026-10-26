@@ -627,7 +627,9 @@
       "questionEditor": "Editor de perguntas",
       "uploadContent": "Enviar conteúdo",
       "uploadLargeContent": "Enviar conteúdo grande",
-      "learningPath": "Trilha de Aprendizagem"
+      "learningPath": "Trilha de Aprendizagem",
+      "dynamicAssessQuestionSet": "Avaliação dinâmica - Conjunto de perguntas",
+      "dynamicAssessEcml": "Avaliação dinâmica - ECML"
     },
     "editorDescriptions": {
       "course": "Crie cursos com módulos, aulas e avaliações.",
@@ -639,7 +641,9 @@
       "quiz": "Crie quizzes com múltipla escolha, preenchimento de lacunas e correção automática.",
       "story": "Crie histórias interativas e experiências de aprendizagem gamificadas.",
       "questionSet": "Crie e gerencie conjuntos de perguntas para quizzes e avaliações.",
-      "questionEditor": "Crie, edite e gerencie perguntas individuais."
+      "questionEditor": "Crie, edite e gerencie perguntas individuais.",
+      "dynamicAssessQuestionSet": "Crie um conjunto de perguntas baseado em um banco que seleciona automaticamente as perguntas por habilidade e dificuldade.",
+      "dynamicAssessEcml": "Crie um conteúdo de avaliação baseado em um banco que seleciona automaticamente as perguntas por habilidade e dificuldade."
     },
     "categories": {
       "collectionEditor": {
@@ -672,7 +676,8 @@
     "errors": {
       "unexpectedResponse": "Resposta inesperada do servidor. Por favor, tente novamente.",
       "creationFailed": "Falha na criação",
-      "unableToCreate": "Não foi possível criar o conteúdo. Por favor, tente novamente."
+      "unableToCreate": "Não foi possível criar o conteúdo. Por favor, tente novamente.",
+      "frameworkRequired": "É necessário um framework para abrir este conteúdo no editor. Peça ao seu administrador para definir um framework padrão para a sua organização."
     },
     "stats": {
       "published": "Publicado",

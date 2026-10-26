@@ -28,6 +28,8 @@ export const WORKSPACE_PRIMARY_CATEGORY_FILTER = [
   'Course',
   'Digital Textbook',
   'Question paper',
+  'Dynamic Course Assessment',
+  'Dynamic QuestionSet',
 ] as const;
 
 /** Number of items to fetch per page. */
@@ -70,7 +72,7 @@ export function getPrimaryCategoryForTypeFilter(
     case 'content':
       return ['Learning Resource', 'Explanation Content', 'Teacher Resource', 'eTextbook'];
     case 'quiz':
-      return ['Practice Question Set', 'Course Assessment', 'Exam Question', 'Question paper'];
+      return ['Practice Question Set', 'Course Assessment', 'Exam Question', 'Question paper', 'Dynamic Course Assessment', 'Dynamic QuestionSet'];
     case 'collection':
       return ['Content Playlist', 'Digital Textbook'];
     case 'all':

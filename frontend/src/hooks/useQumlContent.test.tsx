@@ -469,4 +469,86 @@ describe('useQumlContent', () => {
 
     expect(result.current.data).toBeDefined();
   });
+
+  it('fetches only the learner\'s drawn questions for a Dynamic QuestionSet, never the whole pool (positive)', async () => {
+    // Target 2/2/2 with a pool of 10 per level: 30 ids would exceed the 20-id question/list limit.
+    const level = (l: string, n: number) => Array.from({ length: n }, (_, i) => ({
+      identifier: `${l[0]}${i}`, objectType: 'Question', mimeType: 'application/vnd.sunbird.question', difficultyLevel: l,
+    }));
+    (questionSetService.getHierarchy as Mock).mockResolvedValue({
+      questionset: {
+        identifier: 'do_dqs', primaryCategory: 'Dynamic QuestionSet', difficultyTarget: '{"E":2,"M":2,"D":2}',
+        children: [...level('EASY', 10), ...level('MEDIUM', 10), ...level('DIFFICULT', 10)],
+      },
+    });
+    (questionSetService.getQuestionList as Mock).mockResolvedValue({ questions: [] });
+    const { result } = renderHook(() => useQumlContent('do_dqs'), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    const requested = (questionSetService.getQuestionList as Mock).mock.calls[0]?.[0] as string[];
+    expect(requested).toHaveLength(6);
+    expect(result.current.data.children).toHaveLength(6);
+  });
+
+  it('still fetches every question for an ordinary QuestionSet (negative)', async () => {
+    const children = Array.from({ length: 8 }, (_, i) => ({ identifier: `q${i}`, mimeType: 'application/vnd.sunbird.question' }));
+    (questionSetService.getHierarchy as Mock).mockResolvedValue({ questionset: { identifier: 'qs1', primaryCategory: 'Practice Question Set', children } });
+    (questionSetService.getQuestionList as Mock).mockResolvedValue({ questions: [] });
+    const { result } = renderHook(() => useQumlContent('qs1'), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect((questionSetService.getQuestionList as Mock).mock.calls[0]?.[0]).toHaveLength(8);
+  });
+
+  it('fetches a Dynamic learner set larger than 20 in batches of 20, and plays all of it (positive)', async () => {
+    const level = (l: string, n: number) => Array.from({ length: n }, (_, i) => ({
+      identifier: `${l[0]}${i}`, objectType: 'Question', mimeType: 'application/vnd.sunbird.question', difficultyLevel: l,
+    }));
+    // Target 15/15/10 = 40 per learner, from a pool of 120.
+    (questionSetService.getHierarchy as Mock).mockResolvedValue({
+      questionset: {
+        identifier: 'do_big', primaryCategory: 'Dynamic QuestionSet', difficultyTarget: { E: 15, M: 15, D: 10 },
+        children: [...level('EASY', 45), ...level('MEDIUM', 45), ...level('DIFFICULT', 30)],
+      },
+    });
+    (questionSetService.getQuestionList as Mock).mockImplementation(async (ids: string[]) => ({ questions: ids.map((identifier) => ({ identifier, body: 'b' })) }));
+    const { result } = renderHook(() => useQumlContent('do_big'), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    const calls = (questionSetService.getQuestionList as Mock).mock.calls.map((c) => (c[0] as string[]).length);
+    expect(calls).toEqual([20, 20]);
+    expect(result.current.data.children).toHaveLength(40);
+    expect(result.current.data.children.every((c: any) => c.body === 'b')).toBe(true);
+  });
+
+  it('totals a Dynamic set\'s score from the hydrated questions, not the score-less hierarchy stubs (positive)', async () => {
+    // Stubs carry no marks; question/list returns 5 marks each, so the drawn 2 questions are worth 10.
+    (questionSetService.getHierarchy as Mock).mockResolvedValue({
+      questionset: {
+        identifier: 'do_marks', primaryCategory: 'Dynamic QuestionSet', difficultyTarget: '{"E":2,"M":0,"D":0}',
+        children: ['e1', 'e2', 'e3', 'e4', 'e5', 'e6'].map((identifier) => ({
+          identifier, objectType: 'Question', mimeType: 'application/vnd.sunbird.question', difficultyLevel: 'EASY',
+        })),
+      },
+    });
+    (questionSetService.getQuestionList as Mock).mockImplementation(async (ids: string[]) => ({
+      questions: ids.map((identifier) => ({ identifier, mimeType: 'application/vnd.sunbird.question', maxScore: 5 })),
+    }));
+    const { result } = renderHook(() => useQumlContent('do_marks'), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data.children).toHaveLength(2);
+    expect(result.current.data.maxScore).toBe(10);
+    expect(result.current.data.outcomeDeclaration.maxScore.defaultValue).toBe(10);
+  });
+
+  it('keeps an ordinary QuestionSet\'s published score untouched (negative)', async () => {
+    (questionSetService.getHierarchy as Mock).mockResolvedValue({
+      questionset: {
+        identifier: 'qs_marks', primaryCategory: 'Practice Question Set', maxScore: 3,
+        children: [{ identifier: 'q1', mimeType: 'application/vnd.sunbird.question' }],
+      },
+    });
+    (questionSetService.getQuestionList as Mock).mockResolvedValue({ questions: [{ identifier: 'q1', mimeType: 'application/vnd.sunbird.question', maxScore: 5 }] });
+    const { result } = renderHook(() => useQumlContent('qs_marks'), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data.maxScore).toBe(3);
+    expect(result.current.data.outcomeDeclaration.maxScore.defaultValue).toBe(3);
+  });
 });

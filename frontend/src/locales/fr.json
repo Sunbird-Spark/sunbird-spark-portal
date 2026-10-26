@@ -627,7 +627,9 @@
       "questionEditor": "Éditeur de questions",
       "uploadContent": "Télécharger du contenu",
       "uploadLargeContent": "Télécharger un contenu volumineux",
-      "learningPath": "Parcours d'apprentissage"
+      "learningPath": "Parcours d'apprentissage",
+      "dynamicAssessQuestionSet": "Évaluation dynamique - Ensemble de questions",
+      "dynamicAssessEcml": "Évaluation dynamique - ECML"
     },
     "editorDescriptions": {
       "course": "Concevez des cours avec des modules, des leçons et des évaluations.",
@@ -639,7 +641,9 @@
       "quiz": "Créez des quiz avec des QCM, des textes à trous et une correction automatique.",
       "story": "Concevez des histoires interactives et des expériences d'apprentissage ludiques.",
       "questionSet": "Créez et gérez des ensembles de questions pour les quiz et évaluations.",
-      "questionEditor": "Créez, modifiez et gérez des questions individuelles."
+      "questionEditor": "Créez, modifiez et gérez des questions individuelles.",
+      "dynamicAssessQuestionSet": "Créez un ensemble de questions basé sur un pool qui sélectionne automatiquement les questions selon la compétence et la difficulté.",
+      "dynamicAssessEcml": "Créez un contenu d’évaluation basé sur un pool qui sélectionne automatiquement les questions selon la compétence et la difficulté."
     },
     "categories": {
       "collectionEditor": {
@@ -672,7 +676,8 @@
     "errors": {
       "unexpectedResponse": "Réponse inattendue du serveur. Veuillez réessayer.",
       "creationFailed": "Échec de la création",
-      "unableToCreate": "Impossible de créer le contenu. Veuillez réessayer."
+      "unableToCreate": "Impossible de créer le contenu. Veuillez réessayer.",
+      "frameworkRequired": "Un framework est nécessaire pour ouvrir ce contenu dans l'éditeur. Demandez à votre administrateur de définir un framework par défaut pour votre organisation."
     },
     "stats": {
       "published": "Publié",

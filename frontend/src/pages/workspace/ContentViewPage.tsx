@@ -1,4 +1,4 @@
-import { useState, useCallback, ReactNode } from 'react';
+import { useState, useCallback, useMemo, ReactNode } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useImpression from '@/hooks/useImpression';
 import { useTelemetry } from '@/hooks/useTelemetry';
@@ -13,6 +13,7 @@ import { ContentService } from '@/services/ContentService';
 import { FormService } from '@/services/FormService';
 import { CheckListFormField } from '@/types/formTypes';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
+import { dynamicAssessForLearner } from '@/services/players/dynamicAssessSubset';
 import { useToast } from '@/hooks/useToast';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import ChecklistDialog from '@/components/workspace/ChecklistDialog';
@@ -63,7 +64,12 @@ const ContentReviewPage = ({ mode }: { mode: 'view' | 'review' }) => {
   const isEcmlContent = contentData?.mimeType === 'application/vnd.ekstep.ecml-archive';
 
   const { data: qumlData, isLoading: isQumlLoading, error: qumlError } = useQumlContent(contentId || '', { enabled: isQumlContent });
-  const playerMetadata = isQumlContent ? qumlData : contentData;
+  // Reviewers and creators see a learner-sized Dynamic Assess draw, not the whole published pool (useQumlContent already draws for QuestionSets).
+  const learnerId = userAuthInfoService.getUserId();
+  const playerMetadata = useMemo(
+    () => (isQumlContent ? qumlData : dynamicAssessForLearner(contentData, learnerId)),
+    [isQumlContent, qumlData, contentData, learnerId]
+  );
   const playerIsLoading = isQumlContent ? isQumlLoading : isLoading;
   const playerError = isQumlContent ? qumlError : error;
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({});

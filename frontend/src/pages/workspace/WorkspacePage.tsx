@@ -36,7 +36,13 @@ const DYNAMIC_FORM_OPTIONS = ['quiz', 'story', 'textbook', 'collection'];
 const COLLECTION_FORM_OPTIONS = ['textbook', 'collection'];
 
 /** QuML editor option IDs */
-const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
+const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor', 'dynamic-assess-questionset'];
+
+/** Dynamic Assess QuestionSet: same QuML flow as 'question-set', created as Dynamic QuestionSet. */
+const DYNAMIC_ASSESS_QUESTIONSET_OPTION = 'dynamic-assess-questionset';
+
+/** Dynamic Assess ECML: simple name dialog; skill/difficultyTarget are set in the editor after creation. */
+const DYNAMIC_ASSESS_ECML_OPTIONS = ['dynamic-assess-ecml'];
 
 // Option IDs that use the simple name+description dialog and map directly to a
 // COLLECTION_CONTENT_CONFIG entry keyed by the option id itself
@@ -51,6 +57,8 @@ const EDITOR_OPTION_LABELS: Record<string, string> = {
   'learning-path': 'workspace.editorOptions.learningPath',
   'question-set': 'workspace.editorOptions.questionSet',
   'question-editor': 'workspace.editorOptions.questionSet',
+  'dynamic-assess-questionset': 'workspace.editorOptions.dynamicAssessQuestionSet',
+  'dynamic-assess-ecml': 'workspace.editorOptions.dynamicAssessEcml',
 };
 
 const COLLECTION_CONTENT_CONFIG: Record<string, {
@@ -380,8 +388,8 @@ const WorkspacePage = () => {
       setShowDynamicFormDialog(true);
       return;
     }
-    // Course, Learning Path, and question-set use the simple name dialog
-    if (SIMPLE_COLLECTION_OPTIONS.includes(optionId) || QUML_EDITOR_OPTIONS.includes(optionId)) {
+    // Course, Learning Path, question-set, and Dynamic Assess options use the simple name dialog
+    if (SIMPLE_COLLECTION_OPTIONS.includes(optionId) || QUML_EDITOR_OPTIONS.includes(optionId) || DYNAMIC_ASSESS_ECML_OPTIONS.includes(optionId)) {
       setSelectedOption(optionId);
       setShowNameDialog(true);
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
@@ -475,7 +483,7 @@ const WorkspacePage = () => {
     }
   };
 
-  const handleQuestionSetCreate = async (name: string) => {
+  const handleQuestionSetCreate = async (name: string, primaryCategory?: string) => {
     const { createdBy, createdFor, creator } = getCreatorMeta();
 
     const response = await questionSetCreate.mutateAsync({
@@ -484,6 +492,7 @@ const WorkspacePage = () => {
       createdFor,
       framework: orgFramework || '',
       creator,
+      primaryCategory,
     });
 
     const contentId = response?.identifier;
@@ -493,6 +502,33 @@ const WorkspacePage = () => {
     }
 
     navigate(`/edit/quml-editor/${contentId}`, { state: { from: location.pathname + location.search } });
+  };
+
+  /** Dynamic Assess ECML: created like Quiz/Story but opened in generic-editor-v2, not the legacy content-editor. */
+  const handleDynamicAssessEcmlCreate = async (name: string) => {
+    const { creator, createdBy, organisation, createdFor } = getCreatorMeta();
+
+    const response = await contentService.contentCreate(name, {
+      createdBy,
+      creator,
+      mimeType: 'application/vnd.ekstep.ecml-archive',
+      contentType: 'SelfAssess',
+      primaryCategory: 'Dynamic Course Assessment',
+      description: 'Enter description for Resource',
+      organisation,
+      createdFor,
+      framework: orgFramework,
+      resourceType: 'Learn',
+    });
+    const contentId = response.data?.identifier || response.data?.content_id;
+    if (!contentId) {
+      console.error("Content creation response missing identifier:", response);
+      throw new Error(t("workspace.errors.unexpectedResponse"));
+    }
+
+    navigate(`/workspace/content/edit/generic/${contentId}/draft/${orgFramework}/draft`, {
+      state: { from: location.pathname + location.search },
+    });
   };
 
   const handleContentNameSubmit = async (name: string, extra?: { description?: string }) => {
@@ -520,8 +556,17 @@ const WorkspacePage = () => {
           throw new Error(t("workspace.errors.unexpectedResponse"));
         }
         navigate(`/edit/collection-editor/${contentId}`, { state: { from: location.pathname + location.search } });
+      } else if (selectedOption === DYNAMIC_ASSESS_QUESTIONSET_OPTION) {
+        await handleQuestionSetCreate(name, 'Dynamic QuestionSet');
       } else if (selectedOption && QUML_EDITOR_OPTIONS.includes(selectedOption)) {
         await handleQuestionSetCreate(name);
+      } else if (selectedOption && DYNAMIC_ASSESS_ECML_OPTIONS.includes(selectedOption)) {
+        // The editor route needs a framework segment, so don't create content the editor couldn't open.
+        if (!orgFramework) {
+          toast({ title: t("workspace.errors.creationFailed"), description: t("workspace.errors.frameworkRequired"), variant: "destructive" });
+          return;
+        }
+        await handleDynamicAssessEcmlCreate(name);
       }
       setShowNameDialog(false);
       setSelectedOption(null);
@@ -541,15 +586,24 @@ const WorkspacePage = () => {
     if (["Course", "TextBook", "Collection", "LearningPath"].includes(item.contentType)) {
       return `/edit/collection-editor/${id}`;
     }
-    if (item.primaryCategory === 'Practice Question Set') {
+    if (item.primaryCategory === 'Practice Question Set' || item.primaryCategory === 'Dynamic QuestionSet') {
       return `/edit/quml-editor/${id}`;
-    }
-    if (item.mimeType === 'application/vnd.ekstep.ecml-archive') {
-      return `/edit/content-editor/${id}`;
     }
     const state = (item.status || 'Draft').toLowerCase();
     const framework = item.framework || orgFramework || '';
     const contentStatus = item.contentStatus || 'draft';
+    // Dynamic Assess ECML opens in generic-editor-v2, unlike other ECML content.
+    if (item.primaryCategory === 'Dynamic Course Assessment') {
+      // An empty framework segment matches no editor route and would redirect home, so explain instead.
+      if (!framework) {
+        toast({ title: t("workspace.errors.frameworkRequired"), variant: "destructive" });
+        return null;
+      }
+      return `/workspace/content/edit/generic/${id}/${state}/${framework}/${contentStatus}`;
+    }
+    if (item.mimeType === 'application/vnd.ekstep.ecml-archive') {
+      return `/edit/content-editor/${id}`;
+    }
     return `/workspace/content/edit/generic/${id}/${state}/${framework}/${contentStatus}`;
   };
 
