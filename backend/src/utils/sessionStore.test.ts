@@ -9,7 +9,11 @@ vi.mock('./logger.js', () => ({
     }
 }));
 
-class MockPool {
+vi.mock('../databases/yugabyteConfig.js', () => ({
+    getYsqlPoolConfig: () => ({ host: 'localhost', port: 5433 })
+}));
+
+class MockPool extends EventEmitter {
     connect(cb: Mock) {
         cb(null, {}, vi.fn());
     }
@@ -102,7 +106,7 @@ describe('getSessionStore', () => {
 
         const mockRelease = vi.fn();
 
-        class SuccessfulPool {
+        class SuccessfulPool extends EventEmitter {
             connect(cb: Mock) {
                 cb(null, {}, mockRelease);
             }
@@ -173,7 +177,7 @@ describe('getSessionStore', () => {
 
         const mockExit = vi.spyOn(process, 'exit').mockImplementation((() => {}) as never);
 
-        class FailingPool {
+        class FailingPool extends EventEmitter {
             connect(cb: Mock) {
                 cb(new Error('Connection failed'), null, null);
             }
@@ -210,5 +214,23 @@ describe('getSessionStore', () => {
         expect(mockExit).not.toHaveBeenCalled();
 
         mockExit.mockRestore();
+    });
+
+    it('should log idle client errors emitted by the YugabyteDB pool', async () => {
+        vi.doMock('../config/env.js', () => ({
+            envConfig: {
+                SUNBIRD_PORTAL_SESSION_STORE: 'yugabyte',
+                SUNBIRD_ANONYMOUS_SESSION_TTL: 60000
+            }
+        }));
+
+        const logger = (await import('./logger.js')).default;
+        const { getYsqlPool } = await import('./sessionStore.js');
+
+        const pool = getYsqlPool();
+        const error = new Error('Connection terminated unexpectedly');
+        pool.emit('error', error);
+
+        expect(logger.error).toHaveBeenCalledWith('YugabyteDB pool idle client error', error);
     });
 });

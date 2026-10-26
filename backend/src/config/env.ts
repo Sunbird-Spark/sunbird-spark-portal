@@ -60,6 +60,16 @@ export const envConfig = {
     SUNBIRD_YUGABYTE_DATABASE: env.SUNBIRD_YUGABYTE_DATABASE || 'portal',
     SUNBIRD_YUGABYTE_USER: env.SUNBIRD_YUGABYTE_USER || '',
     SUNBIRD_YUGABYTE_PASSWORD: env.SUNBIRD_YUGABYTE_PASSWORD || '',
+    // TLS for YSQL and YCQL: 'disable' | 'require' | 'verify-ca' | 'verify-full'. Managed
+    // clusters (e.g. YugabyteDB Aeon) require TLS; use 'verify-full' with the cluster root CA,
+    // or 'verify-ca' if the server certificate does not match the configured hostname.
+    SUNBIRD_YUGABYTE_SSL_MODE: env.SUNBIRD_YUGABYTE_SSL_MODE || 'disable',
+    SUNBIRD_YUGABYTE_SSL_ROOT_CERT_PATH: env.SUNBIRD_YUGABYTE_SSL_ROOT_CERT_PATH || '',
+    SUNBIRD_YUGABYTE_SSL_ROOT_CERT: env.SUNBIRD_YUGABYTE_SSL_ROOT_CERT || '',
+    // YCQL local data center; for Aeon this is the cluster's cloud region (e.g. ap-south-1).
+    SUNBIRD_YUGABYTE_YCQL_LOCAL_DATACENTER: env.SUNBIRD_YUGABYTE_YCQL_LOCAL_DATACENTER || 'datacenter1',
+    SUNBIRD_YUGABYTE_YSQL_POOL_MAX: parseInt(env.SUNBIRD_YUGABYTE_YSQL_POOL_MAX || '10'),
+    SUNBIRD_YUGABYTE_CONNECT_TIMEOUT_MS: parseInt(env.SUNBIRD_YUGABYTE_CONNECT_TIMEOUT_MS || '10000'),
     SUNBIRD_PORTAL_SESSION_STORE: env.SUNBIRD_PORTAL_SESSION_STORE || 'in-memory',
     GOOGLE_RECAPTCHA_VERIFY_URL: env.GOOGLE_RECAPTCHA_VERIFY_URL || 'https://www.google.com/recaptcha/api/siteverify',
     GOOGLE_RECAPTCHA_SECRET: env.GOOGLE_RECAPTCHA_SECRET || '',
