@@ -1081,7 +1081,7 @@ NEW_REQUIRED_CONFIG=your-value-here
 
 | Variable | Description | Required | Default |
 |---|---|---|---|
-| `SUNBIRD_YUGABYTE_HOST` | YugabyteDB host address | Yes | `''` |
+| `SUNBIRD_YUGABYTE_HOST` | YugabyteDB host address. Accepts a comma-separated list (all used as YCQL contact points; YSQL uses the first) | Yes | `''` |
 | `SUNBIRD_YUGABYTE_PORT` | YugabyteDB YSQL port | No | `5433` |
 | `SUNBIRD_YUGABYTE_YCQL_PORT` | YugabyteDB YCQL (Cassandra-compatible) port | No | `9042` |
 | `SUNBIRD_YUGABYTE_DATABASE` | YugabyteDB database name | No | `portal` |
@@ -1089,6 +1089,22 @@ NEW_REQUIRED_CONFIG=your-value-here
 | `SUNBIRD_YUGABYTE_PASSWORD` | YugabyteDB password | No | `''` |
 | `FORMS_DB_NAME` | Cassandra keyspace for forms data | Yes | `''` |
 | `CONTENT_REVIEW_COMMENT_DB_NAME` | Cassandra keyspace for review comments | Yes | `''` |
+| `SUNBIRD_YUGABYTE_SSL_MODE` | TLS for YSQL and YCQL: `disable`, `require` (encrypt, no cert check), `verify-ca` (verify CA, skip hostname) or `verify-full` (verify CA and hostname) | No | `disable` |
+| `SUNBIRD_YUGABYTE_SSL_ROOT_CERT_PATH` | Path to the cluster root CA certificate (required for `verify-ca` / `verify-full` unless the inline cert is set) | No | `''` |
+| `SUNBIRD_YUGABYTE_SSL_ROOT_CERT` | Root CA certificate as inline PEM; ignored if the path is set | No | `''` |
+| `SUNBIRD_YUGABYTE_YCQL_LOCAL_DATACENTER` | YCQL local data center. For YugabyteDB Aeon, the cluster region (e.g. `ap-south-1`) | No | `datacenter1` |
+| `SUNBIRD_YUGABYTE_YSQL_POOL_MAX` | Maximum connections in the YSQL session pool | No | `10` |
+| `SUNBIRD_YUGABYTE_CONNECT_TIMEOUT_MS` | Connection timeout for YSQL and YCQL, in milliseconds | No | `10000` |
+
+###### Connecting to YugabyteDB Aeon (managed)
+
+| Step | What to do |
+|---|---|
+| Network | Add the Kubernetes cluster's egress IPs to the Aeon IP allow list, or use VPC peering / PrivateLink and the private endpoint |
+| Host | Set `SUNBIRD_YUGABYTE_HOST` to the cluster endpoint hostname (not an IP) |
+| TLS | Download the cluster root certificate from Aeon, store it in a Kubernetes Secret, mount it into the pod, and set `SUNBIRD_YUGABYTE_SSL_MODE=verify-full` and `SUNBIRD_YUGABYTE_SSL_ROOT_CERT_PATH` to the mounted file. If connections fail with a hostname/altname mismatch (e.g. private endpoint names), use `verify-ca` instead |
+| YCQL data center | Set `SUNBIRD_YUGABYTE_YCQL_LOCAL_DATACENTER` to the cluster region; the default `datacenter1` fails against Aeon |
+| Schema | Create the YSQL database (`SUNBIRD_YUGABYTE_DATABASE`) and the YCQL keyspaces/tables for `FORMS_DB_NAME` and `CONTENT_REVIEW_COMMENT_DB_NAME` before deploying. The `sessions` table is created automatically |
 
 ##### Google reCAPTCHA
 

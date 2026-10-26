@@ -1,6 +1,7 @@
 import cassandra from 'cassandra-driver';
 import { envConfig } from '../config/env.js';
 import { logger } from '../utils/logger.js';
+import { getYcqlClientOptions } from './yugabyteConfig.js';
 
 let _reviewCommentClient: cassandra.Client | null = null;
 
@@ -22,16 +23,7 @@ export const getReviewCommentClient = (): cassandra.Client => {
             } as unknown as cassandra.Client;
             _reviewCommentClient = noopClient;
         } else {
-            _reviewCommentClient = new cassandra.Client({
-                contactPoints: contactPoints,
-                localDataCenter: 'datacenter1',
-                keyspace: envConfig.CONTENT_REVIEW_COMMENT_DB_NAME,
-                protocolOptions: { port: envConfig.SUNBIRD_YUGABYTE_YCQL_PORT },
-                credentials: {  
-                    username: envConfig.SUNBIRD_YUGABYTE_USER,
-                    password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
-                },
-            });
+            _reviewCommentClient = new cassandra.Client(getYcqlClientOptions(envConfig.CONTENT_REVIEW_COMMENT_DB_NAME));
 
             logger.info('Review Comment database (Cassandra/YCQL) client initialized (lazy connection).');
         }
