@@ -2,7 +2,7 @@ import { Request, Response as ExpressResponse } from 'express';
 import pg from '@yugabytedb/pg';
 const { Pool } = pg;
 import { type Pool as PgPool } from 'pg';
-import { envConfig } from '../config/env.js';
+import { getYsqlPoolConfig } from '../databases/yugabyteConfig.js';
 import { Response } from '../models/Response.js';
 import { logger } from '../utils/logger.js';
 
@@ -10,15 +10,8 @@ let healthPool: PgPool | null = null;
 
 const getHealthPool = (): PgPool => {
     if (!healthPool) {
-        healthPool = new Pool({
-            host: envConfig.SUNBIRD_YUGABYTE_HOST,
-            port: envConfig.SUNBIRD_YUGABYTE_PORT,
-            database: envConfig.SUNBIRD_YUGABYTE_DATABASE,
-            user: envConfig.SUNBIRD_YUGABYTE_USER,
-            password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
-            // Use a very small pool for health checks to minimize connection impact
-            max: 1,
-        });
+        // Use a very small pool for health checks to minimize connection impact
+        healthPool = new Pool(getYsqlPoolConfig({ max: 1 }));
 
         healthPool.on('error', (err: Error) => {
             const details = err instanceof Error

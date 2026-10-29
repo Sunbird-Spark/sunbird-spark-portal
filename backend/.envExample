@@ -24,6 +24,13 @@ KONG_ANONYMOUS_DEVICE_REGISTER_TOKEN=test_anonymous_register_token
 KONG_LOGGEDIN_FALLBACK_TOKEN=test_loggedin_fallback_token
 KONG_LOGGEDIN_DEVICE_REGISTER_TOKEN=test_loggedin_register_token
 SUNBIRD_YUGABYTE_YCQL_PORT=9042
+# YugabyteDB TLS / managed cluster (e.g. YugabyteDB Aeon) settings
+# SUNBIRD_YUGABYTE_SSL_MODE=verify-full          # disable | require | verify-ca | verify-full (default: disable)
+# SUNBIRD_YUGABYTE_SSL_ROOT_CERT_PATH=/etc/yugabyte/certs/root.crt
+# SUNBIRD_YUGABYTE_SSL_ROOT_CERT=                # inline PEM, used only if the path is not set
+# SUNBIRD_YUGABYTE_YCQL_LOCAL_DATACENTER=ap-south-1  # Aeon cluster region (default: datacenter1)
+# SUNBIRD_YUGABYTE_YSQL_POOL_MAX=10
+# SUNBIRD_YUGABYTE_CONNECT_TIMEOUT_MS=10000
 
 # Keycloak Configuration
 PORTAL_REALM=sunbird

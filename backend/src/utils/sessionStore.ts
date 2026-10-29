@@ -4,6 +4,7 @@ import connectPgSimple from 'connect-pg-simple';
 import pg from 'pg';
 import logger from './logger.js';
 import { envConfig } from '../config/env.js';
+import { getYsqlPoolConfig } from '../databases/yugabyteConfig.js';
 
 const PgStore = connectPgSimple(session);
 
@@ -13,12 +14,11 @@ const PgStore = connectPgSimple(session);
 let _ysqlPool: pg.Pool | null = null;
 export const getYsqlPool = (): pg.Pool => {
     if (!_ysqlPool) {
-        _ysqlPool = new pg.Pool({
-            host: envConfig.SUNBIRD_YUGABYTE_HOST,
-            port: envConfig.SUNBIRD_YUGABYTE_PORT,
-            database: envConfig.SUNBIRD_YUGABYTE_DATABASE,
-            user: envConfig.SUNBIRD_YUGABYTE_USER,
-            password: envConfig.SUNBIRD_YUGABYTE_PASSWORD,
+        _ysqlPool = new pg.Pool(getYsqlPoolConfig());
+        // Idle connections can be dropped by the server or network (e.g. managed clusters
+        // behind cloud load balancers); without a listener this would crash the process.
+        _ysqlPool.on('error', (err) => {
+            logger.error('YugabyteDB pool idle client error', err);
         });
     }
     return _ysqlPool;
