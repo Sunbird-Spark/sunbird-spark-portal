@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import tls from 'tls';
+import tls from 'node:tls';
 
 const { mockReadFileSync } = vi.hoisted(() => ({ mockReadFileSync: vi.fn() }));
 
-vi.mock('fs', () => ({
+vi.mock('node:fs', () => ({
     default: { readFileSync: mockReadFileSync }
 }));
 

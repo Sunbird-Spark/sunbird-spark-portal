@@ -1,5 +1,5 @@
-import fs from 'fs';
-import tls from 'tls';
+import fs from 'node:fs';
+import tls from 'node:tls';
 import type { PoolConfig } from 'pg';
 import type cassandra from 'cassandra-driver';
 import { envConfig } from '../config/env.js';
