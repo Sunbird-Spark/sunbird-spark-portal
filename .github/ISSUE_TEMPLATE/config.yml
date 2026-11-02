@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    url: https://github.com/orgs/Sunbird-Spark/discussions
+    about: Ask a question, or float an idea before it becomes a feature request.
+  - name: Setup, architecture and theming
+    url: https://github.com/Sunbird-Spark/sunbird-spark-portal/blob/main/README.md
+    about: Prerequisites, running frontend and backend, the theming system, and testing.
+  - name: Spark documentation
+    url: https://sunbird.gitbook.io/sunbird-spark
+    about: How Spark fits together across repositories.
+  - name: Report a security vulnerability
+    url: https://github.com/Sunbird-Spark/sunbird-spark-portal/security/advisories/new
+    about: Never report security issues publicly. Use private reporting instead.
