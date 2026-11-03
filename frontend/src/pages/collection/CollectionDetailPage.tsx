@@ -17,6 +17,7 @@ import { useCollectionBackNavigation, useAuthRefreshOnce } from "./useCollection
 import CollectionDetailLayout from "./CollectionDetailLayout";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import "./collection.css";
+import { useLearnerPlayerMetadata } from "@/hooks/useLearnerPlayerMetadata";
 
 const CollectionDetailPage = () => {
   const navigate = useNavigate();
@@ -105,7 +106,7 @@ const CollectionDetailPage = () => {
   const isQumlContent = selectedContentData?.mimeType === 'application/vnd.sunbird.questionset' ||
     selectedContentData?.mimeType === 'application/vnd.sunbird.question';
   const { data: qumlData, isLoading: qumlIsLoading, error: qumlError } = useQumlContent(contentId ?? '', { enabled: isQumlContent });
-  const rawPlayerMetadata = isQumlContent ? qumlData : selectedContentData;
+  const { playerMetadata: rawPlayerMetadata, notReadyError } = useLearnerPlayerMetadata(selectedContentData, qumlData, isQumlContent);
 
   const { t } = useAppI18n();
 
@@ -132,7 +133,7 @@ const CollectionDetailPage = () => {
   });
 
   const playerIsLoading = contentId ? (isQumlContent ? qumlIsLoading : contentIsLoading) : false;
-  const playerError = isQumlContent ? qumlError : contentError;
+  const playerError = (isQumlContent ? qumlError : contentError) ?? notReadyError;
 
   const currentContentStatus = contentId ? contentStatusMap?.[contentId] : undefined;
   const { handlePlayerEvent, handleTelemetryEvent } = useCollectionDetailPlayer({

@@ -13,6 +13,7 @@ import { ContentService } from '@/services/ContentService';
 import { FormService } from '@/services/FormService';
 import { CheckListFormField } from '@/types/formTypes';
 import userAuthInfoService from '@/services/userAuthInfoService/userAuthInfoService';
+import { useLearnerPlayerMetadata } from '@/hooks/useLearnerPlayerMetadata';
 import { useToast } from '@/hooks/useToast';
 import { useAppI18n } from '@/hooks/useAppI18n';
 import ChecklistDialog from '@/components/workspace/ChecklistDialog';
@@ -62,10 +63,11 @@ const ContentReviewPage = ({ mode }: { mode: 'view' | 'review' }) => {
     contentData?.mimeType === 'application/vnd.sunbird.question';
   const isEcmlContent = contentData?.mimeType === 'application/vnd.ekstep.ecml-archive';
 
-  const { data: qumlData, isLoading: isQumlLoading, error: qumlError } = useQumlContent(contentId || '', { enabled: isQumlContent });
-  const playerMetadata = isQumlContent ? qumlData : contentData;
+  // Creators and reviewers see the whole Dynamic Assess pool, since they write and approve every question; learner pages keep the per-learner draw.
+  const { data: qumlData, isLoading: isQumlLoading, error: qumlError } = useQumlContent(contentId || '', { enabled: isQumlContent, fullPool: true });
+  const { playerMetadata, notReadyError } = useLearnerPlayerMetadata(contentData, qumlData, isQumlContent, { fullPool: true });
   const playerIsLoading = isQumlContent ? isQumlLoading : isLoading;
-  const playerError = isQumlContent ? qumlError : error;
+  const playerError = (isQumlContent ? qumlError : error) ?? notReadyError;
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({});
   const clearWorkspaceQueries = useCallback(() => WORKSPACE_QUERY_KEYS.forEach((key) => queryClient.removeQueries({ queryKey: [key] })), [queryClient]);
 

@@ -134,6 +134,24 @@ describe('GenericEditorService', () => {
       expect(service.validateRequest(content, 'user-123')).toBe(false);
     });
 
+    it('allows ECML mime type specifically for Dynamic Course Assessment content', () => {
+      const content: ContentDetails = {
+        ...mockContentDetails,
+        mimeType: 'application/vnd.ekstep.ecml-archive',
+        primaryCategory: 'Dynamic Course Assessment',
+      };
+      expect(service.validateRequest(content, 'user-123')).toBe(true);
+    });
+
+    it('still rejects ECML mime type for other categories (e.g. Quiz/Story)', () => {
+      const content: ContentDetails = {
+        ...mockContentDetails,
+        mimeType: 'application/vnd.ekstep.ecml-archive',
+        primaryCategory: 'Course Assessment',
+      };
+      expect(service.validateRequest(content, 'user-123')).toBe(false);
+    });
+
     it('rejects an invalid status', () => {
       const content: ContentDetails = { ...mockContentDetails, status: 'Retired' };
       expect(service.validateRequest(content, 'user-123')).toBe(false);

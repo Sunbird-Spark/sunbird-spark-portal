@@ -23,13 +23,15 @@ export class QuestionSetService {
     createdFor: string[];
     framework: string;
     creator: string;
+    /** Defaults to Practice Question Set; Dynamic Assess passes 'Dynamic QuestionSet'. */
+    primaryCategory?: string;
   }): Promise<{identifier: string, versionKey?: string}> {
     const payload = {
       request: {
         questionset: {
           name: options.name,
           mimeType: 'application/vnd.sunbird.questionset',
-          primaryCategory: 'Practice Question Set',
+          primaryCategory: options.primaryCategory ?? 'Practice Question Set',
           createdBy: options.createdBy,
           creator: options.creator,
           createdFor: options.createdFor,
