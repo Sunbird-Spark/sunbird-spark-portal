@@ -52,24 +52,16 @@ describe('useContentSearch', () => {
     expect(call.queryKey[4]).toBe(20);
   });
 
-  it('injects DEFAULT_PRIMARY_CATEGORIES when primaryCategory filter is empty', () => {
+  it.each([
+    ['injects DEFAULT_PRIMARY_CATEGORIES when primaryCategory filter is empty', '', ['Collection', 'Course']],
+    ['includes the Dynamic Assess categories in the default keyword search', 'Dynamic', ['Dynamic Course Assessment', 'Dynamic QuestionSet']],
+  ])('%s', (_name, query, categories) => {
     renderHook(() =>
-      useContentSearch({ request: { query: '', limit: 10, offset: 0, filters: { status: ['Live'] } } })
+      useContentSearch({ request: { query, limit: 10, offset: 0, filters: { status: ['Live'] } } })
     );
     const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
     const filtersStr = call.queryKey[6] as string;
-    expect(filtersStr).toContain('Collection');
-    expect(filtersStr).toContain('Course');
-  });
-
-  it('includes the Dynamic Assess categories in the default keyword search', () => {
-    renderHook(() =>
-      useContentSearch({ request: { query: 'Dynamic', limit: 10, offset: 0, filters: { status: ['Live'] } } })
-    );
-    const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
-    const filtersStr = call.queryKey[6] as string;
-    expect(filtersStr).toContain('Dynamic Course Assessment');
-    expect(filtersStr).toContain('Dynamic QuestionSet');
+    categories.forEach((category) => expect(filtersStr).toContain(category));
   });
 
   it('does NOT inject DEFAULT_PRIMARY_CATEGORIES when primaryCategory is already set', () => {

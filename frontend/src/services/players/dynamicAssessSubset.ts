@@ -13,7 +13,9 @@ const DEFAULT_POOL_MULTIPLIER = 2;
 /** The content's own multiplier (an integer >= 1, stored by knowlg-service at create), else the default; same rule as the editors' dynamicAssessSettings. */
 export function poolMultiplier(metadata: AnyRecord | undefined): number {
   const v = metadata?.multiplier;
-  const n = typeof v === 'number' ? v : typeof v === 'string' && v.trim() ? Number(v) : NaN;
+  let n = Number.NaN;
+  if (typeof v === 'number') n = v;
+  else if (typeof v === 'string' && v.trim()) n = Number(v);
   return Number.isFinite(n) && Math.trunc(n) >= 1 ? Math.trunc(n) : DEFAULT_POOL_MULTIPLIER;
 }
 
@@ -37,7 +39,7 @@ export const scoreOf = (c: AnyRecord) => Number(c.outcomeDeclaration?.maxScore?.
 function hashSeed(seed: string): number {
   let h = 0x811c9dc5;
   for (let i = 0; i < seed.length; i++) {
-    h ^= seed.charCodeAt(i);
+    h ^= seed.codePointAt(i) ?? 0;
     h = Math.imul(h, 0x01000193);
   }
   return h >>> 0;
@@ -47,7 +49,8 @@ function hashSeed(seed: string): number {
 function seededRandom(seed: string): () => number {
   let a = hashSeed(seed);
   return () => {
-    a = (a + 0x6d2b79f5) | 0;
+    // `>>> 0` wraps to the same 32 bits as mulberry32's `| 0`; Math.trunc would not wrap and would change every draw.
+    a = (a + 0x6d2b79f5) >>> 0;
     let t = Math.imul(a ^ (a >>> 15), 1 | a);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
@@ -56,7 +59,8 @@ function seededRandom(seed: string): () => number {
 
 /** The same learner + seed always gets the same `count` ids; ids are sorted first so pool order doesn't matter. */
 export function pickForLearner(ids: string[], count: number, seed: string): string[] {
-  const pool = [...new Set(ids)].sort();
+  // Code-unit order, same as the default sort; localeCompare would vary by locale and change the learner's draw.
+  const pool = [...new Set(ids)].sort((x, y) => (x < y ? -1 : Number(x > y)));
   if (count >= pool.length) return pool;
   const rand = seededRandom(seed);
   for (let i = pool.length - 1; i > 0; i--) {

@@ -381,12 +381,34 @@ describe('WorkspacePage', () => {
     });
   });
 
-  it('refuses to create Dynamic Assess ECML without a framework, instead of opening an unmatched editor route (negative)', async () => {
+  // Opens the create modal, picks `option`, and submits the name dialog.
+  async function createFromOption(option: string | RegExp) {
     renderWithProviders(<WorkspacePage />);
     fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
     const dialog = await screen.findByRole('dialog', { name: 'Create content' });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Dynamic Assess ECML' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: option }));
     fireEvent.click(await screen.findByRole('button', { name: 'Create' }));
+  }
+
+  // Renders the workspace listing a single Dynamic Course Assessment draft.
+  function renderWithDynamicEcml(id: string, title: string, framework: string, contentStatus: string) {
+    const item: WorkspaceItem = {
+      id, title, description: '', type: 'quiz',
+      primaryCategory: 'Dynamic Course Assessment', mimeType: 'application/vnd.ekstep.ecml-archive',
+      status: 'draft', contentType: 'SelfAssess', createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z', author: 'Test Author', framework, contentStatus,
+    };
+    mockUseWorkspace.mockReturnValue({
+      contents: [item], counts: { all: 1, drafts: 1, review: 0, published: 0, pendingReview: 0 },
+      totalCount: 1, isLoading: false, isLoadingMore: false, isCountsLoading: false, isRefreshing: false,
+      error: null, hasMore: false, loadMore: vi.fn(), refetchCounts: vi.fn().mockResolvedValue(undefined),
+      refetchAll: vi.fn().mockResolvedValue(undefined),
+    });
+    renderWithProviders(<WorkspacePage />);
+  }
+
+  it('refuses to create Dynamic Assess ECML without a framework, instead of opening an unmatched editor route (negative)', async () => {
+    await createFromOption('Dynamic Assess ECML');
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({ description: 'workspace.errors.frameworkRequired', variant: 'destructive' }));
     });
@@ -398,11 +420,7 @@ describe('WorkspacePage', () => {
 
   it('creates a Dynamic Assess QuestionSet as a Dynamic QuestionSet, not a Practice Question Set (positive)', async () => {
     mockQuestionSetMutateAsync.mockResolvedValue({ identifier: 'do_dqs_1' });
-    renderWithProviders(<WorkspacePage />);
-    fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Create content' });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Dynamic Assess QuestionSet' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Create' }));
+    await createFromOption('Dynamic Assess QuestionSet');
     await waitFor(() => {
       expect(mockQuestionSetMutateAsync).toHaveBeenCalledWith(expect.objectContaining({ primaryCategory: 'Dynamic QuestionSet' }));
     });
@@ -411,49 +429,21 @@ describe('WorkspacePage', () => {
 
   it('keeps creating plain question sets without a primaryCategory, so they stay Practice Question Sets (negative)', async () => {
     mockQuestionSetMutateAsync.mockResolvedValue({ identifier: 'do_qs_plain' });
-    renderWithProviders(<WorkspacePage />);
-    fireEvent.click(screen.getByRole('button', { name: 'createNew' }));
-    const dialog = await screen.findByRole('dialog', { name: 'Create content' });
-    fireEvent.click(within(dialog).getByRole('button', { name: /^Question Set$/ }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Create' }));
+    await createFromOption(/^Question Set$/);
     await waitFor(() => expect(mockQuestionSetMutateAsync).toHaveBeenCalled());
     const calls = mockQuestionSetMutateAsync.mock.calls;
     expect(calls[calls.length - 1]?.[0]?.primaryCategory).toBeUndefined();
   });
 
   it('explains, rather than navigating, when Dynamic Assess ECML content has no framework to open with (negative)', async () => {
-    const item: WorkspaceItem = {
-      id: 'do_dca_1', title: 'Dynamic ECML', description: '', type: 'quiz',
-      primaryCategory: 'Dynamic Course Assessment', mimeType: 'application/vnd.ekstep.ecml-archive',
-      status: 'draft', contentType: 'SelfAssess', createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z', author: 'Test Author', framework: '', contentStatus: 'Draft',
-    };
-    mockUseWorkspace.mockReturnValue({
-      contents: [item], counts: { all: 1, drafts: 1, review: 0, published: 0, pendingReview: 0 },
-      totalCount: 1, isLoading: false, isLoadingMore: false, isCountsLoading: false, isRefreshing: false,
-      error: null, hasMore: false, loadMore: vi.fn(), refetchCounts: vi.fn().mockResolvedValue(undefined),
-      refetchAll: vi.fn().mockResolvedValue(undefined),
-    });
-    renderWithProviders(<WorkspacePage />);
+    renderWithDynamicEcml('do_dca_1', 'Dynamic ECML', '', 'Draft');
     fireEvent.click(screen.getByRole('button', { name: 'Edit Dynamic ECML' }));
     expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({ title: 'workspace.errors.frameworkRequired', variant: 'destructive' }));
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
   it('opens Dynamic Assess ECML content with a framework in the generic editor (positive)', async () => {
-    const item: WorkspaceItem = {
-      id: 'do_dca_2', title: 'Dynamic ECML 2', description: '', type: 'quiz',
-      primaryCategory: 'Dynamic Course Assessment', mimeType: 'application/vnd.ekstep.ecml-archive',
-      status: 'draft', contentType: 'SelfAssess', createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z', author: 'Test Author', framework: 'USF', contentStatus: 'draft',
-    };
-    mockUseWorkspace.mockReturnValue({
-      contents: [item], counts: { all: 1, drafts: 1, review: 0, published: 0, pendingReview: 0 },
-      totalCount: 1, isLoading: false, isLoadingMore: false, isCountsLoading: false, isRefreshing: false,
-      error: null, hasMore: false, loadMore: vi.fn(), refetchCounts: vi.fn().mockResolvedValue(undefined),
-      refetchAll: vi.fn().mockResolvedValue(undefined),
-    });
-    renderWithProviders(<WorkspacePage />);
+    renderWithDynamicEcml('do_dca_2', 'Dynamic ECML 2', 'USF', 'draft');
     fireEvent.click(screen.getByRole('button', { name: 'Edit Dynamic ECML 2' }));
     expect(mockNavigate).toHaveBeenCalledWith('/workspace/content/edit/generic/do_dca_2/draft/USF/draft', expect.anything());
     expect(mockToast).not.toHaveBeenCalled();
