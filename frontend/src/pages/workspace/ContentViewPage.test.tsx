@@ -395,7 +395,7 @@ describe('ContentViewPage - formatDate null path and navigation guard', () => {
   });
 });
 
-describe('ContentViewPage - Dynamic Assess draw by mode', () => {
+describe('ContentViewPage - Dynamic Assess full pool by mode', () => {
   const levels: Record<string, string> = { a1: 'EASY', a2: 'EASY', a3: 'EASY', a4: 'EASY', b1: 'MEDIUM', b2: 'MEDIUM', b3: 'MEDIUM', b4: 'MEDIUM' };
   const body = JSON.stringify({
     theme: { stage: [{ 'org.ekstep.questionset': [{
@@ -424,13 +424,30 @@ describe('ContentViewPage - Dynamic Assess draw by mode', () => {
   });
   afterEach(() => cleanup());
 
-  it('plays a learner-sized draw, never the full pool, for a reviewer (negative)', () => {
+  it('plays the whole pool, not a learner draw, for a reviewer (positive)', () => {
     renderMode('review');
-    expect(playedQuestions()).toBe(2);
+    expect(playedQuestions()).toBe(8);
   });
 
-  it("plays the creator's own learner-sized draw in view mode (positive)", () => {
+  it('plays the whole pool for the creator in view mode (positive)', () => {
     renderMode('view');
-    expect(playedQuestions()).toBe(2);
+    expect(playedQuestions()).toBe(8);
+  });
+
+  it('asks useQumlContent for the full pool in both modes (positive)', () => {
+    renderMode('review');
+    renderMode('view');
+    for (const call of mockUseQumlContent.mock.calls as unknown as [string, { fullPool?: boolean }][]) expect(call[1]?.fullPool).toBe(true);
+    expect(mockUseQumlContent).toHaveBeenCalled();
+  });
+
+  it('still shows the not-ready error, not a blank player, for Dynamic ECML with nothing generated (negative)', () => {
+    mockUseContentRead.mockReturnValue({
+      data: { data: { content: { ...defaultContentResponse.data.data.content, mimeType: 'application/vnd.ekstep.ecml-archive', primaryCategory: 'Dynamic Course Assessment', body: undefined } } },
+      isLoading: false,
+      error: null,
+    });
+    renderMode('view');
+    expect(screen.queryByTestId('review-player-section')).not.toBeInTheDocument();
   });
 });

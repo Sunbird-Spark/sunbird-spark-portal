@@ -16,6 +16,21 @@ const body = JSON.stringify({
 const ecml = (over: Record<string, unknown> = {}) => ({ identifier: 'do_e', primaryCategory: 'Dynamic Course Assessment', body, ...over });
 const questionsOf = (m: any) => JSON.parse(m.body).theme.stage[0]['org.ekstep.questionset'][0]['org.ekstep.question'];
 
+describe('useLearnerPlayerMetadata — fullPool', () => {
+  it('plays the whole Dynamic ECML pool, unchanged, with fullPool (positive)', () => {
+    const content = ecml();
+    const { result } = renderHook(() => useLearnerPlayerMetadata(content, undefined, false, { fullPool: true }));
+    expect(result.current.playerMetadata).toBe(content);
+    expect(questionsOf(result.current.playerMetadata)).toHaveLength(4);
+    expect(result.current.notReadyError).toBeNull();
+  });
+
+  it('still reports not-ready with fullPool for Dynamic ECML without a body (negative)', () => {
+    const { result } = renderHook(() => useLearnerPlayerMetadata(ecml({ body: undefined }), undefined, false, { fullPool: true }));
+    expect(result.current.notReadyError?.message).toBe('content.dynamicAssessNotReady');
+  });
+});
+
 describe('useLearnerPlayerMetadata', () => {
   it("plays the learner's draw of a Dynamic ECML pool (positive)", () => {
     const { result } = renderHook(() => useLearnerPlayerMetadata(ecml(), undefined, false));

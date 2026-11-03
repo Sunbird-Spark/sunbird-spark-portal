@@ -63,9 +63,9 @@ const ContentReviewPage = ({ mode }: { mode: 'view' | 'review' }) => {
     contentData?.mimeType === 'application/vnd.sunbird.question';
   const isEcmlContent = contentData?.mimeType === 'application/vnd.ekstep.ecml-archive';
 
-  // Reviewers and creators see a learner-sized Dynamic Assess draw, not the whole published pool (useQumlContent already draws for QuestionSets).
-  const { data: qumlData, isLoading: isQumlLoading, error: qumlError } = useQumlContent(contentId || '', { enabled: isQumlContent });
-  const { playerMetadata, notReadyError } = useLearnerPlayerMetadata(contentData, qumlData, isQumlContent);
+  // Creators and reviewers see the whole Dynamic Assess pool, since they write and approve every question; learner pages keep the per-learner draw.
+  const { data: qumlData, isLoading: isQumlLoading, error: qumlError } = useQumlContent(contentId || '', { enabled: isQumlContent, fullPool: true });
+  const { playerMetadata, notReadyError } = useLearnerPlayerMetadata(contentData, qumlData, isQumlContent, { fullPool: true });
   const playerIsLoading = isQumlContent ? isQumlLoading : isLoading;
   const playerError = (isQumlContent ? qumlError : error) ?? notReadyError;
   const { handlePlayerEvent, handleTelemetryEvent } = useContentPlayer({});

@@ -51,6 +51,36 @@ describe('useQumlContent — Dynamic Assess and question/list batching', () => {
     expect(result.current.data.children).toHaveLength(6);
   });
 
+  it('fetches and plays the whole Dynamic pool with fullPool, batched past 20 (positive)', async () => {
+    (questionSetService.getHierarchy as Mock).mockResolvedValue({
+      questionset: {
+        identifier: 'do_dqs', primaryCategory: 'Dynamic QuestionSet', difficultyTarget: '{"E":2,"M":2,"D":2}',
+        children: [...level('EASY', 10), ...level('MEDIUM', 10), ...level('DIFFICULT', 10)],
+      },
+    });
+    (questionSetService.getQuestionList as Mock).mockImplementation(async (ids: string[]) => ({ questions: ids.map((identifier) => ({ identifier, body: 'b' })) }));
+    const { result } = renderHook(() => useQumlContent('do_dqs', { fullPool: true }), { wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect((questionSetService.getQuestionList as Mock).mock.calls.map((c) => (c[0] as string[]).length)).toEqual([20, 10]);
+    expect(result.current.data.children).toHaveLength(30);
+  });
+
+  it('keeps the learner draw and the full pool in separate cache entries (negative)', async () => {
+    (questionSetService.getHierarchy as Mock).mockResolvedValue({
+      questionset: {
+        identifier: 'do_dqs', primaryCategory: 'Dynamic QuestionSet', difficultyTarget: '{"E":2,"M":2,"D":2}',
+        children: [...level('EASY', 10), ...level('MEDIUM', 10), ...level('DIFFICULT', 10)],
+      },
+    });
+    (questionSetService.getQuestionList as Mock).mockResolvedValue({ questions: [] });
+    const full = renderHook(() => useQumlContent('do_dqs', { fullPool: true }), { wrapper });
+    await waitFor(() => expect(full.result.current.isSuccess).toBe(true));
+    const drawn = renderHook(() => useQumlContent('do_dqs'), { wrapper });
+    await waitFor(() => expect(drawn.result.current.isSuccess).toBe(true));
+    expect(full.result.current.data.children).toHaveLength(30);
+    expect(drawn.result.current.data.children).toHaveLength(6);
+  });
+
   it('still fetches every question for an ordinary QuestionSet (negative)', async () => {
     const children = Array.from({ length: 8 }, (_, i) => question(`q${i}`));
     (questionSetService.getHierarchy as Mock).mockResolvedValue({ questionset: { identifier: 'qs1', primaryCategory: 'Practice Question Set', children } });

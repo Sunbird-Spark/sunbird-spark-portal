@@ -1,7 +1,31 @@
 import { describe, it, expect } from 'vitest';
 import {
-  pickForLearner, questionSetForLearner, ecmlForLearner, dynamicAssessForLearner, poolMultiplier, isDynamicAssessUnavailable,
+  pickForLearner, questionSetForLearner, ecmlForLearner, dynamicAssessForLearner, poolMultiplier, isDynamicAssessUnavailable, dynamicAssessFullPool,
 } from './dynamicAssessSubset';
+
+describe('dynamicAssessFullPool', () => {
+  const question = (identifier: string, difficultyLevel: string) => ({ identifier, objectType: 'Question', difficultyLevel });
+  const pool = { identifier: 'do_qs', primaryCategory: 'Dynamic QuestionSet', difficultyTarget: { E: 1, M: 0, D: 0 }, children: [question('e0', 'EASY'), question('e1', 'EASY'), question('m0', 'MEDIUM')] };
+
+  it('returns a generated Dynamic QuestionSet or ECML unchanged, every question included (positive)', () => {
+    expect(dynamicAssessFullPool(pool)).toBe(pool);
+    const ecml = { identifier: 'do_e', primaryCategory: 'Dynamic Course Assessment', body: '{"theme":{"stage":[]}}' };
+    expect(dynamicAssessFullPool(ecml)).toBe(ecml);
+  });
+
+  it('marks Dynamic content with nothing generated unavailable (positive)', () => {
+    expect(isDynamicAssessUnavailable(dynamicAssessFullPool({ ...pool, children: [] }))).toBe(true);
+    for (const body of [undefined, '', '{broken']) {
+      expect(isDynamicAssessUnavailable(dynamicAssessFullPool({ identifier: 'do_e', primaryCategory: 'Dynamic Course Assessment', body }))).toBe(true);
+    }
+  });
+
+  it('leaves non-Dynamic content untouched (negative)', () => {
+    const plain = { identifier: 'do_p', primaryCategory: 'Practice Question Set', children: [] };
+    expect(dynamicAssessFullPool(plain)).toBe(plain);
+    expect(dynamicAssessFullPool(undefined)).toBeUndefined();
+  });
+});
 
 const ids = (n: number, prefix: string) => Array.from({ length: n }, (_, i) => `${prefix}${i}`);
 
@@ -43,7 +67,7 @@ describe('questionSetForLearner', () => {
   });
 
   it('caps a level at what its pool supports, never returning an undersized pool whole (positive)', () => {
-    // Target 3/6 needs 6 EASY + 12 MEDIUM at multiplier 2; the pool holds 3 + 6, so the learner gets floor(3/2)=1 + floor(6/2)=3, like the editors.
+    // Target 3/6 needs 6 EASY + 12 MEDIUM at multiplier 2; the pool holds 3 + 6, so the learner gets floor(3/2)=1 + floor(6/2)=3.
     const out = questionSetForLearner({ ...qs, difficultyTarget: { E: 3, M: 6, D: 0 } }, 'u1');
     expect(out.children.map((c: any) => c.identifier)).toEqual(['e0', 'm1', 'm3', 'm5']);
     expect(out.children.length).toBeLessThan(qs.children.length);

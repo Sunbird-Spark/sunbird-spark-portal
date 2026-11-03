@@ -68,7 +68,7 @@ export function pickForLearner(ids: string[], count: number, seed: string): stri
   return pool.slice(0, Math.max(0, count));
 }
 
-/** Picks the target count per level from `levelOf`, capped at what a full pool of that size supports, exactly like the editors' preview. */
+/** Picks the target count per level from `levelOf`, capped at floor(pool / multiplier), so an undersized pool is never played whole. */
 function pickByLevel(ids: string[], levelOf: (id: string) => string, target: Target, multiplier: number, seed: string): Set<string> {
   const picked = new Set<string>();
   for (const [key, level] of LEVELS) {
@@ -159,4 +159,19 @@ export function ecmlForLearner<T extends AnyRecord | undefined>(metadata: T, lea
 export function dynamicAssessForLearner<T extends AnyRecord | undefined>(metadata: T, learnerId: string | null | undefined): T {
   const id = learnerId || 'anonymous';
   return ecmlForLearner(questionSetForLearner(metadata, id), id);
+}
+
+const hasReadableBody = (body: unknown): boolean => {
+  if (!body) return false;
+  if (typeof body !== 'string') return true;
+  try { JSON.parse(body); return true; } catch { return false; }
+};
+
+/** Workspace view/review: the whole pool, unchanged, for the creator and reviewer; Dynamic content with nothing generated yet is still marked for the page's error state. */
+export function dynamicAssessFullPool<T extends AnyRecord | undefined>(metadata: T): T {
+  if (!metadata) return metadata;
+  const nothingGenerated =
+    (metadata.primaryCategory === DYNAMIC_QUESTIONSET && !(Array.isArray(metadata.children) && metadata.children.some(isQuestion))) ||
+    (metadata.primaryCategory === DYNAMIC_ECML && !hasReadableBody(metadata.body));
+  return nothingGenerated ? ({ ...metadata, [UNAVAILABLE]: true } as T) : metadata;
 }
