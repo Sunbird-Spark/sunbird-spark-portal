@@ -390,6 +390,7 @@
     "loadingEditor": "Chargement de l'éditeur...",
     "notFound": "Contenu introuvable",
     "errorLoading": "Erreur de chargement du contenu : {{error}}",
+    "dynamicAssessNotReady": "Cette évaluation n’est pas encore prête. Veuillez réessayer plus tard.",
     "missingIdentifier": "Identifiant de contenu manquant.",
     "failedToLoadMetadata": "Échec du chargement des métadonnées de contenu.",
     "backToWorkspace": "Retour à l'espace de travail",

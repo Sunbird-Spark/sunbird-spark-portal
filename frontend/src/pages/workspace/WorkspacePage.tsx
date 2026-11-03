@@ -36,9 +36,9 @@ const DYNAMIC_FORM_OPTIONS = ['quiz', 'story', 'textbook', 'collection'];
 const COLLECTION_FORM_OPTIONS = ['textbook', 'collection'];
 
 /** QuML editor option IDs */
-const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor', 'dynamic-assess-questionset'];
+const QUML_EDITOR_OPTIONS = ['question-set', 'question-editor'];
 
-/** Dynamic Assess QuestionSet: same QuML flow as 'question-set', created as Dynamic QuestionSet. */
+/** Dynamic Assess QuestionSet: same QuML flow as 'question-set', created as Dynamic QuestionSet; kept out of QUML_EDITOR_OPTIONS so branch order can't create it as a Practice Question Set. */
 const DYNAMIC_ASSESS_QUESTIONSET_OPTION = 'dynamic-assess-questionset';
 
 /** Dynamic Assess ECML: simple name dialog; skill/difficultyTarget are set in the editor after creation. */
@@ -389,7 +389,7 @@ const WorkspacePage = () => {
       return;
     }
     // Course, Learning Path, question-set, and Dynamic Assess options use the simple name dialog
-    if (SIMPLE_COLLECTION_OPTIONS.includes(optionId) || QUML_EDITOR_OPTIONS.includes(optionId) || DYNAMIC_ASSESS_ECML_OPTIONS.includes(optionId)) {
+    if (SIMPLE_COLLECTION_OPTIONS.includes(optionId) || QUML_EDITOR_OPTIONS.includes(optionId) || optionId === DYNAMIC_ASSESS_QUESTIONSET_OPTION || DYNAMIC_ASSESS_ECML_OPTIONS.includes(optionId)) {
       setSelectedOption(optionId);
       setShowNameDialog(true);
     } else if (GENERIC_EDITOR_OPTIONS.includes(optionId)) {
@@ -564,6 +564,9 @@ const WorkspacePage = () => {
         // The editor route needs a framework segment, so don't create content the editor couldn't open.
         if (!orgFramework) {
           toast({ title: t("workspace.errors.creationFailed"), description: t("workspace.errors.frameworkRequired"), variant: "destructive" });
+          // Retrying can't supply a framework, so close the dialog rather than invite repeat submits.
+          setShowNameDialog(false);
+          setSelectedOption(null);
           return;
         }
         await handleDynamicAssessEcmlCreate(name);

@@ -41,7 +41,7 @@ export const useQumlContent = (
         throw new Error(`Hierarchy payload missing questionset for ID: ${questionSetId}`);
       }
 
-      // Dynamic Assess: draw the learner's questions before fetching, so question/list (capped at 20 ids) only returns the drawn questions' content.
+      // Dynamic Assess: draw before fetching, so only the drawn questions' content is downloaded; the pool ids themselves are still visible in the hierarchy response.
       metadata = dynamicAssessForLearner(metadata, learnerId);
 
       // Collect all question IDs from hierarchy
@@ -63,8 +63,8 @@ export const useQumlContent = (
       // Fetch full question data (with body, responseDeclaration, interactions, etc.)
       let questionMap = new Map<string, any>();
       if (!_.isEmpty(questionIds)) {
-        // question/list accepts at most 20 ids per request, so a Dynamic learner set larger than that is fetched in batches; other sets keep the single request.
-        const batches = metadata?.primaryCategory === 'Dynamic QuestionSet' ? _.chunk(questionIds, QUESTION_LIST_LIMIT) : [questionIds];
+        // question/list accepts at most 20 ids per request, so larger sets are fetched in batches; 20 or fewer is still a single request.
+        const batches = _.chunk(questionIds, QUESTION_LIST_LIMIT);
         const responses = await Promise.all(batches.map((ids) => questionSetService.getQuestionList<any>(ids)));
         const questions = responses.flatMap((listResp) => _.get(listResp, 'result.questions') || _.get(listResp, 'questions', []));
 

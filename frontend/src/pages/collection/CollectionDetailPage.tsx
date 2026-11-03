@@ -17,7 +17,7 @@ import { useCollectionBackNavigation, useAuthRefreshOnce } from "./useCollection
 import CollectionDetailLayout from "./CollectionDetailLayout";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import "./collection.css";
-import { dynamicAssessForLearner } from "@/services/players/dynamicAssessSubset";
+import { useLearnerPlayerMetadata } from "@/hooks/useLearnerPlayerMetadata";
 
 const CollectionDetailPage = () => {
   const navigate = useNavigate();
@@ -106,12 +106,7 @@ const CollectionDetailPage = () => {
   const isQumlContent = selectedContentData?.mimeType === 'application/vnd.sunbird.questionset' ||
     selectedContentData?.mimeType === 'application/vnd.sunbird.question';
   const { data: qumlData, isLoading: qumlIsLoading, error: qumlError } = useQumlContent(contentId ?? '', { enabled: isQumlContent });
-  // Learners get their own Dynamic Assess draw from the published pool (useQumlContent already draws for QuestionSets); other content passes through unchanged.
-  const learnerId = userAuthInfoService.getUserId();
-  const rawPlayerMetadata = useMemo(
-    () => (isQumlContent ? qumlData : dynamicAssessForLearner(selectedContentData, learnerId)),
-    [isQumlContent, qumlData, selectedContentData, learnerId]
-  );
+  const { playerMetadata: rawPlayerMetadata, notReadyError } = useLearnerPlayerMetadata(selectedContentData, qumlData, isQumlContent);
 
   const { t } = useAppI18n();
 
@@ -138,7 +133,7 @@ const CollectionDetailPage = () => {
   });
 
   const playerIsLoading = contentId ? (isQumlContent ? qumlIsLoading : contentIsLoading) : false;
-  const playerError = isQumlContent ? qumlError : contentError;
+  const playerError = (isQumlContent ? qumlError : contentError) ?? notReadyError;
 
   const currentContentStatus = contentId ? contentStatusMap?.[contentId] : undefined;
   const { handlePlayerEvent, handleTelemetryEvent } = useCollectionDetailPlayer({

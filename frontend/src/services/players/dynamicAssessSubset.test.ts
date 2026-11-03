@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { pickForLearner, questionSetForLearner, ecmlForLearner, dynamicAssessForLearner } from './dynamicAssessSubset';
+import {
+  pickForLearner, questionSetForLearner, ecmlForLearner, dynamicAssessForLearner, poolMultiplier, isDynamicAssessUnavailable,
+} from './dynamicAssessSubset';
 
 const ids = (n: number, prefix: string) => Array.from({ length: n }, (_, i) => `${prefix}${i}`);
 
@@ -29,8 +31,8 @@ describe('questionSetForLearner', () => {
 
   it("keeps exactly the target per level for the learner, with the score matching (positive)", () => {
     const out = questionSetForLearner(qs, 'u1');
-    expect(out.children.filter((c: any) => c.difficultyLevel === 'EASY')).toHaveLength(1);
-    expect(out.children.filter((c: any) => c.difficultyLevel === 'MEDIUM')).toHaveLength(2);
+    // Literal ids for seed u1:do_qs (pool 3 EASY + 6 MEDIUM, target 1/2, multiplier 2), so a drifted draw fails here.
+    expect(out.children.map((c: any) => c.identifier)).toEqual(['e0', 'm3', 'm5']);
     expect(out.maxScore).toBe(3);
     expect(out.outcomeDeclaration.maxScore.defaultValue).toBe(3);
     expect(questionSetForLearner(qs, 'u1').children).toEqual(out.children);
@@ -40,17 +42,45 @@ describe('questionSetForLearner', () => {
     expect(questionSetForLearner({ ...qs, difficultyTarget: '{"E":1,"M":1,"D":0}' }, 'u1').children).toHaveLength(2);
   });
 
-  it('leaves non-Dynamic content and already-exact sets untouched (negative)', () => {
+  it('caps a level at what its pool supports, never returning an undersized pool whole (positive)', () => {
+    // Target 3/6 needs 6 EASY + 12 MEDIUM at multiplier 2; the pool holds 3 + 6, so the learner gets floor(3/2)=1 + floor(6/2)=3, like the editors.
+    const out = questionSetForLearner({ ...qs, difficultyTarget: { E: 3, M: 6, D: 0 } }, 'u1');
+    expect(out.children.map((c: any) => c.identifier)).toEqual(['e0', 'm1', 'm3', 'm5']);
+    expect(out.children.length).toBeLessThan(qs.children.length);
+  });
+
+  it("reads the set's own multiplier, falling back to 2 for missing or unusable values (positive/negative)", () => {
+    const medium3 = { ...qs, difficultyTarget: { E: 0, M: 3, D: 0 } };
+    expect(questionSetForLearner(medium3, 'u1').children).toHaveLength(3);
+    expect(questionSetForLearner({ ...medium3, multiplier: 3 }, 'u1').children).toHaveLength(2);
+    expect(questionSetForLearner({ ...medium3, multiplier: '0' }, 'u1').children).toHaveLength(3);
+  });
+
+  it('leaves non-Dynamic content untouched (negative)', () => {
     const plain = { ...qs, primaryCategory: 'Practice Question Set' };
     expect(questionSetForLearner(plain, 'u1')).toBe(plain);
-    const exact = { ...qs, difficultyTarget: { E: 3, M: 6, D: 0 } };
-    expect(questionSetForLearner(exact, 'u1')).toBe(exact);
   });
 
   it('plays nothing, never the pool, for a missing, zero or invalid target (positive)', () => {
     expect(questionSetForLearner({ ...qs, difficultyTarget: undefined }, 'u1').children).toEqual([]);
     expect(questionSetForLearner({ ...qs, difficultyTarget: { E: 0, M: 0, D: 0 } }, 'u1').children).toEqual([]);
     expect(questionSetForLearner({ ...qs, difficultyTarget: 'nope' }, 'u1').children).toEqual([]);
+  });
+
+  it('marks an empty draw unavailable, so the player never re-fetches the pool itself (positive)', () => {
+    // Target 1/1/1 from a pool of one per level: each level supports floor(1/2)=0, so the learner draws nothing.
+    const onePerLevel = { ...qs, difficultyTarget: { E: 1, M: 1, D: 1 }, children: [child('e0', 'EASY'), child('m0', 'MEDIUM'), child('d0', 'DIFFICULT')] };
+    const out: any = questionSetForLearner(onePerLevel, 'u1');
+    expect(out.children).toEqual([]);
+    expect(out.childNodes).toEqual([]);
+    expect(isDynamicAssessUnavailable(out)).toBe(true);
+    expect(isDynamicAssessUnavailable(questionSetForLearner({ ...qs, difficultyTarget: { E: 0, M: 0, D: 0 } }, 'u1'))).toBe(true);
+    expect(isDynamicAssessUnavailable(questionSetForLearner({ ...qs, children: [] }, 'u1'))).toBe(true);
+  });
+
+  it('does not mark a non-empty draw or a non-Dynamic set unavailable (negative)', () => {
+    expect(isDynamicAssessUnavailable(questionSetForLearner(qs, 'u1'))).toBe(false);
+    expect(isDynamicAssessUnavailable(questionSetForLearner({ ...qs, primaryCategory: 'Practice Question Set', children: [] }, 'u1'))).toBe(false);
   });
 
   it('drops non-question children such as sections instead of playing everything (positive)', () => {
@@ -72,6 +102,19 @@ describe('questionSetForLearner', () => {
     const out = questionSetForLearner(scored, 'u1');
     expect(out.maxScore).toBe(6);
     expect(out.maxQuestions).toBe(3);
+  });
+});
+
+describe('poolMultiplier', () => {
+  it('reads an integer >= 1 as a number or numeric string (positive)', () => {
+    expect(poolMultiplier({ multiplier: 3 })).toBe(3);
+    expect(poolMultiplier({ multiplier: '4' })).toBe(4);
+    expect(poolMultiplier({ multiplier: 2.9 })).toBe(2);
+  });
+
+  it('defaults to 2 when missing, below 1 or not a number (negative)', () => {
+    for (const multiplier of [undefined, 0, -1, '', 'abc', null]) expect(poolMultiplier({ multiplier })).toBe(2);
+    expect(poolMultiplier(undefined)).toBe(2);
   });
 });
 
@@ -102,6 +145,20 @@ describe('ecmlForLearner', () => {
     expect(ecmlForLearner(old, 'u1')).toBe(old);
   });
 
+  it('caps an undersized quiz pool, so a raised target never plays it whole (positive)', () => {
+    const body: any = quizBody(true);
+    body.theme.stage[0]['org.ekstep.questionset'][0].config.__cdata = JSON.stringify({ dynamic_assess: { target: { E: 3, M: 3, D: 0 }, levels } });
+    const out: any = ecmlForLearner({ identifier: 'do_ecml', primaryCategory: 'Dynamic Course Assessment', body }, 'u1');
+    expect(out.body.theme.stage[0]['org.ekstep.questionset'][0]['org.ekstep.question'].map((q: any) => q.id)).toEqual(['a1', 'b2']);
+  });
+
+  it("caps with the content's own multiplier (positive)", () => {
+    const out: any = ecmlForLearner({ ...content(), multiplier: 3 }, 'u1');
+    expect(JSON.parse(out.body).theme.stage[0]['org.ekstep.questionset'][0]['org.ekstep.question']).toHaveLength(2);
+    const tight: any = ecmlForLearner({ ...content(), multiplier: 4 }, 'u1');
+    expect(JSON.parse(tight.body).theme.stage[0]['org.ekstep.questionset'][0]['org.ekstep.question']).toEqual([]);
+  });
+
   it('plays nothing, never the pool, for a zero target (positive)', () => {
     const body: any = quizBody(true);
     body.theme.stage[0]['org.ekstep.questionset'][0].config.__cdata = JSON.stringify({ dynamic_assess: { target: { E: 0, M: 0, D: 0 }, levels } });
@@ -118,7 +175,15 @@ describe('ecmlForLearner — fail closed', () => {
       expect(out.artifactUrl).toBeUndefined();
       expect(out.streamingUrl).toBeUndefined();
       expect(out.body).toBeUndefined();
+      expect(isDynamicAssessUnavailable(out)).toBe(true);
     }
+  });
+
+  it('does not mark playable or non-Dynamic content as unavailable (negative)', () => {
+    const body = JSON.stringify({ theme: { stage: [] } });
+    expect(isDynamicAssessUnavailable(ecmlForLearner({ identifier: 'do_e', primaryCategory: 'Dynamic Course Assessment', body }, 'u1'))).toBe(false);
+    expect(isDynamicAssessUnavailable({ identifier: 'do_p', primaryCategory: 'Learning Resource' })).toBe(false);
+    expect(isDynamicAssessUnavailable(undefined)).toBe(false);
   });
 
   it('empties a quiz whose config cannot be read instead of playing it whole (positive)', () => {

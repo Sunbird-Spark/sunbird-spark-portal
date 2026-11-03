@@ -390,6 +390,7 @@
     "loadingEditor": "Carregando editor...",
     "notFound": "Conteúdo não encontrado",
     "errorLoading": "Erro ao carregar conteúdo: {{error}}",
+    "dynamicAssessNotReady": "Esta avaliação ainda não está pronta. Tente novamente mais tarde.",
     "missingIdentifier": "Identificador de conteúdo ausente.",
     "failedToLoadMetadata": "Falha ao carregar metadados do conteúdo.",
     "backToWorkspace": "Voltar para o espaço de trabalho",

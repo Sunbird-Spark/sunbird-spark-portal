@@ -390,6 +390,7 @@
     "loadingEditor": "Loading editor...",
     "notFound": "Content not found",
     "errorLoading": "Error loading content: {{error}}",
+    "dynamicAssessNotReady": "This assessment isn’t ready yet. Please try again later.",
     "missingIdentifier": "Missing content identifier.",
     "failedToLoadMetadata": "Failed to load content metadata.",
     "backToWorkspace": "Back to workspace",

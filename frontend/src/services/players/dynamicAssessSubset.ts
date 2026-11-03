@@ -7,6 +7,16 @@ const LEVELS = [['E', 'EASY'], ['M', 'MEDIUM'], ['D', 'DIFFICULT']] as const;
 type Target = { E: number; M: number; D: number };
 type AnyRecord = Record<string, any>;
 
+/** Default pool multiplier for content without its own; matches the backend's dynamicassess.multiplier default and the editors. */
+const DEFAULT_POOL_MULTIPLIER = 2;
+
+/** The content's own multiplier (an integer >= 1, stored by knowlg-service at create), else the default; same rule as the editors' dynamicAssessSettings. */
+export function poolMultiplier(metadata: AnyRecord | undefined): number {
+  const v = metadata?.multiplier;
+  const n = typeof v === 'number' ? v : typeof v === 'string' && v.trim() ? Number(v) : NaN;
+  return Number.isFinite(n) && Math.trunc(n) >= 1 ? Math.trunc(n) : DEFAULT_POOL_MULTIPLIER;
+}
+
 /** A missing or unparseable target reads as zero, so Dynamic content fails closed (draws nothing) rather than playing the pool. */
 function toTarget(value: unknown): Target {
   let raw: unknown = value;
@@ -58,25 +68,33 @@ export function pickForLearner(ids: string[], count: number, seed: string): stri
   return pool.slice(0, Math.max(0, count));
 }
 
-/** Picks the target count per level from `levelOf`; a level holding no more than its target keeps everything. */
-function pickByLevel(ids: string[], levelOf: (id: string) => string, target: Target, seed: string): Set<string> {
+/** Picks the target count per level from `levelOf`, capped at what a full pool of that size supports, exactly like the editors' preview. */
+function pickByLevel(ids: string[], levelOf: (id: string) => string, target: Target, multiplier: number, seed: string): Set<string> {
   const picked = new Set<string>();
   for (const [key, level] of LEVELS) {
     const atLevel = ids.filter((id) => levelOf(id).toUpperCase() === level);
-    pickForLearner(atLevel, target[key], `${seed}:${level}`).forEach((id) => picked.add(id));
+    // Without the cap an undersized pool (target raised, not regenerated, or mid-generation) would hit pickForLearner's whole-pool shortcut.
+    const count = Math.min(target[key], Math.floor(atLevel.length / multiplier));
+    pickForLearner(atLevel, count, `${seed}:${level}`).forEach((id) => picked.add(id));
   }
   return picked;
 }
+
+const UNAVAILABLE = 'dynamicAssessUnavailable';
+
+/** True for Dynamic content the draw had to blank because it has nothing playable yet. */
+export const isDynamicAssessUnavailable = (metadata: AnyRecord | null | undefined): boolean => metadata?.[UNAVAILABLE] === true;
 
 /** Dynamic QuestionSet: keep only this learner's questions (anything else, e.g. a section, is dropped so it can't carry pool questions), with scores to match. */
 export function questionSetForLearner<T extends AnyRecord | undefined>(metadata: T, learnerId: string): T {
   if (!metadata || metadata.primaryCategory !== DYNAMIC_QUESTIONSET) return metadata;
   const children: AnyRecord[] = Array.isArray(metadata.children) ? metadata.children : [];
-  if (children.length === 0) return metadata;
   const questions = children.filter(isQuestion);
   const levelById = new Map(questions.map((c) => [String(c.identifier), String(c.difficultyLevel ?? '')]));
-  const picked = pickByLevel([...levelById.keys()], (id) => levelById.get(id) ?? '', toTarget(metadata.difficultyTarget), `${learnerId}:${metadata.identifier}`);
+  const picked = pickByLevel([...levelById.keys()], (id) => levelById.get(id) ?? '', toTarget(metadata.difficultyTarget), poolMultiplier(metadata), `${learnerId}:${metadata.identifier}`);
   const selected = questions.filter((c) => picked.has(String(c.identifier)));
+  // Handed no questions, the QuML player re-fetches the full pool itself, so an empty draw is marked for the page's error state instead of played.
+  if (selected.length === 0) return { ...metadata, children: [], childNodes: [], [UNAVAILABLE]: true } as T;
   if (selected.length === children.length) return metadata;
   const maxScore = selected.reduce((sum, c) => sum + scoreOf(c), 0);
   return {
@@ -96,8 +114,8 @@ export function questionSetForLearner<T extends AnyRecord | undefined>(metadata:
 /** Dynamic Course Assessment: trim each generated quiz in the ECML body to this learner's questions. */
 export function ecmlForLearner<T extends AnyRecord | undefined>(metadata: T, learnerId: string): T {
   if (!metadata || metadata.primaryCategory !== DYNAMIC_ECML) return metadata;
-  // Without a readable body there is nothing to draw from, so drop the package URLs too: the renderer must not fall back to the full pool.
-  const unplayable = { ...metadata, body: undefined, artifactUrl: undefined, streamingUrl: undefined } as T;
+  // Without a readable body there is nothing to draw from, so drop the package URLs too (the renderer must not fall back to the full pool) and mark it for the page's error state.
+  const unplayable = { ...metadata, body: undefined, artifactUrl: undefined, streamingUrl: undefined, [UNAVAILABLE]: true } as T;
   if (!metadata.body) return unplayable;
   const isString = typeof metadata.body === 'string';
   let body: AnyRecord;
@@ -119,7 +137,7 @@ export function ecmlForLearner<T extends AnyRecord | undefined>(metadata: T, lea
       const questions: AnyRecord[] = ([] as AnyRecord[]).concat(quiz['org.ekstep.question'] ?? []);
       if (!block || questions.length === 0) continue;
       const levels: AnyRecord = block.levels ?? {};
-      const picked = pickByLevel(questions.map((q) => String(q.id)), (id) => String(levels[id] ?? ''), toTarget(block.target), `${learnerId}:${metadata.identifier}`);
+      const picked = pickByLevel(questions.map((q) => String(q.id)), (id) => String(levels[id] ?? ''), toTarget(block.target), poolMultiplier(metadata), `${learnerId}:${metadata.identifier}`);
       const kept = questions.filter((q) => picked.has(String(q.id)));
       if (kept.length === questions.length) continue;
       let items: AnyRecord[] = [];

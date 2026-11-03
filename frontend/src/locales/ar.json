@@ -390,6 +390,7 @@
     "loadingEditor": "جارٍ تحميل المحرر...",
     "notFound": "المحتوى غير موجود",
     "errorLoading": "خطأ في تحميل المحتوى: {{error}}",
+    "dynamicAssessNotReady": "هذا التقييم غير جاهز بعد. يرجى المحاولة مرة أخرى لاحقًا.",
     "missingIdentifier": "معرّف المحتوى مفقود.",
     "failedToLoadMetadata": "فشل تحميل بيانات المحتوى التعريفية.",
     "backToWorkspace": "العودة إلى مساحة العمل",

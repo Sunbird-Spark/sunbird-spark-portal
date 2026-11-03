@@ -135,6 +135,43 @@ describe('ContentPlayerPage', () => {
     expect(screen.getByText('content.errorLoading')).toBeInTheDocument();
   });
 
+  it('shows the error state, not a blank player, for Dynamic Assess ECML with nothing playable yet (positive)', () => {
+    mockUseContentRead.mockReturnValue({
+      data: { data: { content: { identifier: 'do_player_001', mimeType: 'application/vnd.ekstep.ecml-archive', primaryCategory: 'Dynamic Course Assessment', artifactUrl: 'https://cdn/x.ecar' } } },
+      isLoading: false,
+      error: null,
+    });
+    renderPage();
+    expect(screen.getByText('content.errorLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+  });
+
+  it('shows the error state, not the QuML player, for a Dynamic QuestionSet whose draw is empty (positive)', () => {
+    mockUseContentRead.mockReturnValue({
+      data: { data: { content: { identifier: 'do_player_001', mimeType: 'application/vnd.sunbird.questionset', primaryCategory: 'Dynamic QuestionSet' } } },
+      isLoading: false,
+      error: null,
+    });
+    mockUseQumlContent.mockReturnValue({
+      data: { identifier: 'do_player_001', mimeType: 'application/vnd.sunbird.questionset', primaryCategory: 'Dynamic QuestionSet', children: [], dynamicAssessUnavailable: true },
+      isLoading: false,
+      error: null,
+    });
+    renderPage();
+    expect(screen.getByText('content.errorLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('content-player')).not.toBeInTheDocument();
+  });
+
+  it('plays Dynamic Assess ECML that has a generated body (negative)', () => {
+    mockUseContentRead.mockReturnValue({
+      data: { data: { content: { identifier: 'do_player_001', mimeType: 'application/vnd.ekstep.ecml-archive', primaryCategory: 'Dynamic Course Assessment', body: '{"theme":{"stage":[]}}' } } },
+      isLoading: false,
+      error: null,
+    });
+    renderPage();
+    expect(screen.getByTestId('content-player')).toBeInTheDocument();
+  });
+
   it('shows not-found message when content is absent', () => {
     mockUseContentRead.mockReturnValue({
       data: { data: { content: null } },
