@@ -8,8 +8,9 @@ const mockNavigate = vi.fn();
 const mockToast = vi.fn();
 
 // Hoist useContentWithEnrichments mock so it can be overridden per test
-const { mockUseContentWithEnrichments } = vi.hoisted(() => ({
+const { mockUseContentWithEnrichments, mockUseQumlContent } = vi.hoisted(() => ({
   mockUseContentWithEnrichments: vi.fn(),
+  mockUseQumlContent: vi.fn(() => ({ data: null, isLoading: false, error: null })),
 }));
 
 vi.mock('@/hooks/useContentPlayer', () => ({
@@ -25,11 +26,7 @@ vi.mock('@/hooks/useContentWithEnrichments', () => ({
 }));
 
 vi.mock('@/hooks/useQumlContent', () => ({
-  useQumlContent: () => ({
-    data: null,
-    isLoading: false,
-    error: null,
-  }),
+  useQumlContent: (...args: any[]) => mockUseQumlContent(...(args as [])),
 }));
 
 vi.mock('@/hooks/useToast', () => ({
@@ -113,7 +110,9 @@ vi.mock('@/components/workspace/ReviewPageHeader', () => ({
 }));
 
 vi.mock('@/components/workspace/ReviewPlayerSection', () => ({
-  default: () => <div data-testid="review-player-section">Player Section</div>,
+  default: ({ playerMetadata }: any) => (
+    <div data-testid="review-player-section" data-body={typeof playerMetadata?.body === 'string' ? playerMetadata.body : ''}>Player Section</div>
+  ),
 }));
 
 vi.mock('@/components/workspace/ChecklistDialog', () => ({
@@ -368,5 +367,62 @@ describe('ContentViewPage - formatDate null path and navigation guard', () => {
 
     // The component should call navigate('/workspace', { replace: true }) and return null
     expect(mockNavigate).toHaveBeenCalledWith('/workspace', { replace: true });
+  });
+});
+
+describe('ContentViewPage - Dynamic Assess full pool by mode', () => {
+  const levels: Record<string, string> = { a1: 'EASY', a2: 'EASY', a3: 'EASY', a4: 'EASY', b1: 'MEDIUM', b2: 'MEDIUM', b3: 'MEDIUM', b4: 'MEDIUM' };
+  const body = JSON.stringify({
+    theme: { stage: [{ 'org.ekstep.questionset': [{
+      config: { __cdata: JSON.stringify({ dynamic_assess: { target: { E: 1, M: 1, D: 0 }, levels } }) },
+      data: { __cdata: JSON.stringify(Object.keys(levels).map((identifier) => ({ identifier }))) },
+      'org.ekstep.question': Object.keys(levels).map((id) => ({ id })),
+    }] }] },
+  });
+  const renderMode = (mode: 'view' | 'review') => render(
+    <QueryClientProvider client={new QueryClient()}>
+      <BrowserRouter><ContentViewPage mode={mode} /></BrowserRouter>
+    </QueryClientProvider>,
+  );
+  const playedQuestions = () => {
+    const played = screen.getByTestId('review-player-section').getAttribute('data-body') || '{}';
+    return JSON.parse(played).theme.stage[0]['org.ekstep.questionset'][0]['org.ekstep.question'].length;
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseContentWithEnrichments.mockReturnValue({
+      content: { ...defaultContentResponse.content, mimeType: 'application/vnd.ekstep.ecml-archive', primaryCategory: 'Dynamic Course Assessment', body },
+      isLoading: false,
+      error: null,
+    });
+  });
+  afterEach(() => cleanup());
+
+  it('plays the whole pool, not a learner draw, for a reviewer (positive)', () => {
+    renderMode('review');
+    expect(playedQuestions()).toBe(8);
+  });
+
+  it('plays the whole pool for the creator in view mode (positive)', () => {
+    renderMode('view');
+    expect(playedQuestions()).toBe(8);
+  });
+
+  it('asks useQumlContent for the full pool in both modes (positive)', () => {
+    renderMode('review');
+    renderMode('view');
+    for (const call of mockUseQumlContent.mock.calls as unknown as [string, { fullPool?: boolean }][]) expect(call[1]?.fullPool).toBe(true);
+    expect(mockUseQumlContent).toHaveBeenCalled();
+  });
+
+  it('still shows the not-ready error, not a blank player, for Dynamic ECML with nothing generated (negative)', () => {
+    mockUseContentWithEnrichments.mockReturnValue({
+      content: { ...defaultContentResponse.content, mimeType: 'application/vnd.ekstep.ecml-archive', primaryCategory: 'Dynamic Course Assessment', body: undefined },
+      isLoading: false,
+      error: null,
+    });
+    renderMode('view');
+    expect(screen.queryByTestId('review-player-section')).not.toBeInTheDocument();
   });
 });

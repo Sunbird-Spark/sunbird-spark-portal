@@ -15,6 +15,7 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import useImpression from "@/hooks/useImpression";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useLearnerPlayerMetadata } from "@/hooks/useLearnerPlayerMetadata";
 
 const ContentPlayerPage = () => {
   const { t } = useAppI18n();
@@ -48,10 +49,10 @@ const ContentPlayerPage = () => {
     error: qumlError 
   } = useQumlContent(contentId || '', { enabled: isQumlContent });
   
-  // Determine which data to use based on content type
-  const playerMetadata = isQumlContent ? qumlData : contentData;
+  // Determine which data to use based on content type; learners get their own Dynamic Assess draw.
+  const { playerMetadata, notReadyError } = useLearnerPlayerMetadata(contentData, qumlData, isQumlContent);
   const playerIsLoading = isQumlContent ? isQumlLoading : isLoading;
-  const playerError = isQumlContent ? qumlError : error;
+  const playerError = (isQumlContent ? qumlError : error) ?? notReadyError;
   
   // Search for related content based on mime type
   const { data: relatedContentData } = useContentSearch({
