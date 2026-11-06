@@ -1,9 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   ENRICHMENT_REGISTRY,
-  ENRICHMENT_TYPES,
   applyEnrichments,
-  enrichmentDefinitionsFor,
   enrichmentSearchFilter,
   enrichmentTypesForMime,
   knownEnrichmentTypes,
@@ -38,18 +36,10 @@ describe('enrichmentTypesForMime', () => {
 });
 
 describe('transcript definition', () => {
-  it('is the registered entry for Transcript', () => {
+  it('is the registered entry for Transcript, with its workspace filter label key', () => {
     expect(ENRICHMENT_REGISTRY).toContain(transcriptDefinition);
     expect(transcriptDefinition.type).toBe('Transcript');
-  });
-
-  it('carries the badge icon and tooltip key the workspace cards render', () => {
-    expect(transcriptDefinition.icon).toBeTypeOf('function');
-    expect(transcriptDefinition.labelKey).toBe('workspace.enrichmentLabels.Transcript');
-  });
-
-  it('is included in ENRICHMENT_TYPES, the set the workspace filter selects', () => {
-    expect(ENRICHMENT_TYPES).toEqual(['Transcript']);
+    expect(transcriptDefinition.filterLabelKey).toBe('workspace.enrichmentFilters.Transcript');
   });
 });
 
@@ -132,17 +122,5 @@ describe('enrichmentSearchFilter', () => {
 
   it('returns an empty fragment when nothing is selected (negative)', () => {
     expect(enrichmentSearchFilter([])).toEqual({});
-  });
-});
-
-describe('enrichmentDefinitionsFor', () => {
-  it('returns the registered definitions for the requested types', () => {
-    expect(enrichmentDefinitionsFor(['Transcript'])).toEqual([transcriptDefinition]);
-  });
-
-  it('drops unregistered types and returns nothing for an empty or missing list (negative)', () => {
-    expect(enrichmentDefinitionsFor(['Unknown'])).toEqual([]);
-    expect(enrichmentDefinitionsFor([])).toEqual([]);
-    expect(enrichmentDefinitionsFor(undefined)).toEqual([]);
   });
 });

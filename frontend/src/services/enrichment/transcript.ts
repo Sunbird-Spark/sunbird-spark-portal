@@ -1,4 +1,3 @@
-import { MdOutlineClosedCaption } from 'react-icons/md';
 import type { ContentData, PlayerTranscript } from '@/types/contentTypes';
 import type { EnrichmentObject, TranscriptObject } from '@/types/enrichmentTypes';
 import type { EnrichmentDefinition } from './registry';
@@ -26,8 +25,7 @@ function applyToContent(content: ContentData, objects: EnrichmentObject[]): Cont
 
 export const transcriptDefinition: EnrichmentDefinition = {
   type: 'Transcript',
-  icon: MdOutlineClosedCaption,
-  labelKey: 'workspace.enrichmentLabels.Transcript',
   mimeTypes: ['video/mp4', 'video/webm'],
+  filterLabelKey: 'workspace.enrichmentFilters.Transcript',
   applyToContent,
 };

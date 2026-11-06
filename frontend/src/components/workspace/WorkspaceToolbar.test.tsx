@@ -37,7 +37,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'workspace.typeFilters.content': 'Content',
         'workspace.typeFilters.quiz': 'Quiz',
         'workspace.typeFilters.collection': 'Collection',
-        'workspace.aiEnhancedFilter': 'AI-enhanced content',
+        'workspace.enrichmentFilters.Transcript': 'Transcript requested',
       };
       return translations[key] || key;
     },
@@ -209,19 +209,19 @@ describe('WorkspaceToolbar', () => {
 
   it('toggles an enrichment filter on click', () => {
     const { onEnrichmentFilterChange } = renderToolbar({ enrichmentFilter: [] });
-    fireEvent.click(screen.getByRole('button', { name: 'AI-enhanced content' }));
-    expect(onEnrichmentFilterChange).toHaveBeenCalledWith(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
+    expect(onEnrichmentFilterChange).toHaveBeenCalledWith('Transcript', true);
   });
 
   it('toggles an enrichment filter off when already active', () => {
     const { onEnrichmentFilterChange } = renderToolbar({ enrichmentFilter: ['Transcript'] });
-    fireEvent.click(screen.getByRole('button', { name: 'AI-enhanced content' }));
-    expect(onEnrichmentFilterChange).toHaveBeenCalledWith(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
+    expect(onEnrichmentFilterChange).toHaveBeenCalledWith('Transcript', false);
   });
 
   it('hides the enrichment filters when activeView is create (negative)', () => {
     renderToolbar({ activeView: 'create' });
-    expect(screen.queryByRole('button', { name: 'AI-enhanced content' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Transcript requested' })).not.toBeInTheDocument();
   });
 
   it('shows stats row only for creator with content filters and displays counts', () => {

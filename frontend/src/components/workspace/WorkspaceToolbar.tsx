@@ -28,7 +28,7 @@ interface WorkspaceToolbarProps {
   typeFilter: ContentTypeFilter;
   onTypeFilterChange: (filter: ContentTypeFilter) => void;
   enrichmentFilter: string[];
-  onEnrichmentFilterChange: (on: boolean) => void;
+  onEnrichmentFilterChange: (type: string, on: boolean) => void;
   contentCount?: number;
   totalCount?: number;
   onCreateClick: () => void;

@@ -587,8 +587,7 @@
     "roleCreator": "Criador",
     "roleReviewer": "Revisor",
     "more": "Mais",
-    "aiEnhancedFilter": "Conteúdo aprimorado por IA",
-    "enrichmentLabels": {
+    "enrichmentFilters": {
       "Transcript": "Transcrições"
     },
     "searchPlaceholder": "Pesquisar conteúdo...",

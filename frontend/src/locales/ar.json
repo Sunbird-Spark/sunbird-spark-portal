@@ -587,8 +587,7 @@
     "roleCreator": "منشئ",
     "roleReviewer": "مراجع",
     "more": "المزيد",
-    "aiEnhancedFilter": "محتوى معزز بالذكاء الاصطناعي",
-    "enrichmentLabels": {
+    "enrichmentFilters": {
       "Transcript": "النصوص"
     },
     "searchPlaceholder": "البحث في المحتوى...",

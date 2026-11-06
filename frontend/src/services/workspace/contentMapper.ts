@@ -1,5 +1,4 @@
 import type { ContentSearchItem, WorkspaceItem } from '../../types/workspaceTypes';
-import { knownEnrichmentTypes } from '../enrichment/registry';
 
 const STATUS_MAP: Record<string, WorkspaceItem['status']> = {
   Draft: 'draft',
@@ -19,7 +18,6 @@ const TYPE_MAP: Record<string, WorkspaceItem['type']> = {
 };
 
 export function mapContentToWorkspaceItem(item: ContentSearchItem): WorkspaceItem {
-  const enrichmentTypes = knownEnrichmentTypes(item.enrichmentTypes ?? []);
   return {
     id: item.identifier,
     title: item.name ?? 'Untitled',
@@ -35,6 +33,5 @@ export function mapContentToWorkspaceItem(item: ContentSearchItem): WorkspaceIte
     mimeType: item.mimeType ?? '',
     framework: item.framework ?? '',
     contentStatus: item.status ?? '',
-    enrichmentTypes: enrichmentTypes.length ? enrichmentTypes : undefined,
   };
 }

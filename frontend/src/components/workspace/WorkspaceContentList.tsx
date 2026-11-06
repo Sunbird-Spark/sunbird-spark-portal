@@ -17,15 +17,12 @@ import {
 } from "@/services/workspace";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import CardThumbnailBackground from "./CardThumbnailBackground";
-import EnrichmentIcons from "./EnrichmentIcons";
 import { getCategoryLabel } from "@/utils/i18nUtils";
 
 interface WorkspaceContentListProps {
   items: WorkspaceItem[];
   userRole?: UserRole;
   lockedContentMap?: Record<string, { creatorName: string }>;
-  /** Enrichment types each content has Live, by content id - one badge each. */
-  enrichmentsById?: Record<string, readonly string[]>;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
@@ -35,7 +32,6 @@ const WorkspaceContentList = ({
   items,
   userRole,
   lockedContentMap = {},
-  enrichmentsById = {},
   onEdit,
   onDelete,
   onView,
@@ -81,12 +77,9 @@ const WorkspaceContentList = ({
                   )}
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <h4 className="font-medium text-foreground text-sm font-rubik truncate">
-                      {item.title}
-                    </h4>
-                    <EnrichmentIcons types={enrichmentsById[item.id]} />
-                  </div>
+                  <h4 className="font-medium text-foreground text-sm font-rubik truncate">
+                    {item.title}
+                  </h4>
                   <p className="text-xs text-muted-foreground font-rubik truncate sm:hidden">
                     {categoryLabel}
                   </p>

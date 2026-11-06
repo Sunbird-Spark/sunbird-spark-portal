@@ -14,12 +14,11 @@ import { useUserRead } from "@/hooks/useUserRead";
 import { useToast } from "@/hooks/useToast";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import { useEnrichmentAvailability } from "@/hooks/useEnrichmentAvailability";
 import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
 import { useQuestionSetRetire } from "@/hooks/useQuestionSetRetire";
 import { lockService, type LockListItem } from "@/services/LockService";
 import userProfileService from "@/services/UserProfileService";
-import { ENRICHMENT_TYPES, knownEnrichmentTypes } from "@/services/enrichment/registry";
+import { knownEnrichmentTypes } from "@/services/enrichment/registry";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
 import ContentNameDialog from "./ContentNameDialog";
@@ -322,13 +321,6 @@ const WorkspacePage = () => {
     () => contents.filter((content) => !retiredContentIds.includes(content.id)),
     [contents, retiredContentIds],
   );
-
-  // Badges for the AI-enhanced view: only content that requested an enrichment can have one Live.
-  const enrichmentCandidateIds = useMemo(
-    () => visibleContents.filter((content) => content.enrichmentTypes?.length).map((content) => content.id),
-    [visibleContents],
-  );
-  const enrichmentsById = useEnrichmentAvailability(enrichmentCandidateIds, enrichmentFilter.length > 0);
 
   // Memoize content IDs to prevent unnecessary lock list API calls
   const visibleContentIds = useMemo(
@@ -641,9 +633,14 @@ const WorkspacePage = () => {
     setTypeFilter(type);
   };
 
-  const handleEnrichmentFilterChange = (on: boolean) => {
-    interact({ id: 'workspace-enrichment-filter', type: 'CLICK', pageid: 'workspace', cdata: [{ id: String(on), type: 'EnrichmentFilter' }] });
-    setEnrichmentFilter(on ? [...ENRICHMENT_TYPES] : []);
+  const handleEnrichmentFilterChange = (type: string, on: boolean) => {
+    interact({
+      id: 'workspace-enrichment-filter',
+      type: 'CLICK',
+      pageid: 'workspace',
+      cdata: [{ id: type, type: 'EnrichmentFilter' }, { id: String(on), type: 'EnrichmentFilterState' }],
+    });
+    setEnrichmentFilter((prev) => (on ? (prev.includes(type) ? prev : [...prev, type]) : prev.filter((t) => t !== type)));
   };
 
   const handleViewChange = (view: WorkspaceView) => {
@@ -701,7 +698,6 @@ const WorkspacePage = () => {
               error={error}
               userRole={userRole}
               lockedContentMap={lockedContentMap}
-              enrichmentsById={enrichmentsById}
               onLoadMore={loadMore}
               onRetry={refetchAll}
               onCreateOption={handleCreateOption}
