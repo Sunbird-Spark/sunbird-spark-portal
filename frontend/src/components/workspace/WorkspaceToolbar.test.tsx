@@ -37,7 +37,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'workspace.typeFilters.content': 'Content',
         'workspace.typeFilters.quiz': 'Quiz',
         'workspace.typeFilters.collection': 'Collection',
-        'workspace.hasTranscripts': 'Transcripts',
+        'workspace.enrichmentLabels.Transcript': 'Transcripts',
       };
       return translations[key] || key;
     },
@@ -89,14 +89,14 @@ const renderToolbar = (overrides?: Partial<{
   counts: typeof baseCounts;
   hasCreatorRole: boolean;
   hasReviewerRole: boolean;
-  transcriptFilter: boolean;
+  enrichmentFilter: string[];
 }>) => {
   const onViewChange = vi.fn();
   const onSecondaryActionChange = vi.fn();
   const onRoleChange = vi.fn();
   const onViewModeChange = vi.fn();
   const onTypeFilterChange = vi.fn();
-  const onTranscriptFilterChange = vi.fn();
+  const onEnrichmentFilterChange = vi.fn();
   const onCreateClick = vi.fn();
 
   const props = {
@@ -106,7 +106,7 @@ const renderToolbar = (overrides?: Partial<{
     counts: baseCounts,
     viewMode: 'grid' as ViewMode,
     typeFilter: 'all' as ContentTypeFilter,
-    transcriptFilter: false,
+    enrichmentFilter: [] as string[],
     contentCount: 5,
     hasCreatorRole: true,
     hasReviewerRole: true,
@@ -115,7 +115,7 @@ const renderToolbar = (overrides?: Partial<{
     onRoleChange,
     onViewModeChange,
     onTypeFilterChange,
-    onTranscriptFilterChange,
+    onEnrichmentFilterChange,
     onCreateClick,
     searchQuery: '',
     onSearchChange: vi.fn(),
@@ -125,7 +125,7 @@ const renderToolbar = (overrides?: Partial<{
   render(<WorkspaceToolbar {...props} />);
   return {
     ...props, onViewChange, onSecondaryActionChange, onRoleChange, onViewModeChange,
-    onTypeFilterChange, onTranscriptFilterChange, onCreateClick,
+    onTypeFilterChange, onEnrichmentFilterChange, onCreateClick,
   };
 };
 
@@ -207,19 +207,19 @@ describe('WorkspaceToolbar', () => {
     expect(screen.queryByText(/All Types/)).not.toBeInTheDocument();
   });
 
-  it('toggles the Has Transcripts filter on click', () => {
-    const { onTranscriptFilterChange } = renderToolbar({ transcriptFilter: false });
+  it('toggles an enrichment filter on click', () => {
+    const { onEnrichmentFilterChange } = renderToolbar({ enrichmentFilter: [] });
     fireEvent.click(screen.getByRole('button', { name: 'Transcripts' }));
-    expect(onTranscriptFilterChange).toHaveBeenCalledWith(true);
+    expect(onEnrichmentFilterChange).toHaveBeenCalledWith('Transcript', true);
   });
 
-  it('toggles the Has Transcripts filter off when already active', () => {
-    const { onTranscriptFilterChange } = renderToolbar({ transcriptFilter: true });
+  it('toggles an enrichment filter off when already active', () => {
+    const { onEnrichmentFilterChange } = renderToolbar({ enrichmentFilter: ['Transcript'] });
     fireEvent.click(screen.getByRole('button', { name: 'Transcripts' }));
-    expect(onTranscriptFilterChange).toHaveBeenCalledWith(false);
+    expect(onEnrichmentFilterChange).toHaveBeenCalledWith('Transcript', false);
   });
 
-  it('hides the Has Transcripts filter when activeView is create (negative)', () => {
+  it('hides the enrichment filters when activeView is create (negative)', () => {
     renderToolbar({ activeView: 'create' });
     expect(screen.queryByRole('button', { name: 'Transcripts' })).not.toBeInTheDocument();
   });

@@ -2,6 +2,7 @@ import { useMemo, useCallback, useRef, useEffect } from 'react';
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { ContentService } from '@/services/ContentService';
 import { mapContentToWorkspaceItem } from '@/services/workspace';
+import { enrichmentSearchFilter } from '@/services/enrichment/registry';
 import type {
   WorkspaceView,
   SortOption,
@@ -21,6 +22,9 @@ import {
 } from '@/pages/workspace/workspaceConstants';
 
 const contentService = new ContentService();
+
+// Stable default so an omitted option doesn't change the callback/query identity every render.
+const NO_ENRICHMENT_FILTER: readonly string[] = [];
 
 /** Derive the `sort_by` object from a UI sort option. */
 function buildSortBy(sortBy: SortOption): Record<string, string> {
@@ -53,8 +57,8 @@ interface UseWorkspaceOptions {
   isBookReviewerOnly?: boolean;
   /** Secondary action view (Uploads/Collaborations) merged on top of segment tab filters. */
   secondaryView?: WorkspaceView | null;
-  /** When true, restrict results to content with enrichment data (e.g. transcripts). */
-  transcriptFilter?: boolean;
+  /** Enrichment types (e.g. 'Transcript') the content must have requested, via `Content.enrichmentTypes`; empty means no restriction. */
+  enrichmentFilter?: readonly string[];
 }
 
 /**
@@ -80,7 +84,7 @@ export function useWorkspace({
   isBookCreatorOnly = false,
   isBookReviewerOnly = false,
   secondaryView = null,
-  transcriptFilter = false,
+  enrichmentFilter = NO_ENRICHMENT_FILTER,
 }: UseWorkspaceOptions): UseWorkspaceReturn {
   const queryClient = useQueryClient();
   const isContentTab = !['create'].includes(activeTab);
@@ -104,10 +108,9 @@ export function useWorkspace({
   // Both modes use facets (limit=1) for lightweight counting.
   // Creator mode: scoped to the user's own content.
   // Reviewer mode: uses createdBy != to exclude the reviewer's own content directly.
-  // typeFilter/transcriptFilter are included so tab badges and stats stay consistent
-  // with the filtered content list rather than showing unfiltered totals.
+  // typeFilter is included so tab badges and stats update when a type is selected.
   const countsQuery = useQuery({
-    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter, searchQuery, secondaryView, transcriptFilter],
+    queryKey: ['workspace-counts', userId, userRole, orgId, typeFilter, searchQuery, secondaryView, enrichmentFilter],
     queryFn: () =>
       contentService.contentSearch({
         filters: {
@@ -115,12 +118,12 @@ export function useWorkspace({
           ...(isReviewerMode && orgId ? { createdFor: [orgId] } : {}),
           status: [...WORKSPACE_STATUS_FILTER],
           primaryCategory: primaryCategoryFilter,
+          ...enrichmentSearchFilter(enrichmentFilter),
         },
         query: searchQuery,
         facets: ['status'],
         limit: 1,
         offset: 0,
-        ...(transcriptFilter ? { exists: ['enrichment'] } : {}),
       }),
     enabled: queryEnabled,
     staleTime: 0,
@@ -150,6 +153,8 @@ export function useWorkspace({
       ...(isReviewerTab && orgId ? { createdFor: [orgId] } : {}),
       status: statusFilter,
       primaryCategory: primaryCategoryFilter,
+      // ANDs with the tab's status, so Drafts stays Drafts and the reviewer queue is not widened.
+      ...enrichmentSearchFilter(enrichmentFilter),
     };
 
     if (secondaryView === 'uploads') {
@@ -173,15 +178,11 @@ export function useWorkspace({
       baseFilters.objectType = 'Content';
     }
 
-    // transcriptFilter deliberately does NOT touch status - exists: ['enrichment'] (added
-    // below) ANDs with whatever status the active tab/secondary view already narrowed to,
-    // so "Has Transcripts" on Drafts still only shows Drafts, and the reviewer queue's
-    // createdBy-scoped, status-narrowed filter isn't widened into leaking other users' drafts.
     return baseFilters;
-  }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, secondaryView]);
+  }, [isReviewerTab, userId, orgId, statusFilter, primaryCategoryFilter, secondaryView, enrichmentFilter]);
 
   const contentQuery = useInfiniteQuery<ApiResponse<ContentSearchResponse>, Error>({
-    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery, secondaryView, transcriptFilter],
+    queryKey: ['workspace-content', userId, activeTab, sortBy, typeFilter, userRole, orgId, searchQuery, secondaryView, enrichmentFilter],
     queryFn: ({ pageParam }) =>
       contentService.contentSearch({
         filters: getFiltersForTab(),
@@ -189,7 +190,6 @@ export function useWorkspace({
         limit: WORKSPACE_PAGE_LIMIT,
         offset: pageParam as number,
         sort_by: buildSortBy(sortBy),
-        ...(transcriptFilter ? { exists: ['enrichment'] } : {}),
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {

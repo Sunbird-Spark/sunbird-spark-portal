@@ -45,24 +45,6 @@ describe('ContentService', () => {
     );
   });
 
-  it('forwards exists to the composite search request when provided', async () => {
-    mockClient.post = vi.fn().mockResolvedValue({ data: { content: [] }, status: 200, headers: {} });
-    await service.contentSearch({ filters: { objectType: 'Content' }, exists: ['enrichment'] });
-    expect(mockClient.post).toHaveBeenCalledWith(
-      '/composite/v1/search',
-      expect.objectContaining({
-        request: expect.objectContaining({ exists: ['enrichment'] }),
-      })
-    );
-  });
-
-  it('omits exists from the composite search request when not provided (negative)', async () => {
-    mockClient.post = vi.fn().mockResolvedValue({ data: { content: [] }, status: 200, headers: {} });
-    await service.contentSearch({ sort_by: { lastUpdatedOn: 'desc' } });
-    const body = (mockClient.post as any).mock.calls[0][1];
-    expect(body.request.exists).toBeUndefined();
-  });
-
   describe('semanticSearch', () => {
     it('posts to /composite/v1/search with search_mode: semantic', async () => {
       mockClient.post = vi.fn().mockResolvedValue({ data: { content: [] }, status: 200, headers: {} });
@@ -108,6 +90,32 @@ describe('ContentService', () => {
     expect(callUrl).toContain('artifactUrl');
   });
 
+  it('requests enrichmentTypes among the default read fields', async () => {
+    mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+    await service.contentRead('do_123');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callUrl = (mockClient as any).get.mock.calls[0][0] as string;
+    expect(callUrl).toContain('enrichmentTypes');
+  });
+
+  it('never adds an enrich param to the content read URL (negative)', async () => {
+    mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+    await service.contentRead('do_123', undefined, 'edit');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callUrl = (mockClient as any).get.mock.calls[0][0] as string;
+    expect(callUrl).toContain('mode=edit');
+    expect(callUrl).not.toContain('enrich=');
+  });
+
+  it('passes filters.enrichmentTypes through to the search body and sends no exists field', async () => {
+    mockClient.post = vi.fn().mockResolvedValue({ data: { content: [] }, status: 200, headers: {} });
+    await service.contentSearch({ filters: { objectType: 'Content', enrichmentTypes: ['Transcript'] } });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const body = (mockClient as any).post.mock.calls[0][1];
+    expect(body.request.filters).toEqual({ objectType: 'Content', enrichmentTypes: ['Transcript'] });
+    expect(body.request).not.toHaveProperty('exists');
+  });
+
   it('should call contentRead with custom fields when provided', async () => {
     mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
     await service.contentRead('do_456', ['name', 'description']);
@@ -118,87 +126,6 @@ describe('ContentService', () => {
     mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
     await service.contentRead('do_789', []);
     expect(mockClient.get).toHaveBeenCalledWith('/content/v1/read/do_789');
-  });
-
-  describe('contentRead enrichTranscripts', () => {
-    it('does not add enrich=all when enrichTranscripts is false', async () => {
-      mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
-      await service.contentRead('do_100', [], undefined, false);
-      expect(mockClient.get).toHaveBeenCalledWith('/content/v1/read/do_100');
-    });
-
-    it('adds enrich=all when enrichTranscripts is true', async () => {
-      mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
-      await service.contentRead('do_101', [], undefined, true);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const callUrl = (mockClient as any).get.mock.calls[0][0] as string;
-      expect(callUrl).toContain('/content/v1/read/do_101');
-      expect(callUrl).toContain('enrich=all');
-    });
-
-    it('maps enrichment.transcripts to content.transcripts, filtering out non-Live and captionsUrl-less entries', async () => {
-      mockClient.get = vi.fn().mockResolvedValue({
-        data: {
-          content: {
-            enrichment: {
-              transcripts: [
-                { code: 'c_en', language: 'English', languageCode: 'en', captionsUrl: 'https://x/en.vtt', sourceLanguage: true, status: 'Live' },
-                { code: 'c_fr', language: 'French', languageCode: 'fr', captionsUrl: 'https://x/fr.vtt', status: 'Draft' },
-                { code: 'c_pt', language: 'Portuguese', languageCode: 'pt', status: 'Live' },
-              ],
-            },
-          },
-        },
-        status: 200,
-        headers: {},
-      });
-      const response = await service.contentRead('do_102', [], undefined, true);
-      expect(response.data.content.transcripts).toEqual([
-        {
-          language: 'English',
-          identifier: 'c_en',
-          languageCode: 'en',
-          artifactUrl: 'https://x/en.vtt',
-          wordByWordUrl: 'https://x/en.vtt',
-          sourceLanguage: true,
-        },
-      ]);
-    });
-
-    it('leaves content.transcripts untouched when enrichment is missing', async () => {
-      mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
-      const response = await service.contentRead('do_103', [], undefined, true);
-      expect(response.data.content.transcripts).toBeUndefined();
-    });
-
-    it('does not clobber an existing raw content.transcripts when mapping yields nothing', async () => {
-      mockClient.get = vi.fn().mockResolvedValue({
-        data: { content: { transcripts: [{ some: 'raw-shape' }] } },
-        status: 200,
-        headers: {},
-      });
-      const response = await service.contentRead('do_104', [], undefined, true);
-      expect(response.data.content.transcripts).toEqual([{ some: 'raw-shape' }]);
-    });
-
-    it('treats a missing status as Live and normalizes case', async () => {
-      mockClient.get = vi.fn().mockResolvedValue({
-        data: {
-          content: {
-            enrichment: {
-              transcripts: [
-                { code: 'c_en', language: 'English', languageCode: 'en', captionsUrl: 'https://x/en.vtt' },
-                { code: 'c_hi', language: 'Hindi', languageCode: 'hi', captionsUrl: 'https://x/hi.vtt', status: 'live' },
-              ],
-            },
-          },
-        },
-        status: 200,
-        headers: {},
-      });
-      const response = await service.contentRead('do_105', [], undefined, true);
-      expect(response.data.content.transcripts).toHaveLength(2);
-    });
   });
 
   describe('contentPublish', () => {

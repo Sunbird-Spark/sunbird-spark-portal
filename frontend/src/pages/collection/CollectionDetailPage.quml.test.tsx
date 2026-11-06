@@ -47,7 +47,7 @@ const mockCollectionData = {
 
 const mockUseCollection = vi.fn();
 const mockUseContentSearch = vi.fn();
-const mockUseContentRead = vi.fn();
+const mockUseContentWithEnrichments = vi.fn();
 const mockUseQumlContent = vi.fn();
 
 vi.mock('@/hooks/useCollection', () => ({
@@ -73,9 +73,12 @@ const mockEnrollment = {
 vi.mock('@/hooks/useCollectionEnrollment', () => ({
   useCollectionEnrollment: () => mockEnrollment,
 }));
+vi.mock('@/hooks/useContentWithEnrichments', () => ({
+  useContentWithEnrichments: (id: string) => mockUseContentWithEnrichments(id),
+}));
+
 vi.mock('@/hooks/useContent', () => ({
   useContentSearch: (opts: { request?: object; enabled?: boolean }) => mockUseContentSearch(opts),
-  useContentRead: (id: string) => mockUseContentRead(id),
 }));
 vi.mock('@/hooks/useQumlContent', () => ({
   useQumlContent: (id: string, opts?: { enabled?: boolean }) => mockUseQumlContent(id, opts),
@@ -207,7 +210,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
     vi.mocked(userAuthInfoService.isUserAuthenticated).mockReturnValue(false);
     mockUseCollection.mockReturnValue({ data: mockCollectionData, isLoading: false });
     mockUseContentSearch.mockReturnValue({ data: { data: { content: [] } }, isLoading: false });
-    mockUseContentRead.mockReturnValue({ data: null, isLoading: false, error: null });
+    mockUseContentWithEnrichments.mockReturnValue({ content: undefined, isLoading: false, error: null });
     mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: null });
   });
 
@@ -222,7 +225,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
           },
         },
       };
-      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: null });
+      mockUseContentWithEnrichments.mockReturnValue({ content: questionSetContent.data.content, isLoading: false, error: null });
       renderWithProviders(<CollectionDetailPage />);
       expect(mockUseQumlContent).toHaveBeenCalledWith('l1', { enabled: true });
     });
@@ -237,7 +240,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
           },
         },
       };
-      mockUseContentRead.mockReturnValue({ data: questionContent, isLoading: false, error: null });
+      mockUseContentWithEnrichments.mockReturnValue({ content: questionContent.data.content, isLoading: false, error: null });
       renderWithProviders(<CollectionDetailPage />);
       expect(mockUseQumlContent).toHaveBeenCalledWith('l1', { enabled: true });
     });
@@ -252,7 +255,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
           },
         },
       };
-      mockUseContentRead.mockReturnValue({ data: videoContent, isLoading: false, error: null });
+      mockUseContentWithEnrichments.mockReturnValue({ content: videoContent.data.content, isLoading: false, error: null });
       renderWithProviders(<CollectionDetailPage />);
       expect(mockUseQumlContent).toHaveBeenCalledWith('l1', { enabled: false });
     });
@@ -273,7 +276,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
         mimeType: 'application/vnd.sunbird.questionset',
         children: [{ identifier: 'q1-1', body: 'Question 1' }],
       };
-      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: null });
+      mockUseContentWithEnrichments.mockReturnValue({ content: questionSetContent.data.content, isLoading: false, error: null });
       mockUseQumlContent.mockReturnValue({ data: qumlMetadata, isLoading: false, error: null });
       
       renderWithProviders(<CollectionDetailPage />);
@@ -291,7 +294,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
           },
         },
       };
-      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: null });
+      mockUseContentWithEnrichments.mockReturnValue({ content: questionSetContent.data.content, isLoading: false, error: null });
       mockUseQumlContent.mockReturnValue({ data: null, isLoading: true, error: null });
       
       renderWithProviders(<CollectionDetailPage />);
@@ -310,7 +313,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
           },
         },
       };
-      mockUseContentRead.mockReturnValue({ data: videoContent, isLoading: false, error: null });
+      mockUseContentWithEnrichments.mockReturnValue({ content: videoContent.data.content, isLoading: false, error: null });
       mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: null });
       
       renderWithProviders(<CollectionDetailPage />);
@@ -322,7 +325,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
   describe('Error handling', () => {
     it('passes contentError to CollectionOverview when non-QUML content fails to load', () => {
       const error = new Error('Failed to load content');
-      mockUseContentRead.mockReturnValue({ data: null, isLoading: false, error });
+      mockUseContentWithEnrichments.mockReturnValue({ content: undefined, isLoading: false, error });
       mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: null });
       
       renderWithProviders(<CollectionDetailPage />);
@@ -341,7 +344,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
         },
       };
       const qumlError = new Error('Failed to load QUML data');
-      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: null });
+      mockUseContentWithEnrichments.mockReturnValue({ content: questionSetContent.data.content, isLoading: false, error: null });
       mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: qumlError });
       
       renderWithProviders(<CollectionDetailPage />);
@@ -361,7 +364,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
       };
       const contentError = new Error('Content error');
       const qumlError = new Error('QUML error');
-      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: contentError });
+      mockUseContentWithEnrichments.mockReturnValue({ content: questionSetContent.data.content, isLoading: false, error: contentError });
       mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: qumlError });
       
       renderWithProviders(<CollectionDetailPage />);
@@ -380,7 +383,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
           },
         },
       };
-      mockUseContentRead.mockReturnValue({ data: videoContent, isLoading: false, error: null });
+      mockUseContentWithEnrichments.mockReturnValue({ content: videoContent.data.content, isLoading: false, error: null });
       mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: null });
       
       renderWithProviders(<CollectionDetailPage />);
@@ -399,7 +402,7 @@ describe('CollectionDetailPage - QUML Content & Error Handling', () => {
         },
       };
       const qumlError = new Error('Failed to load QUML data');
-      mockUseContentRead.mockReturnValue({ data: questionSetContent, isLoading: false, error: null });
+      mockUseContentWithEnrichments.mockReturnValue({ content: questionSetContent.data.content, isLoading: false, error: null });
       mockUseQumlContent.mockReturnValue({ data: null, isLoading: false, error: qumlError });
       
       renderWithProviders(<CollectionDetailPage />);

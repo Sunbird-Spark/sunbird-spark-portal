@@ -14,10 +14,12 @@ import { useUserRead } from "@/hooks/useUserRead";
 import { useToast } from "@/hooks/useToast";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useEnrichmentAvailability } from "@/hooks/useEnrichmentAvailability";
 import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
 import { useQuestionSetRetire } from "@/hooks/useQuestionSetRetire";
 import { lockService, type LockListItem } from "@/services/LockService";
 import userProfileService from "@/services/UserProfileService";
+import { knownEnrichmentTypes } from "@/services/enrichment/registry";
 import WorkspacePageContent from "./WorkspacePageContent";
 import CreateContentModal from "./CreateContentModal";
 import ContentNameDialog from "./ContentNameDialog";
@@ -28,6 +30,10 @@ import "./workspace.css";
 import { QumlEditor } from "@/components/quml-editor";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import useInteract from "@/hooks/useInteract";
+
+/** `?enrichment=Transcript,...` -> the registered enrichment types it names; unknown values are dropped. */
+const parseEnrichmentParam = (value: string | null): string[] =>
+  knownEnrichmentTypes((value ?? '').split(',').filter(Boolean));
 
 // Option IDs that use the dynamic form dialog for content creation
 const DYNAMIC_FORM_OPTIONS = ['quiz', 'story', 'textbook', 'collection'];
@@ -218,7 +224,7 @@ const WorkspacePage = () => {
       ? (type as ContentTypeFilter)
       : 'all';
   });
-  const [transcriptFilter, setTranscriptFilter] = useState(() => searchParams.get('transcripts') === '1');
+  const [enrichmentFilter, setEnrichmentFilter] = useState<string[]>(() => parseEnrichmentParam(searchParams.get('enrichment')));
 
   // Local state for responsive typing; debounced value drives API + URL.
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
@@ -245,7 +251,7 @@ const WorkspacePage = () => {
     }, { replace: true });
   }, [debouncedSearch, setSearchParams]);
 
-  // Sync typeFilter, activeView, secondaryView, transcriptFilter from URL on back/forward
+  // Sync typeFilter, activeView, secondaryView, enrichmentFilter from URL on back/forward
   useEffect(() => {
     const urlType = searchParams.get('type');
     if (urlType && ['all', 'course', 'content', 'quiz', 'collection'].includes(urlType)) {
@@ -257,10 +263,11 @@ const WorkspacePage = () => {
     }
     const urlMore = searchParams.get('more');
     setSecondaryView(urlMore === 'uploads' || urlMore === 'collaborations' ? (urlMore as WorkspaceView) : null);
-    setTranscriptFilter(searchParams.get('transcripts') === '1');
+    const urlEnrichment = parseEnrichmentParam(searchParams.get('enrichment'));
+    setEnrichmentFilter((prev) => (prev.join(',') === urlEnrichment.join(',') ? prev : urlEnrichment));
   }, [searchParams]);
 
-  // Sync typeFilter, activeView, secondaryView, transcriptFilter to URL
+  // Sync typeFilter, activeView, secondaryView, enrichmentFilter to URL
   useEffect(() => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -275,12 +282,12 @@ const WorkspacePage = () => {
       const newMore = secondaryView || '';
       if (next.get('more') !== newMore) { changed = true; if (newMore) next.set('more', newMore); else next.delete('more'); }
 
-      const newTranscripts = transcriptFilter ? '1' : '';
-      if (next.get('transcripts') !== newTranscripts) { changed = true; if (newTranscripts) next.set('transcripts', newTranscripts); else next.delete('transcripts'); }
+      const newEnrichment = enrichmentFilter.join(',');
+      if ((next.get('enrichment') ?? '') !== newEnrichment) { changed = true; if (newEnrichment) next.set('enrichment', newEnrichment); else next.delete('enrichment'); }
 
       return changed ? next : prev;
     }, { replace: true });
-  }, [typeFilter, activeView, secondaryView, transcriptFilter, setSearchParams]);
+  }, [typeFilter, activeView, secondaryView, enrichmentFilter, setSearchParams]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [showDynamicFormDialog, setShowDynamicFormDialog] = useState(false);
@@ -316,13 +323,20 @@ const WorkspacePage = () => {
     enabled: showContent,
     isBookCreatorOnly,
     isBookReviewerOnly,
-    transcriptFilter,
+    enrichmentFilter,
   });
 
   const visibleContents = useMemo(
     () => contents.filter((content) => !retiredContentIds.includes(content.id)),
     [contents, retiredContentIds],
   );
+
+  // Badges: only content that requested an enrichment can have one Live, and only while the filter is on.
+  const enrichmentCandidateIds = useMemo(
+    () => visibleContents.filter((content) => content.enrichmentTypes?.length).map((content) => content.id),
+    [visibleContents],
+  );
+  const enrichmentsById = useEnrichmentAvailability(enrichmentCandidateIds, enrichmentFilter.length > 0);
 
   // Memoize content IDs to prevent unnecessary lock list API calls
   const visibleContentIds = useMemo(
@@ -684,9 +698,14 @@ const WorkspacePage = () => {
     setTypeFilter(type);
   };
 
-  const handleTranscriptFilterChange = (value: boolean) => {
-    interact({ id: 'workspace-transcript-filter', type: 'CLICK', pageid: 'workspace', cdata: [{ id: String(value), type: 'TranscriptFilter' }] });
-    setTranscriptFilter(value);
+  const handleEnrichmentFilterChange = (type: string, on: boolean) => {
+    interact({
+      id: 'workspace-enrichment-filter',
+      type: 'CLICK',
+      pageid: 'workspace',
+      cdata: [{ id: type, type: 'EnrichmentFilter' }, { id: String(on), type: 'EnrichmentFilterState' }],
+    });
+    setEnrichmentFilter((prev) => (on ? (prev.includes(type) ? prev : [...prev, type]) : prev.filter((t) => t !== type)));
   };
 
   const handleViewChange = (view: WorkspaceView) => {
@@ -714,8 +733,8 @@ const WorkspacePage = () => {
     onViewModeChange: handleViewModeChange,
     typeFilter,
     onTypeFilterChange: handleTypeFilterChange,
-    transcriptFilter,
-    onTranscriptFilterChange: handleTranscriptFilterChange,
+    enrichmentFilter,
+    onEnrichmentFilterChange: handleEnrichmentFilterChange,
     contentCount: showContent ? visibleContents.length : undefined,
     totalCount: showContent ? totalCount : undefined,
     onCreateClick: handleCreateClick,
@@ -744,6 +763,7 @@ const WorkspacePage = () => {
               error={error}
               userRole={userRole}
               lockedContentMap={lockedContentMap}
+              enrichmentsById={enrichmentsById}
               onLoadMore={loadMore}
               onRetry={refetchAll}
               onCreateOption={handleCreateOption}
