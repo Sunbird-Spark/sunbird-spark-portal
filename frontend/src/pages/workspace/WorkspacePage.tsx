@@ -14,6 +14,7 @@ import { useUserRead } from "@/hooks/useUserRead";
 import { useToast } from "@/hooks/useToast";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useEnrichmentAvailability } from "@/hooks/useEnrichmentAvailability";
 import { useQuestionSetCreate } from "@/hooks/useQuestionSetCreate";
 import { useQuestionSetRetire } from "@/hooks/useQuestionSetRetire";
 import { lockService, type LockListItem } from "@/services/LockService";
@@ -321,6 +322,13 @@ const WorkspacePage = () => {
     () => contents.filter((content) => !retiredContentIds.includes(content.id)),
     [contents, retiredContentIds],
   );
+
+  // Badges: only content that requested an enrichment can have one Live, and only while the filter is on.
+  const enrichmentCandidateIds = useMemo(
+    () => visibleContents.filter((content) => content.enrichmentTypes?.length).map((content) => content.id),
+    [visibleContents],
+  );
+  const enrichmentsById = useEnrichmentAvailability(enrichmentCandidateIds, enrichmentFilter.length > 0);
 
   // Memoize content IDs to prevent unnecessary lock list API calls
   const visibleContentIds = useMemo(
@@ -698,6 +706,7 @@ const WorkspacePage = () => {
               error={error}
               userRole={userRole}
               lockedContentMap={lockedContentMap}
+              enrichmentsById={enrichmentsById}
               onLoadMore={loadMore}
               onRetry={refetchAll}
               onCreateOption={handleCreateOption}

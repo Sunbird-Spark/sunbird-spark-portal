@@ -587,7 +587,7 @@
     "roleCreator": "Creator",
     "roleReviewer": "Reviewer",
     "more": "More",
-    "enrichmentFilters": {
+    "enrichmentLabels": {
       "Transcript": "Transcripts"
     },
     "searchPlaceholder": "Search content...",

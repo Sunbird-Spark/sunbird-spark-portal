@@ -587,7 +587,7 @@
     "roleCreator": "Créateur",
     "roleReviewer": "Réviseur",
     "more": "Plus",
-    "enrichmentFilters": {
+    "enrichmentLabels": {
       "Transcript": "Transcriptions"
     },
     "searchPlaceholder": "Rechercher du contenu...",

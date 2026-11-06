@@ -14,7 +14,7 @@ vi.mock('@/hooks/useAppI18n', () => ({
         'workspace.typeFilters.content': 'Content',
         'workspace.typeFilters.quiz': 'Quiz',
         'workspace.typeFilters.collection': 'Collection',
-        'workspace.enrichmentFilters.Transcript': 'Transcript requested',
+        'workspace.enrichmentLabels.Transcript': 'Transcripts',
         'workspace.gridView': 'Grid view',
         'workspace.listView': 'List view',
       };
@@ -77,13 +77,13 @@ describe('WorkspaceContentFilters', () => {
 
   it('calls onEnrichmentFilterChange(type, true) when an inactive toggle is clicked', () => {
     const { onEnrichmentFilterChange } = renderFilters();
-    fireEvent.click(screen.getByRole('button', { name: 'Transcript requested' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Transcripts' }));
     expect(onEnrichmentFilterChange).toHaveBeenCalledWith('Transcript', true);
   });
 
   it('marks an active toggle as pressed and calls onEnrichmentFilterChange(type, false) when clicked', () => {
     const { onEnrichmentFilterChange } = renderFilters({ enrichmentFilter: ['Transcript'] });
-    const button = screen.getByRole('button', { name: 'Transcript requested' });
+    const button = screen.getByRole('button', { name: 'Transcripts' });
     expect(button).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(button);
     expect(onEnrichmentFilterChange).toHaveBeenCalledWith('Transcript', false);

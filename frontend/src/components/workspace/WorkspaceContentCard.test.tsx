@@ -127,4 +127,29 @@ describe('WorkspaceContentCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(onDelete).toHaveBeenCalledWith('item-1');
   });
+
+  describe('enrichment badges', () => {
+    const renderCard = (enrichments?: string[]) =>
+      render(
+        <WorkspaceContentCard item={defaultItem} enrichments={enrichments} onEdit={vi.fn()} onDelete={vi.fn()} onView={vi.fn()} />,
+      );
+    const badge = () => screen.queryByRole('img', { name: 'workspace.enrichmentLabels.Transcript' });
+
+    it('shows a badge for each enrichment type the content has Live', () => {
+      renderCard(['Transcript']);
+      expect(badge()).toBeInTheDocument();
+    });
+
+    it('shows nothing when the content has none (negative)', () => {
+      renderCard(undefined);
+      expect(badge()).not.toBeInTheDocument();
+      renderCard([]);
+      expect(badge()).not.toBeInTheDocument();
+    });
+
+    it('ignores an enrichment type that is not registered (negative)', () => {
+      renderCard(['Unknown']);
+      expect(badge()).not.toBeInTheDocument();
+    });
+  });
 });

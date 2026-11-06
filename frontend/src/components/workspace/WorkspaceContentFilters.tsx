@@ -72,7 +72,7 @@ const WorkspaceContentFilters = ({
               active && "bg-sunbird-theme-accent-muted/20 border-sunbird-theme-accent text-sunbird-theme-accent"
             )}
           >
-            {t(def.filterLabelKey)}
+            {t(def.labelKey)}
           </Button>
         );
       })}
