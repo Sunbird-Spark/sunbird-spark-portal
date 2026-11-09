@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { EnrichmentObjectService } from './EnrichmentObjectService';
+import { EnrichmentObjectService, LIST_TIMEOUT_MS } from './EnrichmentObjectService';
 import { IHttpClient, init } from '../lib/http-client';
 
 const transcript = (identifier: string) => ({
@@ -57,6 +57,29 @@ describe('EnrichmentObjectService', () => {
     it('propagates an HTTP error (negative)', async () => {
       mockClient.post = vi.fn().mockRejectedValue(new Error('boom'));
       await expect(service.list('do_1', 'Transcript')).rejects.toThrow('boom');
+    });
+
+    it('rejects once LIST_TIMEOUT_MS passes without a response (negative)', async () => {
+      vi.useFakeTimers();
+      try {
+        mockClient.post = vi.fn().mockReturnValue(new Promise(() => {}));
+        const pending = expect(service.list('do_1', 'Transcript')).rejects.toThrow(/timed out/);
+        await vi.advanceTimersByTimeAsync(LIST_TIMEOUT_MS);
+        await pending;
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('clears its timer when the response arrives in time', async () => {
+      vi.useFakeTimers();
+      try {
+        mockClient.post = vi.fn().mockResolvedValue({ data: { enrichmentObjects: [] }, status: 200, headers: {} });
+        await service.list('do_1', 'Transcript');
+        expect(vi.getTimerCount()).toBe(0);
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 
