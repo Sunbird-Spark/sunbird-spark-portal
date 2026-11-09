@@ -2,7 +2,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useEnrichmentAvailability } from './useEnrichmentAvailability';
+import { useEnrichmentAvailability, AVAILABILITY_CHUNK_SIZE } from './useEnrichmentAvailability';
 import { init, IHttpClient } from '../lib/http-client';
 
 let mockClient: IHttpClient;
@@ -43,6 +43,36 @@ describe('useEnrichmentAvailability', () => {
     });
     expect(fields).toEqual(['parentId', 'enrichmentObjectType']);
     expect(limit).toBe(40);
+  });
+
+  it('searches in chunks and, when more ids load, only searches the new ids', async () => {
+    const ids = (from: number, to: number) => Array.from({ length: to - from }, (_, i) => `do_${from + i}`);
+    const { rerender } = renderHook(({ list }) => useEnrichmentAvailability(list, true), {
+      wrapper: Wrapper,
+      initialProps: { list: ids(0, AVAILABILITY_CHUNK_SIZE) },
+    });
+    await waitFor(() => expect(calls()).toHaveLength(1));
+    expect((calls()[0]![1].request.filters as { parentId: string[] }).parentId).toHaveLength(AVAILABILITY_CHUNK_SIZE);
+    expect(calls()[0]![1].request.limit).toBe(AVAILABILITY_CHUNK_SIZE * 20);
+
+    rerender({ list: ids(0, AVAILABILITY_CHUNK_SIZE * 2) });
+    await waitFor(() => expect(calls()).toHaveLength(2));
+    const second = (calls()[1]![1].request.filters as { parentId: string[] }).parentId;
+    expect(second).toEqual(ids(AVAILABILITY_CHUNK_SIZE, AVAILABILITY_CHUNK_SIZE * 2).sort((a, b) => a.localeCompare(b)));
+  });
+
+  it('merges the results of every chunk', async () => {
+    (mockClient.post as ReturnType<typeof vi.fn>).mockImplementation((_url: string, body: { request: { filters: { parentId: string[] } } }) =>
+      Promise.resolve({
+        data: { EnrichmentObject: [{ parentId: body.request.filters.parentId[0], enrichmentObjectType: 'Transcript' }] },
+        status: 200,
+        headers: {},
+      }),
+    );
+    const list = Array.from({ length: AVAILABILITY_CHUNK_SIZE + 1 }, (_, i) => `do_${String(i).padStart(3, '0')}`);
+    const { result } = renderHook(() => useEnrichmentAvailability(list, true), { wrapper: Wrapper });
+    await waitFor(() => expect(Object.keys(result.current)).toHaveLength(2));
+    expect(result.current).toEqual({ do_000: ['Transcript'], [`do_${String(AVAILABILITY_CHUNK_SIZE).padStart(3, '0')}`]: ['Transcript'] });
   });
 
   it('does not search while disabled or when there are no ids (negative)', async () => {
