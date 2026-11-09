@@ -64,6 +64,17 @@ describe('useContentWithEnrichments', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('does not refetch the list on window focus, so a newly Live transcript cannot rebuild the player mid-playback', async () => {
+    mockContentRead.mockResolvedValue(readResponse({ identifier: 'do_1', mimeType: 'video/mp4' }));
+    mockListForTypes.mockResolvedValue([liveTranscript]);
+
+    const { result } = renderHook(() => useContentWithEnrichments('do_1'), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const query = queryClient.getQueryCache().find({ queryKey: ['enrichment-objects', 'do_1', ['Transcript']] });
+    expect(query?.observers[0]?.options.refetchOnWindowFocus).toBe(false);
+  });
+
   it('never lists for a mimeType no enrichment applies to (negative)', async () => {
     mockContentRead.mockResolvedValue(readResponse({ identifier: 'do_2', mimeType: 'application/pdf' }));
 

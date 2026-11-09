@@ -26,6 +26,8 @@ export const useContentWithEnrichments = (
     enabled: !!content && types.length > 0,
     // Objects appear after publish; an hour-old empty list (the content read's staleTime) would hide them.
     staleTime: 5 * 60 * 1000,
+    // A refetch on tab focus that finds a newly Live transcript would change `content`'s identity and rebuild the player mid-playback.
+    refetchOnWindowFocus: false,
     retry: false,
   });
 
