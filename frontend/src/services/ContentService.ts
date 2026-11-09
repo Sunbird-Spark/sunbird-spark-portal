@@ -3,7 +3,7 @@ import { ContentApiResponse } from "@/types/contentTypes";
 import type { ContentSearchRequest, ContentSearchResponse } from '../types/workspaceTypes';
 
 const DEFAULT_CONTENT_FIELDS = [
-  'transcripts', 'ageGroup', 'appIcon', 'artifactUrl', 'attributions', 'audience',
+  'ageGroup', 'appIcon', 'artifactUrl', 'attributions', 'audience',
   'author', 'badgeAssertions', 'body', 'channel', 'code', 'concepts', 'contentCredits',
   'contentType', 'contributors', 'copyright', 'copyrightYear', 'createdBy', 'createdOn',
   'creator', 'creators', 'description', 'displayScore', 'domain', 'editorState',

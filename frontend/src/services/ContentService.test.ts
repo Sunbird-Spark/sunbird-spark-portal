@@ -90,6 +90,14 @@ describe('ContentService', () => {
     expect(callUrl).toContain('artifactUrl');
   });
 
+  it('does not request the raw transcripts field; captions come from EnrichmentObjects (negative)', async () => {
+    mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
+    await service.contentRead('do_123');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callUrl = (mockClient as any).get.mock.calls[0][0] as string;
+    expect(callUrl.split('fields=')[1]!.split('&')[0]!.split(',')).not.toContain('transcripts');
+  });
+
   it('requests enrichmentTypes among the default read fields', async () => {
     mockClient.get = vi.fn().mockResolvedValue({ data: { content: {} }, status: 200, headers: {} });
     await service.contentRead('do_123');
