@@ -705,7 +705,10 @@ const WorkspacePage = () => {
       pageid: 'workspace',
       cdata: [{ id: type, type: 'EnrichmentFilter' }, { id: String(on), type: 'EnrichmentFilterState' }],
     });
-    setEnrichmentFilter((prev) => (on ? (prev.includes(type) ? prev : [...prev, type]) : prev.filter((t) => t !== type)));
+    setEnrichmentFilter((prev) => {
+      if (!on) return prev.filter((t) => t !== type);
+      return prev.includes(type) ? prev : [...prev, type];
+    });
   };
 
   const handleViewChange = (view: WorkspaceView) => {

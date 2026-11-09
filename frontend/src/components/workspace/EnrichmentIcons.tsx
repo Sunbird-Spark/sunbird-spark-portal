@@ -2,12 +2,12 @@ import { enrichmentDefinitionsFor } from "@/services/enrichment/registry";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
 interface EnrichmentIconsProps {
-  /** `Content.enrichmentTypes` of the item. */
+  /** Enrichment types the item has Live (e.g. 'Transcript'), one badge each. */
   types?: readonly string[];
   className?: string;
 }
 
-/** One small badge per enrichment type the content requested (e.g. closed captions for Transcript).
+/** One small badge per enrichment type the content has Live (e.g. closed captions for Transcript).
  *  Renders nothing when there are none, so callers can drop it in unconditionally. */
 const EnrichmentIcons = ({ types, className = "w-3.5 h-3.5" }: EnrichmentIconsProps) => {
   const { t } = useAppI18n();

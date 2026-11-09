@@ -19,7 +19,7 @@ export interface EnrichmentDefinition {
 
 export const ENRICHMENT_REGISTRY: readonly EnrichmentDefinition[] = [transcriptDefinition];
 
-/** Every registered enrichment type; what the workspace "AI-enhanced" filter selects. */
+/** Every registered enrichment type; the set the workspace badge search looks for among Live objects. */
 export const ENRICHMENT_TYPES: readonly string[] = ENRICHMENT_REGISTRY.map((d) => d.type);
 
 /** Types that apply to a content mimeType. */
