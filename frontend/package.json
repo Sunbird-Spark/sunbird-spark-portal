@@ -25,7 +25,7 @@
   "dependencies": {
     "@babel/runtime": "^8.0.0",
     "@project-sunbird/collection-editor-react": "1.0.15",
-    "@project-sunbird/generic-editor-v2": "^2.0.7",
+    "@project-sunbird/generic-editor-v2": "^2.0.8",
     "@project-sunbird/sunbird-epub-player-web-component": "^2.0.0",
     "@project-sunbird/sunbird-pdf-player-web-component": "^2.0.0",
     "@project-sunbird/sunbird-questionset-editor-web-component-react": "^0.1.21",
