@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useCollectionPageData } from "@/hooks/useCollectionPageData";
-import { useContentRead, useContentSearch } from "@/hooks/useContent";
+import { useContentSearch } from "@/hooks/useContent";
+import { useContentWithEnrichments } from "@/hooks/useContentWithEnrichments";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useCollectionDetailPlayer } from "@/hooks/useCollectionDetailPlayer";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
@@ -98,11 +99,8 @@ const CollectionDetailPage = () => {
     request: { limit: 20, offset: 0 },
     enabled: hierarchySuccess,
   });
-  // Fetch selected content when contentId is in the URL. enrichTranscripts is safe here
-  // (unlike ContentPlayerPage) since this is the only read for this content - no
-  // second phased read exists to swap metadata identity out from under the player.
-  const { data: contentReadData, isLoading: contentIsLoading, error: contentError } = useContentRead(contentId ?? '', { enrichTranscripts: true });
-  const selectedContentData = contentReadData?.data?.content;
+  // Fetch selected content (with its enrichment objects, e.g. transcripts) when contentId is in the URL.
+  const { content: selectedContentData, isLoading: contentIsLoading, error: contentError } = useContentWithEnrichments(contentId ?? '');
   const isQumlContent = selectedContentData?.mimeType === 'application/vnd.sunbird.questionset' ||
     selectedContentData?.mimeType === 'application/vnd.sunbird.question';
   const { data: qumlData, isLoading: qumlIsLoading, error: qumlError } = useQumlContent(contentId ?? '', { enabled: isQumlContent });

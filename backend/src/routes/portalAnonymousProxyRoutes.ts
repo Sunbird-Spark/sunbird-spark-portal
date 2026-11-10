@@ -12,5 +12,6 @@ router.get('/questionset/v2/hierarchy/*rest', kongProxy);
 router.post('/question/v2/list', kongProxy);
 router.get('/rc/certificate/v1/download/:id', kongProxy);
 router.get('/rc/certificate/v1/key/:id', kongProxy);
+router.post('/object/enrichment/v4/list', kongProxy);
 
 export default router;

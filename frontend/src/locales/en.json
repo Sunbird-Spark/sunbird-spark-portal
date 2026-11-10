@@ -588,7 +588,9 @@
     "roleCreator": "Creator",
     "roleReviewer": "Reviewer",
     "more": "More",
-    "hasTranscripts": "Transcripts",
+    "enrichmentLabels": {
+      "Transcript": "Transcripts"
+    },
     "searchPlaceholder": "Search content...",
     "clearSearch": "Clear search",
     "gridView": "Grid view",
