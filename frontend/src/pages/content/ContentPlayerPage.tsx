@@ -8,12 +8,14 @@ import RelatedContent from "@/components/common/RelatedContent";
 import { mapSearchContentToRelatedContentItems } from "@/services/collection";
 import { ContentPlayer as PlayerComponent } from "@/components/players";
 import { useContentPlayer } from "@/hooks/useContentPlayer";
-import { useContentRead, useContentSearch } from "@/hooks/useContent";
+import { useContentSearch } from "@/hooks/useContent";
+import { useContentWithEnrichments } from "@/hooks/useContentWithEnrichments";
 import { useQumlContent } from "@/hooks/useQumlContent";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { TelemetryTracker } from '@/components/telemetry/TelemetryTracker';
 import useImpression from "@/hooks/useImpression";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useLearnerPlayerMetadata } from "@/hooks/useLearnerPlayerMetadata";
 
 const ContentPlayerPage = () => {
   const { t } = useAppI18n();
@@ -31,16 +33,10 @@ const ContentPlayerPage = () => {
   const backTo = stateFrom && !stateFrom.startsWith('/content/') && !stateFrom.startsWith('/collection/') ? stateFrom : '/explore';
   const linkState = { from: backTo };
 
-  // Single read with enrich=all. A two-phase read (base first, enriched once
-  // mimeType is known) was tried but caused a real bug: VideoPlayer's init
-  // effect depends on `metadata` identity, so once the enriched read resolved
-  // it tore down and rebuilt the <sunbird-video-player> element mid-playback -
-  // restarting the video, dropping any seek, and double-firing START
-  // telemetry. For YouTube (EcmlPlayer) it reloaded the iframe the same way.
-  // The extra `enrich=all` param on non-video mimeTypes just returns an
-  // unused key, which is cheaper than that.
-  const { data, isLoading, error } = useContentRead(contentId || '', { enrichTranscripts: true });
-  const contentData = data?.data?.content;
+  // VideoPlayer's init effect depends on `metadata` identity, so the player must get its metadata
+  // as one object; swapping it mid-playback rebuilds the player. useContentWithEnrichments therefore
+  // holds `isLoading` until the content read and the enrichment list (transcripts) have both settled.
+  const { content: contentData, isLoading, error } = useContentWithEnrichments(contentId || '');
 
   // Check if this is QUML content that needs special handling
   const isQumlContent = contentData?.mimeType === 'application/vnd.sunbird.questionset' ||
@@ -53,10 +49,10 @@ const ContentPlayerPage = () => {
     error: qumlError 
   } = useQumlContent(contentId || '', { enabled: isQumlContent });
   
-  // Determine which data to use based on content type
-  const playerMetadata = isQumlContent ? qumlData : contentData;
+  // Determine which data to use based on content type; learners get their own Dynamic Assess draw.
+  const { playerMetadata, notReadyError } = useLearnerPlayerMetadata(contentData, qumlData, isQumlContent);
   const playerIsLoading = isQumlContent ? isQumlLoading : isLoading;
-  const playerError = isQumlContent ? qumlError : error;
+  const playerError = (isQumlContent ? qumlError : error) ?? notReadyError;
   
   // Search for related content based on mime type
   const { data: relatedContentData } = useContentSearch({

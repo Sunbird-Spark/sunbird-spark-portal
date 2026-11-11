@@ -52,14 +52,16 @@ describe('useContentSearch', () => {
     expect(call.queryKey[4]).toBe(20);
   });
 
-  it('injects DEFAULT_PRIMARY_CATEGORIES when primaryCategory filter is empty', () => {
+  it.each([
+    ['injects DEFAULT_PRIMARY_CATEGORIES when primaryCategory filter is empty', '', ['Collection', 'Course']],
+    ['includes the Dynamic Assess categories in the default keyword search', 'Dynamic', ['Dynamic Course Assessment', 'Dynamic QuestionSet']],
+  ])('%s', (_name, query, categories) => {
     renderHook(() =>
-      useContentSearch({ request: { query: '', limit: 10, offset: 0, filters: { status: ['Live'] } } })
+      useContentSearch({ request: { query, limit: 10, offset: 0, filters: { status: ['Live'] } } })
     );
     const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
     const filtersStr = call.queryKey[6] as string;
-    expect(filtersStr).toContain('Collection');
-    expect(filtersStr).toContain('Course');
+    categories.forEach((category) => expect(filtersStr).toContain(category));
   });
 
   it('does NOT inject DEFAULT_PRIMARY_CATEGORIES when primaryCategory is already set', () => {
@@ -173,7 +175,7 @@ describe('useContentRead', () => {
   it('uses content-read queryKey with contentId, fields, and mode', () => {
     renderHook(() => useContentRead('content-abc', { fields: ['name', 'description'], mode: 'edit' }));
     const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
-    expect(call.queryKey).toEqual(['content-read', 'content-abc', ['name', 'description'], 'edit', false]);
+    expect(call.queryKey).toEqual(['content-read', 'content-abc', ['name', 'description'], 'edit']);
   });
 
   it('is enabled when contentId is non-empty', () => {
@@ -199,16 +201,7 @@ describe('useContentRead', () => {
     renderHook(() => useContentRead('c-123', { fields: ['name'], mode: 'view' }));
     const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
     (call.queryFn as () => void)();
-    expect(mockContentRead).toHaveBeenCalledWith('c-123', ['name'], 'view', false);
-  });
-
-  it('includes enrichTranscripts=true in queryKey and passes it through to contentRead when enabled', () => {
-    mockContentRead.mockResolvedValue({ data: {} });
-    renderHook(() => useContentRead('c-123', { fields: ['name'], mode: 'view', enrichTranscripts: true }));
-    const call = vi.mocked(useQuery).mock.calls[0]?.[0] as Parameters<typeof useQuery>[0];
-    expect(call.queryKey).toEqual(['content-read', 'c-123', ['name'], 'view', true]);
-    (call.queryFn as () => void)();
-    expect(mockContentRead).toHaveBeenCalledWith('c-123', ['name'], 'view', true);
+    expect(mockContentRead).toHaveBeenCalledWith('c-123', ['name'], 'view');
   });
 
   it('has 1 hour staleTime', () => {

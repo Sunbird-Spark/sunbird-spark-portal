@@ -25,6 +25,8 @@ interface WorkspacePageContentProps {
   error: Error | null;
   userRole: UserRole;
   lockedContentMap?: LockedContentMap;
+  /** Live enrichment types per content id, for the card badges. */
+  enrichmentsById?: Record<string, readonly string[]>;
   onLoadMore: () => void;
   onRetry: () => void;
   onCreateOption: (optionId: string) => void;
@@ -54,6 +56,7 @@ export default function WorkspacePageContent({
   onView,
   userRole,
   lockedContentMap = {},
+  enrichmentsById = {},
 }: WorkspacePageContentProps) {
   if (showCreateModal || activeView === 'create') {
     return (
@@ -132,10 +135,11 @@ export default function WorkspacePageContent({
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {filteredItems.map(item => (
             <WorkspaceContentCard
-              key={item.id}
+              key={`${item.id}-${item.status}`}
               item={item}
               userRole={userRole}
               lockInfo={lockedContentMap[item.id]}
+              enrichments={enrichmentsById[item.id]}
               onEdit={onEdit}
               onDelete={onDelete}
               onView={onView}
@@ -147,6 +151,7 @@ export default function WorkspacePageContent({
           items={filteredItems}
           userRole={userRole}
           lockedContentMap={lockedContentMap}
+          enrichmentsById={enrichmentsById}
           onEdit={onEdit}
           onDelete={onDelete}
           onView={onView}

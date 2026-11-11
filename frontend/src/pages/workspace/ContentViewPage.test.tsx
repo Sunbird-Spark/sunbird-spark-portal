@@ -7,9 +7,10 @@ import ContentViewPage from './ContentViewPage';
 const mockNavigate = vi.fn();
 const mockToast = vi.fn();
 
-// Hoist useContentRead mock so it can be overridden per test
-const { mockUseContentRead } = vi.hoisted(() => ({
-  mockUseContentRead: vi.fn(),
+// Hoist useContentWithEnrichments mock so it can be overridden per test
+const { mockUseContentWithEnrichments, mockUseQumlContent } = vi.hoisted(() => ({
+  mockUseContentWithEnrichments: vi.fn(),
+  mockUseQumlContent: vi.fn(() => ({ data: null, isLoading: false, error: null })),
 }));
 
 vi.mock('@/hooks/useContentPlayer', () => ({
@@ -20,16 +21,12 @@ vi.mock('@/hooks/useContentPlayer', () => ({
 }));
 
 // Default mock: content with status 'Review' and valid dates
-vi.mock('@/hooks/useContent', () => ({
-  useContentRead: (...args: any[]) => mockUseContentRead(...args),
+vi.mock('@/hooks/useContentWithEnrichments', () => ({
+  useContentWithEnrichments: (...args: any[]) => mockUseContentWithEnrichments(...args),
 }));
 
 vi.mock('@/hooks/useQumlContent', () => ({
-  useQumlContent: () => ({
-    data: null,
-    isLoading: false,
-    error: null,
-  }),
+  useQumlContent: (...args: any[]) => mockUseQumlContent(...(args as [])),
 }));
 
 vi.mock('@/hooks/useToast', () => ({
@@ -113,7 +110,9 @@ vi.mock('@/components/workspace/ReviewPageHeader', () => ({
 }));
 
 vi.mock('@/components/workspace/ReviewPlayerSection', () => ({
-  default: () => <div data-testid="review-player-section">Player Section</div>,
+  default: ({ playerMetadata }: any) => (
+    <div data-testid="review-player-section" data-body={typeof playerMetadata?.body === 'string' ? playerMetadata.body : ''}>Player Section</div>
+  ),
 }));
 
 vi.mock('@/components/workspace/ChecklistDialog', () => ({
@@ -165,19 +164,15 @@ const renderPage = () =>
 
 // Default content response used by most tests
 const defaultContentResponse = {
-  data: {
-    data: {
-      content: {
-        name: 'Test Content',
-        description: 'Test Description',
-        creator: 'Test Creator',
-        lastUpdatedOn: '2024-01-01',
-        createdOn: '2024-01-01',
-        primaryCategory: 'Resource',
-        mimeType: 'application/pdf',
-        status: 'Review',
-      },
-    },
+  content: {
+    name: 'Test Content',
+    description: 'Test Description',
+    creator: 'Test Creator',
+    lastUpdatedOn: '2024-01-01',
+    createdOn: '2024-01-01',
+    primaryCategory: 'Resource',
+    mimeType: 'application/pdf',
+    status: 'Review',
   },
   isLoading: false,
   error: null,
@@ -186,7 +181,7 @@ const defaultContentResponse = {
 describe('ContentViewPage - Layout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseContentRead.mockReturnValue(defaultContentResponse);
+    mockUseContentWithEnrichments.mockReturnValue(defaultContentResponse);
   });
   afterEach(() => cleanup());
 
@@ -212,23 +207,10 @@ describe('ContentViewPage - Layout', () => {
   });
 });
 
-describe('ContentViewPage - transcript enrichment', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockUseContentRead.mockReturnValue(defaultContentResponse);
-  });
-  afterEach(() => cleanup());
-
-  it('requests enrichTranscripts so video captions load in the workspace view/review pages', () => {
-    renderPage();
-    expect(mockUseContentRead).toHaveBeenCalledWith('test-content-id', { mode: 'edit', enrichTranscripts: true });
-  });
-});
-
 describe('ContentReviewPage - Button Functionality', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseContentRead.mockReturnValue(defaultContentResponse);
+    mockUseContentWithEnrichments.mockReturnValue(defaultContentResponse);
     mockNavigate.mockClear();
     mockToast.mockClear();
   });
@@ -289,7 +271,7 @@ describe('ContentReviewPage - Button Functionality', () => {
 describe('ContentViewPage - Publish and Reject flows', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseContentRead.mockReturnValue(defaultContentResponse);
+    mockUseContentWithEnrichments.mockReturnValue(defaultContentResponse);
   });
   afterEach(() => cleanup());
 
@@ -321,30 +303,26 @@ describe('ContentViewPage - Publish and Reject flows', () => {
 describe('ContentViewPage - formatDate null path and navigation guard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseContentRead.mockReturnValue(defaultContentResponse);
+    mockUseContentWithEnrichments.mockReturnValue(defaultContentResponse);
   });
   afterEach(() => cleanup());
 
   it('shows notAvailable fallback when content has no dates (covers formatDate returning null, line 229)', () => {
-    // Override useContentRead to return content with null/undefined date fields
-    mockUseContentRead.mockReturnValue({
-      data: {
-        data: {
-          content: {
-            name: 'No-Date Content',
-            description: 'Desc',
-            creator: 'Author',
-            lastUpdatedOn: undefined,
-            createdOn: undefined,
-            primaryCategory: 'Resource',
-            mimeType: 'application/pdf',
-            status: 'Review',
-          },
-        },
+    // Override useContentWithEnrichments to return content with null/undefined date fields
+    mockUseContentWithEnrichments.mockReturnValue({
+  content: {
+        name: 'No-Date Content',
+        description: 'Desc',
+        creator: 'Author',
+        lastUpdatedOn: undefined,
+        createdOn: undefined,
+        primaryCategory: 'Resource',
+        mimeType: 'application/pdf',
+        status: 'Review',
       },
-      isLoading: false,
-      error: null,
-    });
+  isLoading: false,
+  error: null,
+});
 
     render(
       <QueryClientProvider client={new QueryClient()}>
@@ -360,25 +338,21 @@ describe('ContentViewPage - formatDate null path and navigation guard', () => {
   });
 
   it('navigates to /workspace with replace:true when in review mode and status is not Review (covers lines 166-167)', () => {
-    // Override useContentRead to return a content with status 'Draft' (not 'Review')
-    mockUseContentRead.mockReturnValue({
-      data: {
-        data: {
-          content: {
-            name: 'Draft Content',
-            description: 'Desc',
-            creator: 'Author',
-            lastUpdatedOn: '2024-01-01',
-            createdOn: '2024-01-01',
-            primaryCategory: 'Resource',
-            mimeType: 'application/pdf',
-            status: 'Draft',
-          },
-        },
+    // Override useContentWithEnrichments to return a content with status 'Draft' (not 'Review')
+    mockUseContentWithEnrichments.mockReturnValue({
+  content: {
+        name: 'Draft Content',
+        description: 'Desc',
+        creator: 'Author',
+        lastUpdatedOn: '2024-01-01',
+        createdOn: '2024-01-01',
+        primaryCategory: 'Resource',
+        mimeType: 'application/pdf',
+        status: 'Draft',
       },
-      isLoading: false,
-      error: null,
-    });
+  isLoading: false,
+  error: null,
+});
 
     mockNavigate.mockClear();
 
@@ -393,5 +367,62 @@ describe('ContentViewPage - formatDate null path and navigation guard', () => {
 
     // The component should call navigate('/workspace', { replace: true }) and return null
     expect(mockNavigate).toHaveBeenCalledWith('/workspace', { replace: true });
+  });
+});
+
+describe('ContentViewPage - Dynamic Assess full pool by mode', () => {
+  const levels: Record<string, string> = { a1: 'EASY', a2: 'EASY', a3: 'EASY', a4: 'EASY', b1: 'MEDIUM', b2: 'MEDIUM', b3: 'MEDIUM', b4: 'MEDIUM' };
+  const body = JSON.stringify({
+    theme: { stage: [{ 'org.ekstep.questionset': [{
+      config: { __cdata: JSON.stringify({ dynamic_assess: { target: { E: 1, M: 1, D: 0 }, levels } }) },
+      data: { __cdata: JSON.stringify(Object.keys(levels).map((identifier) => ({ identifier }))) },
+      'org.ekstep.question': Object.keys(levels).map((id) => ({ id })),
+    }] }] },
+  });
+  const renderMode = (mode: 'view' | 'review') => render(
+    <QueryClientProvider client={new QueryClient()}>
+      <BrowserRouter><ContentViewPage mode={mode} /></BrowserRouter>
+    </QueryClientProvider>,
+  );
+  const playedQuestions = () => {
+    const played = screen.getByTestId('review-player-section').getAttribute('data-body') || '{}';
+    return JSON.parse(played).theme.stage[0]['org.ekstep.questionset'][0]['org.ekstep.question'].length;
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseContentWithEnrichments.mockReturnValue({
+      content: { ...defaultContentResponse.content, mimeType: 'application/vnd.ekstep.ecml-archive', primaryCategory: 'Dynamic Course Assessment', body },
+      isLoading: false,
+      error: null,
+    });
+  });
+  afterEach(() => cleanup());
+
+  it('plays the whole pool, not a learner draw, for a reviewer (positive)', () => {
+    renderMode('review');
+    expect(playedQuestions()).toBe(8);
+  });
+
+  it('plays the whole pool for the creator in view mode (positive)', () => {
+    renderMode('view');
+    expect(playedQuestions()).toBe(8);
+  });
+
+  it('asks useQumlContent for the full pool in both modes (positive)', () => {
+    renderMode('review');
+    renderMode('view');
+    for (const call of mockUseQumlContent.mock.calls as unknown as [string, { fullPool?: boolean }][]) expect(call[1]?.fullPool).toBe(true);
+    expect(mockUseQumlContent).toHaveBeenCalled();
+  });
+
+  it('still shows the not-ready error, not a blank player, for Dynamic ECML with nothing generated (negative)', () => {
+    mockUseContentWithEnrichments.mockReturnValue({
+      content: { ...defaultContentResponse.content, mimeType: 'application/vnd.ekstep.ecml-archive', primaryCategory: 'Dynamic Course Assessment', body: undefined },
+      isLoading: false,
+      error: null,
+    });
+    renderMode('view');
+    expect(screen.queryByTestId('review-player-section')).not.toBeInTheDocument();
   });
 });

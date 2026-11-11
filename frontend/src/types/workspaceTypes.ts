@@ -75,6 +75,8 @@ export interface WorkspaceItem {
   mimeType: string;
   framework: string;
   contentStatus: string;
+  /** Registered enrichment types the content requested (`Content.enrichmentTypes`); absent when none. */
+  enrichmentTypes?: string[];
 }
 
 export interface FacetValue {
@@ -99,8 +101,6 @@ export interface ContentSearchRequest {
   fields?: string[];
   search_mode?: 'semantic';
   semantic?: { k: number; min_score: number };
-  /** Field names required to be present on the content (e.g. ['enrichment']). */
-  exists?: string[];
 }
 
 export interface ContentSearchItem {
@@ -121,12 +121,15 @@ export interface ContentSearchItem {
   contentType?: string;
   framework?: string;
   leafNodesCount?: number;
+  enrichmentTypes?: string[];
 }
 
 export interface ContentSearchResponse {
   count?: number;
   content?: ContentSearchItem[];
   QuestionSet?: ContentSearchItem[];
+  /** Present when the search filters on objectType EnrichmentObject (workspace availability check). */
+  EnrichmentObject?: Array<{ parentId?: string; enrichmentObjectType?: string }>;
   facets?: Facet[];
 }
 

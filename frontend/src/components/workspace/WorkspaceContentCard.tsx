@@ -16,6 +16,7 @@ import {
   getPrimaryCategoryIcon,
 } from "@/services/workspace";
 import CardThumbnailBackground from "./CardThumbnailBackground";
+import EnrichmentIcons from "./EnrichmentIcons";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { getCategoryLabel } from "@/utils/i18nUtils";
 
@@ -23,6 +24,8 @@ interface WorkspaceContentCardProps {
   item: WorkspaceItem;
   userRole?: UserRole;
   lockInfo?: { creatorName: string };
+  /** Enrichment types this content has Live (e.g. Transcript) - one badge each. */
+  enrichments?: readonly string[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
@@ -32,6 +35,7 @@ const WorkspaceContentCard = ({
   item,
   userRole,
   lockInfo,
+  enrichments,
   onEdit,
   onDelete,
   onView,
@@ -175,6 +179,11 @@ const WorkspaceContentCard = ({
             <FiUser className="w-3 h-3" />
             <span>{item.author}</span>
           </div>
+          {enrichments && enrichments.length > 0 && (
+            <div className="ml-auto">
+              <EnrichmentIcons types={enrichments} className="w-4 h-4" />
+            </div>
+          )}
         </div>
       </div>
     </div>
